@@ -1,0 +1,2576 @@
+#include "regdef.h"
+
+#define _offset_libc -28595
+
+.text
+
+.set noreorder
+.option pic0
+
+.globl func_808
+.ent func_808
+func_808:
+     addiu	sp,sp,-48		// 808
+     sw	s2,32(sp)		// 80c
+     sb	zero,0(a3)		// 810
+     move	s2,a0		// 814
+     addiu	a0,a0,4		// 818
+     sw	s4,40(sp)		// 81c
+     sw	s3,36(sp)		// 820
+     move	s4,a2		// 824
+     sw	s1,28(sp)		// 828
+     sw	s0,24(sp)		// 82c
+     move	s3,a3		// 830
+     sw	ra,44(sp)		// 834
+     jal	func_b1c		// 838
+     move	s1,a1		// 83c
+     lui	v1,0xbfc3		// 840
+     addiu	s0,v1,_offset_libc		// 844
+     move	a0,s4		// 848
+     move	a1,s2		// 84c
+     li	a2,296		// 850
+     move	a3,zero		// 854
+     bnez	v0,__958		// 858
+     li	v1,11		// 85c
+     li	t7,1		// 860
+     jal	memcpy         /* memcpy() */		// 864
+     sb	t7,0(s3)		// 868
+     li	t6,906		// 86c
+     move	a0,s1		// 870
+     addiu	a1,s2,906		// 874
+     li	a2,5		// 878
+     move	a3,zero		// 87c
+     jal	memcpy		// 880
+     sw	t6,16(sp)		// 884
+     lw	t5,16(sp)		// 888
+     lw	a0,8(s1)		// 88c
+     addiu	t4,t5,5		// 890
+     move	a1,zero		// 894
+     li	a2,32		// 898
+     li	a3,1		// 89c
+     jal	memset		// 8a0
+     sw	t4,16(sp)		// 8a4
+     lw	a0,12(s1)		// 8a8
+     move	a1,zero		// 8ac
+     li	a2,32		// 8b0
+     jal	memset		// 8b4
+     li	a3,1		// 8b8
+     lw	t3,16(sp)		// 8bc
+     lw	a0,8(s1)		// 8c0
+     addu	a1,s2,t3		// 8c4
+     li	a2,30		// 8c8
+     jal	memcpy		// 8cc
+     move	a3,zero		// 8d0
+     lw	a3,16(sp)		// 8d4
+     lw	a0,12(s1)		// 8d8
+     addiu	t2,a3,30		// 8dc
+     addu	a1,s2,t2		// 8e0
+     li	a2,30		// 8e4
+     move	a3,zero		// 8e8
+     jal	memcpy		// 8ec
+     sw	t2,16(sp)		// 8f0
+     lw	a2,16(sp)		// 8f4
+     addiu	a0,s1,16		// 8f8
+     addiu	t1,a2,30		// 8fc
+     addu	a1,s2,t1		// 900
+     li	a2,16		// 904
+     move	a3,zero		// 908
+     jal	memcpy		// 90c
+     sw	t1,16(sp)		// 910
+     lw	a1,16(sp)		// 914
+     addiu	a0,s1,49		// 918
+     addiu	t0,a1,33		// 91c
+     addu	a1,s2,t0		// 920
+     li	a2,21		// 924
+     move	a3,zero		// 928
+     jal	memcpy		// 92c
+     sw	t0,16(sp)		// 930
+     li	v0,1		// 934
+     addiu	a0,s4,286		// 938
+     addiu	a1,sp,16		// 93c
+     li	a2,2		// 940
+     li	a3,2		// 944
+     jal	memcmp		// 948
+     sw	v0,16(sp)		// 94c
+     li	v1,24		// 950
+     movz	v1,zero,v0		// 954
+
+	__958:
+     lw	ra,44(sp)		// 958
+     lw	s4,40(sp)		// 95c
+     lw	s3,36(sp)		// 960
+     lw	s2,32(sp)		// 964
+     lw	s1,28(sp)		// 968
+     lw	s0,24(sp)		// 96c
+     move	v0,v1		// 970
+     jr	ra		// 974
+     addiu	sp,sp,48		// 978
+.end func_808
+
+.globl func_97c_accum_to_pglbuffer
+.ent func_97c_accum_to_pglbuffer
+func_97c_accum_to_pglbuffer:
+	// 3 parameters.
+	// a0: pInOutBuffer
+	// a1: length
+	// a2: pGLBuffer
+	// actually this may be the part of the process which fills pGLBuffer *from* the retrieved bytes.
+
+     addiu	sp,sp,-40		// 97c
+     lui	t3,0x6666		// 980
+     sw	s2,24(sp)		// 984
+     ori	t2,t3,0x6667     /* compiler optimised division, see http://blog.dkbza.org/2007/09/reverse-engineering-compiler-produced.html */   // 988
+     seh	s2,a1				/* s2 = a1 & 0xffff effectively (it won't be negative) */		// 98c
+     mult	s2,t2			/* hi,lo = s2 * 0x66666667 = length * 0x66666667 */		// 990
+     sra	t0,s2,0x1f			/* t0 = s2 >> 0x1f */		// 994
+     mfhi	t1				/* t1 <- hi */		// 998
+     lui	v1,0xbfc3			// 99c
+     sra	a3,t1,0x3			/* a3 = t1 >> 0x3 */		// 9a0
+     subu	a1,a3,t0		/* a1 = length // 20  (this is the important bit) */		// 9a4
+     sw	s3,28(sp)			/* This implies that the input must be a multiple of 20 bytes long */		// 9a8
+     sw	s1,20(sp)		// 9ac
+     sw	s0,16(sp)		// 9b0
+     sw	ra,32(sp)		// 9b4
+     move	s0,a2			/* s0 = pGLBuffer */		// 9b8
+     move	s3,a0			/* s3 = pInOutBuffer */		// 9bc
+     andi	s1,a1,0xff     /* s1 = (length // 20) & 0xff */		// 9c0
+     move	a0,a2			/* memset(pGLBuffer, 0, 20) */		// 9c4
+     move	a1,zero		// 9c8
+     li	a2,20		// 9cc
+     addiu	v0,v1,_offset_libc		// 9d0
+     jal	memset           		// 9d4
+     li	a3,1		// 9d8
+     beqz	s1,__a34		/* if s1 == 0, i.e. if length is a multiple of 10240 */		// 9dc
+     move	t0,zero		// 9e0
+
+     sll	t4,t0,0x2		// wtf? t4 = t0 << 2, but t0 == 0. This is a precursor to a loop...		// 9e4
+	 								
+	__9e8:  // handle the inner 10240 bytes 
+     addu	a2,t4,t0	// a2 = 		// 9e8
+     sll	a0,a2,0x2		// 9ec
+     addu	a3,a0,s3		// 9f0
+     move	a2,zero		// 9f4
+
+	__9f8:
+     addu	t6,a2,s0		// 9f8
+     addu	v0,a3,a2		// 9fc
+     lbu	t9,0(v0)		// a00
+     lbu	t8,0(t6)		// a04
+     addiu	ra,a2,1		// a08
+     andi	a2,ra,0xff		// a0c
+     xor	t7,t8,t9		// a10
+     sltiu	t5,a2,20		// a14
+     bnez	t5,__9f8		// a18
+     sb	t7,0(t6)		// a1c
+     addiu	a1,t0,1		// a20
+     andi	t0,a1,0xff		// a24
+     sltu	v1,t0,s1		// a28
+     bnez	v1,__9e8		// a2c
+     sll	t4,t0,0x2		// a30
+	 // We arrive here from 0x9dc if length is a multiple of 10240
+
+	__a34:
+     sll	t0,s1,0x2		// a34
+     addu	a3,t0,s1		// a38
+     sll	v0,a3,0x2		// a3c
+     subu	s1,s2,v0		// a40
+     andi	t0,s1,0xff		// a44
+     beqz	t0,__a7c		// a48
+     move	a2,zero		// a4c
+     addu	a3,v0,s3		// a50
+
+	 __a54:
+     addu	s3,a2,s0		// a54
+     addu	t4,a3,a2		// a58
+     lbu	t3,0(t4)		// a5c
+     lbu	t2,0(s3)		// a60
+     addiu	a0,a2,1		// a64
+     andi	a2,a0,0xff		// a68
+     xor	t1,t2,t3		// a6c
+     sltu	s2,a2,t0		// a70
+     bnez	s2,__a54		// a74
+     sb	t1,0(s3)		// a78
+
+	 __a7c:
+     move	a1,zero		// a7c
+
+	 __a80:
+     addu	t5,a1,s0		// a80
+     lbu	t7,0(t5)		// a84
+     addiu	t8,a1,1		// a88
+     andi	a1,t8,0xff		// a8c
+     nor	t6,zero,t7		// a90
+     sltiu	a2,a1,20		// a94
+     bnez	a2,__a80		// a98
+     sb	t6,0(t5)		// a9c
+     lw	ra,32(sp)		// aa0
+     lw	s3,28(sp)		// aa4
+     lw	s2,24(sp)		// aa8
+     lw	s1,20(sp)		// aac
+     lw	s0,16(sp)		// ab0
+     jr	ra		// ab4
+     addiu	sp,sp,40		// ab8
+.end func_97c_accum_to_pglbuffer
+
+.globl func_abc
+.ent func_abc
+func_abc:
+     addiu	sp,sp,-48		// abc
+     sw	s0,40(sp)		// ac0
+     move	s0,a1		// ac4
+     seh	a1,a2		// ac8
+     addiu	a2,sp,16		// acc
+     sw	ra,44(sp)		// ad0
+     sw	zero,16(sp)		// ad4
+     sw	zero,20(sp)		// ad8
+     sw	zero,24(sp)		// adc
+     sw	zero,28(sp)		// ae0
+     jal	func_97c_accum_to_pglbuffer		// ae4
+     sw	zero,32(sp)		// ae8
+     lui	v1,0xbfc3		// aec
+     move	a1,s0		// af0
+     addiu	a0,sp,16		// af4
+     li	a2,20		// af8
+     addiu	v0,v1,_offset_libc		// afc
+     jal	memcmp       // b00
+     li	a3,2		// b04
+	 // wzdd: this is where the failure is occurring: the memcmp-ed areas differ.
+     lw	ra,44(sp)		// b08
+     lw	s0,40(sp)		// b0c
+     seb	v0,v0		// b10
+     jr	ra		// b14
+     addiu	sp,sp,48		// b18
+.end func_abc
+
+.globl func_b1c
+.ent func_b1c
+func_b1c:
+     addiu	sp,sp,-56		// b1c
+     sw	ra,48(sp)		// b20
+     lbu	a1,998(a0)		// b24
+     move	t2,a0		// b28
+     lui	v1,0xbfc3		// b2c
+     andi	a0,a1,0x1f		// b30
+     sll	v0,a0,0x5		// b34
+	 la t3, _key_2950
+     addiu	t5,sp,16		// b3c
+     addu	a2,v0,t3		// b40
+     move	a3,zero		// b44
+     move	t0,t5		// b48
+
+	 __b4c:
+     addu	t6,a3,t2		// b4c
+     lbu	t8,0(a2)		// b50
+     lbu	t7,1000(t6)		// b54
+     addiu	t9,a3,1		// b58
+     seb	a3,t9		// b5c
+     xor	t4,t7,t8		// b60
+     slti	t1,a3,20		// b64
+     sb	t4,1000(t6)		// b68
+     addiu	a2,a2,1		// b6c
+     sb	t4,0(t0)		// b70
+     bnez	t1,__b4c		// b74
+     addiu	t0,t0,1		// b78
+     li	a1,20		// b7c
+
+	 __b80:
+     addu	a3,t5,a1		// b80
+     addiu	ra,a1,1		// b84
+     seb	a1,ra		// b88
+     lbu	t0,-20(a3)		// b8c
+     slti	a2,a1,32		// b90
+     bnez	a2,__b80		// b94
+     sb	t0,0(a3)		// b98
+     move	t4,zero		// b9c
+     sll	t1,t4,0x5		// ba0
+
+	 __ba4:
+     move	t0,zero		// ba4
+     move	a3,t5		// ba8
+
+	 __bac:
+     addu	a2,t1,t0		// bac
+     addu	ra,a2,t3		// bb0
+     lbu	t8,0(a3)		// bb4
+     lbu	t9,0(ra)		// bb8
+     addu	v1,a2,t2		// bbc
+     lbu	a1,0(v1)		// bc0
+     addiu	t7,t0,1		// bc4
+     xor	t6,t8,t9		// bc8
+     seb	t0,t7		// bcc
+     xor	v0,t6,a1		// bd0
+     slti	a0,t0,32		// bd4
+     sb	v0,0(v1)		// bd8
+     bnez	a0,__bac		// bdc
+     addiu	a3,a3,1		// be0
+     addiu	a3,t4,1		// be4
+     seb	t4,a3		// be8
+     slti	t1,t4,31		// bec
+     bnez	t1,__ba4		// bf0
+     sll	t1,t4,0x5		// bf4
+     addiu	a1,t2,1000		// bf8
+     addiu	a0,t2,-1		// bfc
+     jal	func_abc		// c00
+     li	a2,1001		// c04
+     lw	ra,48(sp)		// c08
+     jr	ra		// c0c
+     addiu	sp,sp,56		// c10
+.end func_b1c
+
+.globl func_c14
+.ent func_c14
+func_c14:
+     move	t4,a0		// c14
+     move	t3,a1		// c18
+     move	t2,a2		// c1c
+     move	a1,zero		// c20
+     move	a0,a2		// c24
+
+	 __c28:
+     addiu	v0,a1,1		// c28
+     sb	a1,0(a0)		// c2c
+     seh	a1,v0		// c30
+     slti	v1,a1,256		// c34
+     bnez	v1,__c28		// c38
+     addiu	a0,a0,1		// c3c
+     sb	zero,256(t2)		// c40
+     sb	zero,257(t2)		// c44
+     move	v1,zero		// c48
+     move	t1,zero		// c4c
+     move	t0,zero		// c50
+
+	 __c54:
+     addiu	v0,v1,1		// c54
+     div	zero,v0,t3		// c58
+     teq	t3,zero,0x7		// c5c
+     addu	a2,t0,t2		// c60
+     addu	v1,v1,t4		// c64
+     lbu	t9,0(v1)		// c68
+     lbu	a1,0(a2)		// c6c
+     addiu	t7,t0,1		// c70
+     addu	t8,t9,a1		// c74
+     addu	t0,t8,t1		// c78
+     andi	t1,t0,0xff		// c7c
+     addu	t5,t1,t2		// c80
+     lbu	t6,0(t5)		// c84
+     seh	t0,t7		// c88
+     slti	a0,t0,256		// c8c
+     sb	t6,0(a2)		// c90
+     sb	a1,0(t5)		// c94
+     mfhi	a3		// c98
+     bnez	a0,__c54		// c9c
+     andi	v1,a3,0xff		// ca0
+     jr	ra		// ca4
+     nop		// ca8
+.end func_c14
+
+.globl func_cac
+.ent func_cac
+func_cac:
+     move	t1,a2		// cac
+     move	t3,a1		// cb0
+     move	t4,a0		// cb4
+     lbu	t0,256(a2)		// cb8
+     lbu	a3,257(a2)		// cbc
+     blez	a1,__d20		// cc0
+     move	t2,zero		// cc4
+
+	__cc8:
+     addiu	a2,t0,1		// cc8
+     andi	t0,a2,0xff		// ccc
+     addu	a1,t0,t1		// cd0
+     lbu	t9,0(a1)		// cd4
+     addu	a2,t4,t2		// cd8
+     addu	a0,t9,a3		// cdc
+     andi	a3,a0,0xff		// ce0
+     addu	v1,a3,t1		// ce4
+     lbu	t5,0(v1)		// ce8
+     addiu	t2,t2,1		// cec
+     sb	t5,0(a1)		// cf0
+     sb	t9,0(v1)		// cf4
+     lbu	t8,0(a1)		// cf8
+     lbu	t5,0(a2)		// cfc
+     addu	t7,t8,t9		// d00
+     andi	t6,t7,0xff		// d04
+     addu	v0,t6,t1		// d08
+     lbu	a0,0(v0)		// d0c
+     slt	a1,t2,t3		// d10
+     xor	v1,t5,a0		// d14
+     bnez	a1,__cc8		// d18
+     sb	v1,0(a2)		// d1c
+
+	__d20:
+     sb	a3,257(t1)		// d20
+     jr	ra		// d24
+     sb	t0,256(t1)		// d28
+.end func_cac
+
+.globl func_d80
+.ent func_d80
+func_d80:
+     addiu	sp,sp,-72		// d80
+     sw	s1,60(sp)		// d84
+     sw	s0,56(sp)		// d88
+     move	s1,a3		// d8c
+     move	s0,a2		// d90
+     move	a3,a1		// d94
+     li	a2,32		// d98
+     sw	ra,64(sp)		// d9c
+     jal	func_1b1c     /* Only called from here */		// da0
+     addiu	a1,sp,24		// da4
+     lw	v0,88(sp)		// da8
+     move	a2,s0		// dac
+     move	a3,s1		// db0
+     addiu	a0,sp,24		// db4
+     li	a1,32		// db8
+     jal	func_d2c		// dbc
+     sw	v0,16(sp)		// dc0
+     lw	ra,64(sp)		// dc4
+     lw	s1,60(sp)		// dc8
+     lw	s0,56(sp)		// dcc
+     jr	ra		// dd0
+     addiu	sp,sp,72		// dd4
+.end func_d80
+
+.globl func_d2c
+.ent func_d2c
+func_d2c:
+     addiu	sp,sp,-32		// d2c
+     sw	s0,16(sp)		// d30
+     lw	s0,48(sp)		// d34
+     sw	s2,24(sp)		// d38
+     sw	s1,20(sp)		// d3c
+     move	s2,a3		// d40
+     move	s1,a2		// d44
+     sw	ra,28(sp)		// d48
+     jal	func_c14      /* Only called from here */		// d4c
+     move	a2,s0		// d50
+     move	a0,s1		// d54
+     move	a1,s2		// d58
+     move	a2,s0		// d5c
+     lw	ra,28(sp)		// d60
+     lw	s2,24(sp)		// d64
+     lw	s1,20(sp)		// d68
+     lw	s0,16(sp)		// d6c
+     j	func_cac       /* Only called from here */		// d70
+     addiu	sp,sp,32		// d74
+.end func_d2c
+
+.globl func_d78
+.ent func_d78
+func_d78:
+     j	func_d2c  		// d78
+     nop		// d7c
+.end func_d78
+
+.globl func_dd8
+.ent func_dd8
+func_dd8:
+     li	v0,1		// dd8
+     move	a3,zero		// ddc
+     li	v1,15		// de0
+     beq	a1,v0,__e14		// de4
+     li	a2,15		// de8
+
+	 __dec:
+     sll	a1,v1,0x2		// dec
+     addu	v0,a1,a0		// df0
+     lw	v1,0(v0)		// df4
+
+	 __df8:
+     bnez	v1,__e20		// df8
+     addiu	v0,v0,-4		// dfc
+     addiu	a2,a2,-1		// e00
+     bgezl	a2,__df8		// e04
+     lw	v1,0(v0)		// e08
+
+	 __e0c:
+     jr	ra		// e0c
+     move	v0,a3		// e10
+
+	 __e14:
+     li	v1,7		// e14
+     b	__dec		// e18
+     li	a2,7		// e1c
+
+	 __e20:
+     move	a0,v1		// e20
+     sll	a3,a2,0x5		// e24
+     li	v1,31		// e28
+     b	__e3c		// e2c
+     li	a1,1		// e30
+
+	 __e34:
+     bltz	v1,__e0c		// e34
+     nop		// e38
+
+	 __e3c:
+     sllv	t0,a1,v1		// e3c
+     and	a2,a0,t0		// e40
+     beqzl	a2,__e34		// e44
+     addiu	v1,v1,-1		// e48
+     addu	a3,a3,v1		// e4c
+     jr	ra		// e50
+     move	v0,a3		// e54
+.end func_dd8
+
+.globl func_e58
+.ent func_e58
+func_e58:
+     addiu	a1,a1,28		// e58
+     addiu	a0,a0,28		// e5c
+     move	t0,zero		// e60
+     li	a3,7		// e64
+     lw	v1,0(a0)		// e68
+
+	 __e6c:
+     lw	t1,0(a1)		// e6c
+     addiu	a3,a3,-1		// e70
+     sltu	v0,t1,v1		// e74
+     sltu	a2,v1,t1		// e78
+     addiu	a0,a0,-4		// e7c
+     bnez	v0,__ea0		// e80
+     addiu	a1,a1,-4		// e84
+     bnezl	a2,__eac		// e88
+     li	t0,-1		// e8c
+     bgezl	a3,__e6c		// e90
+     lw	v1,0(a0)		// e94
+     jr	ra		// e98
+     move	v0,t0		// e9c
+
+	 __ea0:
+     li	t0,1		// ea0
+     jr	ra		// ea4
+     move	v0,t0		// ea8
+
+	 __eac:
+     jr	ra		// eac
+     move	v0,t0		// eb0
+.end func_e58
+
+.globl func_eb4_copy_32_bytes
+.ent func_eb4_copy_32_bytes
+func_eb4_copy_32_bytes:   /* ptr in a0 gets 32 bytes from ptr in a1 */
+     li	v1,7		// eb4
+
+	 __eb8:
+     lw	v0,0(a1)		// eb8
+     addiu	v1,v1,-1		// ebc
+     sw	v0,0(a0)		// ec0
+     addiu	a1,a1,4		// ec4
+     bgez	v1,__eb8		// ec8
+     addiu	a0,a0,4		// ecc
+     jr	ra		// ed0
+     nop		// ed4
+.end func_eb4_copy_32_bytes
+
+.globl func_ed8_zero_memory
+.ent func_ed8_zero_memory
+func_ed8_zero_memory:
+     blez	a1,__ef0		// ed8
+     nop		// edc
+
+	 __ee0:
+     addiu	a1,a1,-1		// ee0
+     sw	zero,0(a0)		// ee4
+     bnez	a1,__ee0		// ee8
+     addiu	a0,a0,4		// eec
+
+	 __ef0:
+     jr	ra		// ef0
+     nop		// ef4
+.end func_ed8_zero_memory
+
+.globl func_ef8_xor_64_bytes
+.ent func_ef8_xor_64_bytes
+func_ef8_xor_64_bytes:   /* ptr in a0 gets *a1 xor *a2 for 64 bytes */
+     li	a3,15		// ef8
+
+	 __efc:
+     lw	t0,0(a1)		// efc
+     lw	v1,0(a2)		// f00
+     addiu	a3,a3,-1		// f04
+     xor	v0,t0,v1		// f08
+     sw	v0,0(a0)		// f0c
+     addiu	a1,a1,4		// f10
+     addiu	a0,a0,4		// f14
+     bgez	a3,__efc		// f18
+     addiu	a2,a2,4		// f1c
+     jr	ra		// f20
+     nop		// f24
+.end func_ef8_xor_64_bytes
+
+.globl func_f28
+.ent func_f28
+func_f28:
+     move	t1,a0		// f28
+     move	t0,a1		// f2c
+     move	a3,zero		// f30
+
+	 __f34:
+     sll	t2,a3,0x2		// f34
+     addu	a2,t2,t0		// f38
+     addu	v0,t2,t1		// f3c
+     lw	a1,0(v0)		// f40
+     lw	v1,0(a2)		// f44
+     addiu	a3,a3,1		// f48
+     slti	a0,a3,8		// f4c
+     sw	v1,0(v0)		// f50
+     bnez	a0,__f34		// f54
+     sw	a1,0(a2)		// f58
+     jr	ra		// f5c
+     nop		// f60
+.end func_f28
+
+.globl func_f64
+.ent func_f64
+func_f64:
+     slti	t2,a1,0		// f64
+     addiu	t0,a1,31		// f68
+     movz	t0,a1,t2		// f6c
+     sra	t1,t0,0x5		// f70
+     move	t2,t1		// f74
+     sll	a3,t1,0x5		// f78
+     subu	t1,a1,a3		// f7c
+     li	a2,1		// f80
+     sll	a1,t2,0x2		// f84
+     sllv	v0,a2,t1		// f88
+     addu	v1,a1,a0		// f8c
+     addiu	t3,v0,-1		// f90
+     addiu	v1,v1,28		// f94
+     li	a2,7		// f98
+     addiu	a1,a0,28		// f9c
+
+	 __fa0:
+     lw	t4,0(a1)		// fa0
+     addiu	a2,a2,-1		// fa4
+     sw	t4,0(v1)		// fa8
+     addiu	a1,a1,-4		// fac
+     bgez	a2,__fa0		// fb0
+     addiu	v1,v1,-4		// fb4
+     blez	t2,__fdc		// fb8
+     li	t5,32		// fbc
+     move	v1,a0		// fc0
+     move	v0,t2		// fc4
+
+	 __fc8:
+     addiu	v0,v0,-1		// fc8
+     sw	zero,0(v1)		// fcc
+     bnez	v0,__fc8		// fd0
+     addiu	v1,v1,4		// fd4
+     li	t5,32		// fd8
+
+	 __fdc:
+     addiu	t4,t2,8		// fdc
+     subu	t0,t5,t1		// fe0
+     blez	t4,__1028		// fe4
+     move	a3,zero		// fe8
+     move	a2,t4		// fec
+     move	a1,a0		// ff0
+
+	 __ff4:
+     lw	t8,0(a1)		// ff4
+     addiu	a2,a2,-1		// ff8
+     sllv	t9,t8,t1		// ffc
+    or	t7,t9,a3		// 1000
+    srlv	t6,t8,t0		// 1004
+    sw	t7,0(a1)		// 1008
+    and	a3,t6,t3		// 100c
+    bnez	a2,__ff4		// 1010
+    addiu	a1,a1,4		// 1014
+    beqz	a3,__1028		// 1018
+    sll	v1,t4,0x2		// 101c
+    addu	t3,v1,a0		// 1020
+    sw	a3,0(t3)		// 1024
+
+	__1028:
+    jr	ra		// 1028
+    nop		// 102c
+.end func_f64
+
+.globl func_1030
+.ent func_1030
+func_1030:
+    addiu	sp,sp,-48		// 1030
+    lui	a3,0xbfc3		// 1034
+    sw	s1,20(sp)		// 1038
+	la s1, __bss + 0x0320
+    sw	s4,32(sp)		// 1040
+    sw	s0,16(sp)		// 1044
+    move	s4,a0		// 1048
+    move	s0,a1		// 104c
+    move	a0,s1		// 1050
+    li	a1,16		// 1054
+    sw	ra,40(sp)		// 1058
+    sw	s5,36(sp)		// 105c
+    sw	s3,28(sp)		// 1060
+    jal	func_ed8_zero_memory		// 1064
+    sw	s2,24(sp)		// 1068
+    move	a0,s4		// 106c
+    jal	func_ed8_zero_memory		// 1070
+    li	a1,8		// 1074
+    lui	a2,0xbfc3		// 1078
+	la s5, __bss + 0x1080
+    li	a0,1		// 1080
+    sw	a0,0(s4)		// 1084
+    li	a1,8		// 1088
+    jal	func_ed8_zero_memory		// 108c
+    move	a0,s5		// 1090
+    lui	v1,0xbfc3		// 1094
+    la	s2, __bss + 0x0020 // 1098
+    move	a1,s0		// 109c
+    jal	func_eb4_copy_32_bytes		// 10a0
+    move	a0,s2		// 10a4
+    lui	v0,0xbfc3		// 10a8
+	la s3, __bss + 0x08a0
+	la a1, _data_3400
+    jal	func_eb4_copy_32_bytes		// 10b8
+    move	a0,s3		// 10bc
+    b	__1138		// 10c0
+    move	a0,s2		// 10c4
+
+	__10c8:
+    move	a0,s3		// 10c8
+    jal	func_dd8		// 10cc
+    li	a1,1		// 10d0
+    subu	s0,s0,v0		// 10d4
+    move	a0,s2		// 10d8
+    bltz	s0,__116c		// 10dc
+    move	a1,s3		// 10e0
+    move	a0,s1		// 10e4
+
+	__10e8:
+    jal	func_eb4_copy_32_bytes		// 10e8
+    move	a1,s3		// 10ec
+    move	a0,s1		// 10f0
+    jal	func_f64		// 10f4
+    move	a1,s0		// 10f8
+    move	a2,s1		// 10fc
+    move	a0,s2		// 1100
+    jal	func_ef8_xor_64_bytes		// 1104
+    move	a1,s2		// 1108
+    move	a0,s1		// 110c
+    jal	func_eb4_copy_32_bytes		// 1110
+    move	a1,s5		// 1114
+    move	a0,s1		// 1118
+    jal	func_f64		// 111c
+    move	a1,s0		// 1120
+    move	a0,s4		// 1124
+    move	a1,s4		// 1128
+    jal	func_ef8_xor_64_bytes		// 112c
+    move	a2,s1		// 1130
+    move	a0,s2		// 1134
+
+	__1138:
+    jal	func_dd8		// 1138
+    li	a1,1		// 113c
+    bnez	v0,__10c8		// 1140
+    move	s0,v0		// 1144
+    lw	ra,40(sp)		// 1148
+    lw	s5,36(sp)		// 114c
+    lw	s4,32(sp)		// 1150
+    lw	s3,28(sp)		// 1154
+    lw	s2,24(sp)		// 1158
+    lw	s1,20(sp)		// 115c
+    lw	s0,16(sp)		// 1160
+    jr	ra		// 1164
+    addiu	sp,sp,48		// 1168
+
+	__116c:
+    jal	func_f28      /* only called here and 4 lines down */		// 116c
+    negu	s0,s0		// 1170
+    move	a0,s4		// 1174
+    jal	func_f28      /* only called here and 4 lines up */		// 1178
+    move	a1,s5		// 117c
+    b	__10e8		// 1180
+    move	a0,s1		// 1184
+.end func_1030
+
+.globl func_1188
+.ent func_1188
+func_1188:
+    addiu	sp,sp,-24		// 1188
+    move	a1,zero		// 118c
+    sw	s0,16(sp)		// 1190
+    sw	ra,20(sp)		// 1194
+    jal	func_dd8		// 1198
+    move	s0,a0		// 119c
+    addiu	a0,v0,31		// 11a0
+    slti	v1,v0,0		// 11a4
+    movn	v0,a0,v1		// 11a8
+    sra	v0,v0,0x5		// 11ac
+    addiu	a3,v0,1		// 11b0
+    blez	a3,__11f8		// 11b4
+    move	a2,zero		// 11b8
+    move	a1,a3		// 11bc
+    move	a0,s0		// 11c0
+
+	__11c4:
+    lw	t0,0(a0)		// 11c4
+    addiu	a1,a1,-1		// 11c8
+    sll	t2,t0,0x1		// 11cc
+    or	t1,t2,a2		// 11d0
+    sw	t1,0(a0)		// 11d4
+    srl	a2,t0,0x1f		// 11d8
+    bnez	a1,__11c4		// 11dc
+    addiu	a0,a0,4		// 11e0
+    beqz	a2,__11fc		// 11e4
+    lw	ra,20(sp)		// 11e8
+    sll	t3,a3,0x2		// 11ec
+    addu	a1,t3,s0		// 11f0
+    sw	a2,0(a1)		// 11f4
+
+	__11f8:
+    lw	ra,20(sp)		// 11f8
+
+	__11fc:
+    lw	s0,16(sp)		// 11fc
+    jr	ra		// 1200
+    addiu	sp,sp,24		// 1204
+.end func_1188
+
+.globl func_1208
+.ent func_1208
+func_1208:
+    addiu	sp,sp,-40		// 1208
+    move	a0,a1		// 120c
+    sw	s2,24(sp)		// 1210
+    move	s2,a1		// 1214
+    move	a1,zero		// 1218
+    sw	s3,28(sp)		// 121c
+    sw	s0,16(sp)		// 1220
+    move	s3,a2		// 1224
+    sw	ra,32(sp)		// 1228
+    jal	func_dd8		// 122c
+    sw	s1,20(sp)		// 1230
+    addiu	s0,v0,-233		// 1234
+    move	a0,s2		// 1238
+    jal	func_e58                /* only called from here */		// 123c
+    move	a1,s3		// 1240
+    bltz	s0,__129c		// 1244
+    lui	v0,0xbfc3		// 1248
+	la s1, __bss + 0x0c20
+    move	a0,s1		// 1250
+
+	__1254:
+    jal	func_ed8_zero_memory		// 1254
+    li	a1,16		// 1258
+    move	a0,s1		// 125c
+    jal	func_eb4_copy_32_bytes		// 1260
+    move	a1,s3		// 1264
+    move	a1,s0		// 1268
+    jal	func_f64		// 126c
+    move	a0,s1		// 1270
+    move	a0,s2		// 1274
+    move	a1,s2		// 1278
+    jal	func_ef8_xor_64_bytes		// 127c
+    move	a2,s1		// 1280
+    move	a0,s2		// 1284
+    jal	func_dd8		// 1288
+    move	a1,zero		// 128c
+    addiu	s0,v0,-233		// 1290
+    bgez	s0,__1254		// 1294
+    move	a0,s1		// 1298
+
+	__129c:
+    lw	ra,32(sp)		// 129c
+    lw	s3,28(sp)		// 12a0
+    lw	s2,24(sp)		// 12a4
+    lw	s1,20(sp)		// 12a8
+    lw	s0,16(sp)		// 12ac
+    jr	ra		// 12b0
+    addiu	sp,sp,40		// 12b4
+.end func_1208
+
+func_12b8:
+    addiu	sp,sp,-40		// 12b8
+    lui	v1,0xbfc3		// 12bc
+    sw	s4,32(sp)		// 12c0
+	la s4, __bss + 0x1220
+    sw	s3,28(sp)		// 12c8
+    sw	s0,16(sp)		// 12cc
+    move	s3,a0		// 12d0
+    move	s0,a1		// 12d4
+    move	a0,s4		// 12d8
+    li	a1,8		// 12dc
+    sw	ra,36(sp)		// 12e0
+    sw	s2,24(sp)		// 12e4
+    sw	s1,20(sp)		// 12e8
+    jal	func_ed8_zero_memory		// 12ec
+    move	s1,a2		// 12f0
+    lui	v0,0xbfc3		// 12f4
+	la s2, __bss + 0x0420
+    move	a0,s2		// 12fc
+    jal	func_ed8_zero_memory		// 1300
+    li	a1,16		// 1304
+    move	a1,s0		// 1308
+    jal	func_eb4_copy_32_bytes		// 130c
+    move	a0,s4		// 1310
+    move	a1,s1		// 1314
+    jal	func_eb4_copy_32_bytes		// 1318
+    move	a0,s2		// 131c
+    li	s0,1		// 1320
+    li	t3,8		// 1324
+    move	s1,zero		// 1328
+    slt	t2,zero,t3		// 132c
+
+	__1330:
+    move	t0,s4		// 1330
+    li	a3,7		// 1334
+    move	t1,zero		// 1338
+
+	__133c:
+    lw	a1,0(t0)		// 133c
+    and	a0,a1,s0		// 1340
+    beqzl	a0,__1384		// 1344
+    addiu	a3,a3,-1		// 1348
+    beqzl	t2,__1384		// 134c
+    addiu	a3,a3,-1		// 1350
+    move	a2,s2		// 1354
+    addu	a0,t1,s3		// 1358
+    move	a1,t3		// 135c
+
+	__1360:
+    lw	t5,0(a0)		// 1360
+    lw	t6,0(a2)		// 1364
+    addiu	a1,a1,-1		// 1368
+    xor	t4,t5,t6		// 136c
+    sw	t4,0(a0)		// 1370
+    addiu	a2,a2,4		// 1374
+    bnez	a1,__1360		// 1378
+    addiu	a0,a0,4		// 137c
+    addiu	a3,a3,-1		// 1380
+
+	__1384:
+    addiu	t0,t0,4		// 1384
+    bgez	a3,__133c		// 1388
+    addiu	t1,t1,4		// 138c
+    li	a2,31		// 1390
+    beql	s1,a2,__13cc		// 1394
+    addiu	s1,s1,1		// 1398
+    jal	func_1188        /* only called from here */		// 139c
+    move	a0,s2		// 13a0
+    move	a0,s2		// 13a4
+    jal	func_dd8		// 13a8
+    move	a1,zero		// 13ac
+    addiu	t0,v0,31		// 13b0
+    slti	t1,v0,0		// 13b4
+    movn	v0,t0,t1		// 13b8
+    sra	a3,v0,0x5		// 13bc
+    sll	s0,s0,0x1		// 13c0
+    addiu	t3,a3,1		// 13c4
+    addiu	s1,s1,1		// 13c8
+
+	__13cc:
+    slti	t2,s1,32		// 13cc
+    bnezl	t2,__1330		// 13d0
+    slt	t2,zero,t3		// 13d4
+    lw	ra,36(sp)		// 13d8
+    lw	s4,32(sp)		// 13dc
+    lw	s3,28(sp)		// 13e0
+    lw	s2,24(sp)		// 13e4
+    lw	s1,20(sp)		// 13e8
+    lw	s0,16(sp)		// 13ec
+    jr	ra		// 13f0
+    addiu	sp,sp,40		// 13f4
+
+func_13f8_xor_32_bytes:
+    li	a3,7		// 13f8
+
+	__13fc:
+    lw	t0,0(a1)		// 13fc
+    lw	v1,0(a2)		// 1400
+    addiu	a3,a3,-1		// 1404
+    xor	v0,t0,v1		// 1408
+    sw	v0,0(a0)		// 140c
+    addiu	a1,a1,4		// 1410
+    addiu	a0,a0,4		// 1414
+    bgez	a3,__13fc		// 1418
+    addiu	a2,a2,4		// 141c
+    jr	ra		// 1420
+    nop		// 1424
+
+.globl func_1428
+.ent func_1428
+func_1428:
+    move	t0,a0		// 1428
+    lw	t1,4(a1)		// 142c
+    move	a3,zero		// 1430
+    lw	a2,0(a1)		// 1434
+
+	__1438:
+    addu	a1,t0,a3		// 1438
+    lbu	v1,0(a2)		// 143c
+    lbu	t2,0(a1)		// 1440
+    addiu	a3,a3,1		// 1444
+    xor	v0,t2,v1		// 1448
+    slti	a0,a3,29		// 144c
+    sb	v0,0(a1)		// 1450
+    bnez	a0,__1438		// 1454
+    addiu	a2,a2,1		// 1458
+    move	a2,t1		// 145c
+    li	a3,29		// 1460
+
+	__1464:
+    addu	t3,t0,a3		// 1464
+    lbu	t6,0(a2)		// 1468
+    lbu	t5,0(t3)		// 146c
+    addiu	a3,a3,1		// 1470
+    xor	t4,t5,t6		// 1474
+    slti	t1,a3,32		// 1478
+    sb	t4,0(t3)		// 147c
+    bnez	t1,__1464		// 1480
+    addiu	a2,a2,1		// 1484
+    jr	ra		// 1488
+    nop		// 148c
+.end func_1428
+
+.globl func_1490
+.ent func_1490
+func_1490:
+    addiu	sp,sp,-56		// 1490
+    sw	ra,48(sp)		// 1494
+    sw	s7,44(sp)		// 1498
+    sw	s6,40(sp)		// 149c
+    sw	s5,36(sp)		// 14a0
+    sw	s4,32(sp)		// 14a4
+    sw	s3,28(sp)		// 14a8
+    sw	s2,24(sp)		// 14ac
+    sw	s1,20(sp)		// 14b0
+    sw	s0,16(sp)		// 14b4
+    move	s7,a0		// 14b8
+    lw	a0,0(a2)		// 14bc
+    move	s6,a2		// 14c0
+    move	s5,a1		// 14c4
+    jal	func_ed8_zero_memory		// 14c8
+    li	a1,8		// 14cc
+    lw	a0,4(s6)		// 14d0
+    jal	func_ed8_zero_memory		// 14d4
+    li	a1,8		// 14d8
+    lui	t0,0xbfc3		// 14dc
+	la s2, __bss + 0x0120
+    move	a0,s2		// 14e4
+    jal	func_ed8_zero_memory		// 14e8
+    li	a1,16		// 14ec
+    lui	a3,0xbfc3		// 14f0
+	la s1, __bss + 0x0e20
+    move	a0,s1		// 14f8
+    jal	func_ed8_zero_memory		// 14fc
+    li	a1,16		// 1500
+    lui	a1,0xbfc3		// 1504
+	la s3, __bss + 0x0520
+    lw	a2,4(s5)		// 150c
+    lw	a1,4(s7)		// 1510
+    jal	func_13f8_xor_32_bytes		// 1514
+    move	a0,s3		// 1518
+    lui	a0,0xbfc3		// 151c
+	la s4, __bss + 0x0620
+    lw	a2,0(s5)		// 1524
+    lw	a1,0(s7)		// 1528
+    jal	func_13f8_xor_32_bytes		// 152c
+    move	a0,s4		// 1530
+    move	a0,s1		// 1534
+    jal	func_1030    /* called in one other place */		// 1538
+    move	a1,s4		// 153c
+    lui	v1,0xbfc3		// 1540
+	la s0, __bss + 0x0d20
+    move	a0,s0		// 1548
+    jal	func_ed8_zero_memory		// 154c
+    li	a1,16		// 1550
+    move	a0,s0		// 1554
+    move	a1,s1		// 1558
+    jal	func_12b8		// 155c
+    move	a2,s3		// 1560
+	la s5, _data_3400
+    move	a0,s0		// 156c
+    move	a1,s0		// 1570
+    jal	func_1208		// 1574
+    move	a2,s5		// 1578
+    la	a2,_data_34c8 // 1580
+    move	a0,s3		// 1584
+    jal	func_13f8_xor_32_bytes		// 1588
+    move	a1,s0		// 158c
+    move	a0,s2		// 1590
+    jal	func_ed8_zero_memory		// 1594
+    li	a1,16		// 1598
+    move	a0,s2		// 159c
+    move	a1,s0		// 15a0
+    jal	func_12b8		// 15a4
+    move	a2,s0		// 15a8
+    move	a0,s2		// 15ac
+    move	a1,s2		// 15b0
+    jal	func_1208		// 15b4
+    move	a2,s5		// 15b8
+    move	a0,s1		// 15bc
+    move	a1,s3		// 15c0
+    jal	func_13f8_xor_32_bytes		// 15c4
+    move	a2,s2		// 15c8
+    lw	a0,0(s6)		// 15cc
+    move	a1,s1		// 15d0
+    jal	func_13f8_xor_32_bytes		// 15d4
+    move	a2,s4		// 15d8
+    lw	a1,0(s7)		// 15dc
+    lw	a2,0(s6)		// 15e0
+    jal	func_13f8_xor_32_bytes		// 15e4
+    move	a0,s3		// 15e8
+    lw	a2,4(s7)		// 15ec
+    lw	a1,0(s6)		// 15f0
+    jal	func_13f8_xor_32_bytes		// 15f4
+    move	a0,s4		// 15f8
+    move	a0,s1		// 15fc
+    jal	func_ed8_zero_memory		// 1600
+    li	a1,16		// 1604
+    move	a0,s1		// 1608
+    move	a1,s3		// 160c
+    jal	func_12b8		// 1610
+    move	a2,s0		// 1614
+    move	a0,s1		// 1618
+    move	a1,s1		// 161c
+    jal	func_1208		// 1620
+    move	a2,s5		// 1624
+    lw	a0,4(s6)		// 1628
+    move	a1,s1		// 162c
+    move	a2,s4		// 1630
+    lw	ra,48(sp)		// 1634
+    lw	s7,44(sp)		// 1638
+    lw	s6,40(sp)		// 163c
+    lw	s5,36(sp)		// 1640
+    lw	s4,32(sp)		// 1644
+    lw	s3,28(sp)		// 1648
+    lw	s2,24(sp)		// 164c
+    lw	s1,20(sp)		// 1650
+    lw	s0,16(sp)		// 1654
+    j	func_13f8_xor_32_bytes		// 1658
+    addiu	sp,sp,56		// 165c
+.end func_1490
+
+.global func_1660
+.ent func_1660
+func_1660:
+    addiu	sp,sp,-56		// 1660
+    sw	ra,48(sp)		// 1664
+    sw	s7,44(sp)		// 1668
+    sw	s6,40(sp)		// 166c
+    sw	s5,36(sp)		// 1670
+    sw	s4,32(sp)		// 1674
+    sw	s3,28(sp)		// 1678
+    sw	s2,24(sp)		// 167c
+    sw	s1,20(sp)		// 1680
+    sw	s0,16(sp)		// 1684
+    move	s7,a0		// 1688
+    lw	a0,0(a1)		// 168c
+    move	s6,a1		// 1690
+    jal	func_ed8_zero_memory		// 1694
+    li	a1,8		// 1698
+    lw	a0,4(s6)		// 169c
+    jal	func_ed8_zero_memory		// 16a0
+    li	a1,8		// 16a4
+    lui	t1,0xbfc3		// 16a8
+    //addiu	s3,t1,-25544		// 16ac
+	la s3, __bss + 0x0720
+    move	a0,s3		// 16b0
+    jal	func_ed8_zero_memory		// 16b4
+    li	a1,16		// 16b8
+    lui	t0,0xbfc3		// 16bc
+    la	s4, __bss + 0x0fa0 // 16c0
+    move	a0,s4		// 16c4
+    jal	func_ed8_zero_memory		// 16c8
+    li	a1,16		// 16cc
+    lui	a3,0xbfc3		// 16d0
+    la	s2, __bss + 0x0b20		// 16d4
+    move	a0,s2		// 16d8
+    jal	func_ed8_zero_memory		// 16dc
+    li	a1,16		// 16e0
+    lw	a1,0(s7)		// 16e4
+    jal	func_1030    /* called in one other place */		// 16e8
+    move	a0,s2		// 16ec
+    lui	a1,0xbfc3		// 16f0
+    la	s1, __bss + 0x09a0		// 16f4
+    move	a0,s1		// 16f8
+    jal	func_ed8_zero_memory		// 16fc
+    li	a1,16		// 1700
+    lw	a2,4(s7)		// 1704
+    move	a0,s1		// 1708
+    jal	func_12b8		// 170c
+    move	a1,s2		// 1710
+	la s5, _data_3400 /* g_crypt_key6 */
+    move	a1,s1		// 171c
+    move	a0,s1		// 1720
+    jal	func_1208		// 1724
+    move	a2,s5		// 1728
+    lui	v1,0xbfc3		// 172c
+	la s0, __bss + 0x0220
+    lw	a1,0(s7)		// 1734
+    move	a0,s0		// 1738
+    jal	func_13f8_xor_32_bytes		// 173c
+    move	a2,s1		// 1740
+	la a2, _data_34c8
+    move	a0,s2		// 174c
+    jal	func_13f8_xor_32_bytes		// 1750
+    move	a1,s0		// 1754
+    move	a0,s3		// 1758
+    jal	func_ed8_zero_memory		// 175c
+    li	a1,16		// 1760
+    move	a0,s3		// 1764
+    move	a1,s0		// 1768
+    jal	func_12b8		// 176c
+    move	a2,s0		// 1770
+    move	a0,s3		// 1774
+    move	a1,s3		// 1778
+    jal	func_1208		// 177c
+    move	a2,s5		// 1780
+    lw	a0,0(s6)		// 1784
+    move	a2,s3		// 1788
+    jal	func_13f8_xor_32_bytes		// 178c
+    move	a1,s2		// 1790
+    move	a0,s1		// 1794
+    jal	func_ed8_zero_memory		// 1798
+    li	a1,16		// 179c
+	la a2, _data_3460
+    move	a1,s0		// 17a4
+    move	a0,s2		// 17a8
+    jal	func_13f8_xor_32_bytes		// 17ac
+	nop
+    lw	a2,0(s6)		// 17b4
+    move	a0,s1		// 17b8
+    jal	func_12b8		// 17bc
+    move	a1,s2		// 17c0
+    move	a2,s5		// 17c4
+    move	a0,s1		// 17c8
+    jal	func_1208		// 17cc
+    move	a1,s1		// 17d0
+    move	a0,s4		// 17d4
+    jal	func_ed8_zero_memory		// 17d8
+    li	a1,16		// 17dc
+    lw	a1,0(s7)		// 17e0
+    move	a0,s4		// 17e4
+    jal	func_12b8		// 17e8
+    move	a2,a1		// 17ec
+    move	a0,s4		// 17f0
+    move	a1,s4		// 17f4
+    jal	func_1208		// 17f8
+    move	a2,s5		// 17fc
+    lw	a0,4(s6)		// 1800
+    move	a1,s1		// 1804
+    move	a2,s4		// 1808
+    lw	ra,48(sp)		// 180c
+    lw	s7,44(sp)		// 1810
+    lw	s6,40(sp)		// 1814
+    lw	s5,36(sp)		// 1818
+    lw	s4,32(sp)		// 181c
+    lw	s3,28(sp)		// 1820
+    lw	s2,24(sp)		// 1824
+    lw	s1,20(sp)		// 1828
+    lw	s0,16(sp)		// 182c
+    j	func_13f8_xor_32_bytes		// 1830
+    addiu	sp,sp,56		// 1834
+.end func_1660
+
+
+.globl func_1838
+.ent func_1838
+func_1838:
+    addiu	sp,sp,-56		// 1838
+    sw	ra,48(sp)		// 183c
+    sw	s5,44(sp)		// 1840
+    sw	s4,40(sp)		// 1844
+    sw	s3,36(sp)		// 1848
+    sw	s2,32(sp)		// 184c
+    sw	s1,28(sp)		// 1850
+    sw	s0,24(sp)		// 1854
+    lui	t4,0xbfc3		// 1858
+    lui	t2,0xbfc3		// 185c
+    move	s4,a0		// 1860
+    lw	a0,0(a2)		// 1864
+    move	s1,a2		// 1868
+	la t3, __bss + 0x0820
+	la t1, __bss + 0x0aa0
+    move	s3,a1		// 1874
+    li	a1,8		// 1878
+    sw	t3,16(sp)		// 187c
+    jal	func_ed8_zero_memory		// 1880
+    sw	t1,20(sp)		// 1884
+    lw	a0,4(s1)		// 1888
+    jal	func_ed8_zero_memory		// 188c
+    li	a1,8		// 1890
+    lw	a0,16(sp)		// 1894
+    jal	func_ed8_zero_memory		// 1898
+    li	a1,8		// 189c
+    lw	a0,20(sp)		// 18a0
+    jal	func_ed8_zero_memory		// 18a4
+    li	a1,8		// 18a8
+    move	a0,s4		// 18ac
+    jal	func_dd8		// 18b0
+    li	a1,1		// 18b4
+    slti	a1,v0,0		// 18b8
+    addiu	a0,v0,31		// 18bc
+    movz	a0,v0,a1		// 18c0
+    move	a3,v0		// 18c4
+    sra	v0,a0,0x5		// 18c8
+    sll	t0,v0,0x2		// 18cc
+    lw	a0,16(sp)		// 18d0
+    lw	a1,0(s3)		// 18d4
+    addu	a2,t0,s4		// 18d8
+    sll	v1,v0,0x5		// 18dc
+    subu	s0,a3,v1		// 18e0
+    lw	s2,0(a2)		// 18e4
+    jal	func_eb4_copy_32_bytes		// 18e8
+    addiu	s5,v0,-1		// 18ec
+    lw	a0,20(sp)		// 18f0
+    lw	a1,4(s3)		// 18f4
+    addiu	s0,s0,-1		// 18f8
+
+	__18fc:
+    jal	func_eb4_copy_32_bytes		// 18fc
+    nop		// 1900
+
+	__1904:
+    bltz	s0,__196c		// 1904
+    addiu	a0,sp,16		// 1908
+    jal	func_1660    /* only called here and below */		// 190c
+    move	a1,s1		// 1910
+    lw	a0,16(sp)		// 1914
+    jal	func_eb4_copy_32_bytes		// 1918
+    lw	a1,0(s1)		// 191c
+    lw	a0,20(sp)		// 1920
+    jal	func_eb4_copy_32_bytes		// 1924
+    lw	a1,4(s1)		// 1928
+    li	t7,1		// 192c
+    sllv	t6,t7,s0		// 1930
+    and	t5,t6,s2		// 1934
+    addiu	a0,sp,16		// 1938
+    move	a1,s3		// 193c
+    move	a2,s1		// 1940
+    beqz	t5,__1904		// 1944
+    addiu	s0,s0,-1		// 1948
+    jal	func_1490   /* only called here and below */		// 194c
+    nop		// 1950
+    lw	a0,16(sp)		// 1954
+    jal	func_eb4_copy_32_bytes		// 1958
+    lw	a1,0(s1)		// 195c
+    lw	a0,20(sp)		// 1960
+    b	__18fc		// 1964
+    lw	a1,4(s1)		// 1968
+
+	__196c:
+    bltz	s5,__1a04		// 196c
+    sll	s2,s5,0x2		// 1970
+    addu	s4,s2,s4		// 1974
+
+	__1978:
+    lw	s2,0(s4)		// 1978
+    b	__198c		// 197c
+    li	s0,31		// 1980
+
+	__1984:
+    bltzl	s0,__19fc		// 1984
+    addiu	s5,s5,-1		// 1988
+
+	__198c:
+    addiu	a0,sp,16		// 198c
+
+	__1990:
+    jal	func_1660    /* only called here and above */		// 1990
+    move	a1,s1		// 1994
+    lw	a0,16(sp)		// 1998
+    jal	func_eb4_copy_32_bytes		// 199c
+    lw	a1,0(s1)		// 19a0
+    lw	a0,20(sp)		// 19a4
+    jal	func_eb4_copy_32_bytes		// 19a8
+    lw	a1,4(s1)		// 19ac
+    li	ra,1		// 19b0
+    sllv	t9,ra,s0		// 19b4
+    and	t8,t9,s2		// 19b8
+    addiu	a0,sp,16		// 19bc
+    move	a1,s3		// 19c0
+    move	a2,s1		// 19c4
+    beqz	t8,__1984		// 19c8
+    addiu	s0,s0,-1		// 19cc
+    jal	func_1490   /* only called here and above */		// 19d0
+    nop		// 19d4
+    lw	a0,16(sp)		// 19d8
+    jal	func_eb4_copy_32_bytes		// 19dc
+    lw	a1,0(s1)		// 19e0
+    lw	a0,20(sp)		// 19e4
+    jal	func_eb4_copy_32_bytes		// 19e8
+    lw	a1,4(s1)		// 19ec
+    bgez	s0,__1990		// 19f0
+    addiu	a0,sp,16		// 19f4
+    addiu	s5,s5,-1		// 19f8
+
+	__19fc:
+    bgez	s5,__1978		// 19fc
+    addiu	s4,s4,-4		// 1a00
+
+	__1a04:
+    lw	a0,0(s1)		// 1a04
+    jal	func_eb4_copy_32_bytes		// 1a08
+    lw	a1,16(sp)		// 1a0c
+    lw	a0,4(s1)		// 1a10
+    jal	func_eb4_copy_32_bytes		// 1a14
+    lw	a1,20(sp)		// 1a18
+    lw	ra,48(sp)		// 1a1c
+    lw	s5,44(sp)		// 1a20
+    lw	s4,40(sp)		// 1a24
+    lw	s3,36(sp)		// 1a28
+    lw	s2,32(sp)		// 1a2c
+    lw	s1,28(sp)		// 1a30
+    lw	s0,24(sp)		// 1a34
+    move	v0,zero		// 1a38
+    jr	ra		// 1a3c
+    addiu	sp,sp,56		// 1a40
+.end func_1838
+
+.globl func_1a44
+.ent func_1a44
+func_1a44:
+    addiu	sp,sp,-24		// 1a44
+    sw	ra,20(sp)		// 1a48
+    sw	s0,16(sp)		// 1a4c
+    lui	v0,0xbfc3		// 1a50
+    move	s0,a0		// 1a54
+    lw	a0,0(a0)		// 1a58
+	la a1, _data_3440
+    jal	func_eb4_copy_32_bytes		// 1a5c
+	nop
+    lw	a0,4(s0)		// 1a64
+	la a1, _data_3420
+    jal	func_eb4_copy_32_bytes		// 1a6c
+	nop
+    lw	ra,20(sp)		// 1a74
+    lw	s0,16(sp)		// 1a78
+    move	v0,zero		// 1a7c
+    jr	ra		// 1a80
+    addiu	sp,sp,24		// 1a84
+.end func_1a44
+
+.globl func_1a88
+.ent func_1a88
+func_1a88:
+    lui	t0,0xbfc3		// 1a88
+    addiu	sp,sp,-40		// 1a8c
+	la v1, __bss + 0x0f20
+    lui	a3,0xbfc3		// 1a94
+	la v0, __bss + 0x11a0
+    sw	s2,32(sp)		// 1a9c
+    sw	s1,28(sp)		// 1aa0
+    move	s2,a0		// 1aa4
+    move	s1,a1		// 1aa8
+    move	a0,v1		// 1aac
+    li	a1,8		// 1ab0
+    sw	ra,36(sp)		// 1ab4
+    sw	v0,20(sp)		// 1ab8
+    sw	v1,16(sp)		// 1abc
+    sw	s0,24(sp)		// 1ac0
+    jal	func_ed8_zero_memory		// 1ac4
+    move	s0,a2		// 1ac8
+    lw	a0,20(sp)		// 1acc
+    jal	func_ed8_zero_memory		// 1ad0
+    li	a1,8		// 1ad4
+    move	a0,s0		// 1ad8
+    move	a1,s1		// 1adc
+    jal	func_1838    /* only called from here */		// 1ae0
+    addiu	a2,sp,16		// 1ae4
+    move	s0,v0		// 1ae8
+    move	a0,s2		// 1aec
+    bnez	v0,__1b00		// 1af0
+    addiu	a1,sp,16		// 1af4
+    jal	func_1428 /* only called from here */		// 1af8
+    nop		// 1afc
+
+	__1b00:
+    move	v0,s0		// 1b00
+    lw	ra,36(sp)		// 1b04
+    lw	s2,32(sp)		// 1b08
+    lw	s1,28(sp)		// 1b0c
+    lw	s0,24(sp)		// 1b10
+    jr	ra		// 1b14
+    addiu	sp,sp,40		// 1b18
+.end func_1a88
+
+
+.globl func_1b1c
+.ent func_1b1c
+func_1b1c:
+    addiu	sp,sp,-32		// 1b1c
+    sw	s1,20(sp)		// 1b20
+    lui	t0,0xbfc3		// 1b24
+    move	s1,a1		// 1b28
+    sw	ra,24(sp)		// 1b2c
+    sw	s0,16(sp)		// 1b30
+    move	a1,a0		// 1b34
+    move	s0,a3		// 1b38
+    move	a0,s1		// 1b3c
+    seh	a2,a2		// 1b40
+    addiu	v0,t0,_offset_libc		// 1b44
+	jal    memcpy
+    move	a3,zero		// 1b4c
+    ext	a3,s0,0x4,0x4		// 1b50
+    addiu	a2,a3,16		// 1b54
+    addu	v1,a2,s1		// 1b58
+    lbu	v0,0(v1)		// 1b5c
+    andi	a1,s0,0xf		// 1b60
+    addu	s0,a1,s1		// 1b64
+    lbu	a0,0(s0)		// 1b68
+    lw	ra,24(sp)		// 1b6c
+    sb	v0,0(s0)		// 1b70
+    lw	s1,20(sp)		// 1b74
+    lw	s0,16(sp)		// 1b78
+    addiu	sp,sp,32		// 1b7c
+    jr	ra		// 1b80
+    sb	a0,0(v1)		// 1b84
+.end func_1b1c
+
+.globl func_1b88
+.ent func_1b88
+func_1b88:
+	la      t4,_data_3484
+    move	t5,a1		// 1b90
+    move	t3,a0		// 1b94
+    move	t1,zero		// 1b98
+    move	t0,a1		// 1b9c
+    move	t2,t4		// 1ba0
+    move	a3,a2		// 1ba4
+
+	__1ba8:
+    addu	a0,t3,t1		// 1ba8
+    lbu	t9,0(t2)		// 1bac
+    lbu	t8,0(a0)		// 1bb0
+    addiu	t1,t1,1		// 1bb4
+    xor	t7,t8,t9		// 1bb8
+    sb	t7,0(a3)		// 1bbc
+    lbu	v1,0(t0)		// 1bc0
+    slti	a1,t1,16		// 1bc4
+    xor	t6,t7,v1		// 1bc8
+    sb	t6,0(a0)		// 1bcc
+    addiu	a3,a3,1		// 1bd0
+    addiu	t2,t2,1		// 1bd4
+    bnez	a1,__1ba8		// 1bd8
+    addiu	t0,t0,1		// 1bdc
+    addiu	a3,t5,16		// 1be0
+    addiu	t1,t4,16		// 1be4
+    addiu	a2,a2,16		// 1be8
+    li	t0,16		// 1bec
+
+	__1bf0:
+    addu	t4,t3,t0		// 1bf0
+    lbu	t6,0(t1)		// 1bf4
+    lbu	a0,0(t4)		// 1bf8
+    addiu	t0,t0,1		// 1bfc
+    xor	v0,a0,t6		// 1c00
+    sb	v0,0(a2)		// 1c04
+    lbu	a1,-16(a3)		// 1c08
+    slti	t2,t0,20		// 1c0c
+    xor	t5,v0,a1		// 1c10
+    sb	t5,0(t4)		// 1c14
+    addiu	a2,a2,1		// 1c18
+    addiu	t1,t1,1		// 1c1c
+    bnez	t2,__1bf0		// 1c20
+    addiu	a3,a3,1		// 1c24
+    jr	ra		// 1c28
+    nop		// 1c2c
+.end func_1b88
+
+.globl func_1c30
+.ent func_1c30
+func_1c30:
+    addiu	sp,sp,-64		// 1c30
+    sw	s1,52(sp)		// 1c34
+    sw	s0,48(sp)		// 1c38
+    move	s1,a0		// 1c3c
+    move	s0,a2		// 1c40
+    addu	a0,a0,a2		// 1c44
+    addiu	a2,sp,24		// 1c48
+    sw	ra,60(sp)		// 1c4c
+    sw	s2,56(sp)		// 1c50
+    sw	zero,24(sp)		// 1c54
+    move	s2,a3		// 1c58
+    sw	zero,28(sp)		// 1c5c
+    sw	zero,32(sp)		// 1c60
+    sw	zero,36(sp)		// 1c64
+    jal	func_1b88      /* only called from here */		// 1c68
+    sw	zero,40(sp)		// 1c6c
+    move	a2,s1		// 1c70
+    move	a3,s0		// 1c74
+    addiu	a0,sp,24		// 1c78
+    li	a1,20		// 1c7c
+    jal	func_d78      /* only called from here. nb is effectively func_d2c */		// 1c80
+    sw	s2,16(sp)		// 1c84
+    lw	ra,60(sp)		// 1c88
+    lw	s2,56(sp)		// 1c8c
+    lw	s1,52(sp)		// 1c90
+    lw	s0,48(sp)		// 1c94
+    jr	ra		// 1c98
+    addiu	sp,sp,64		// 1c9c
+.end func_1c30
+
+.globl func_1ca0
+.ent func_1ca0
+func_1ca0:
+    addiu	sp,sp,-48		// 1ca0
+    sw	s1,28(sp)		// 1ca4
+    move	s1,a0		// 1ca8
+    move	a0,a1		// 1cac
+    lw	a1,64(sp)		// 1cb0
+    sw	s0,24(sp)		// 1cb4
+    addiu	s0,s1,3		// 1cb8
+    li	v1,489		// 1cbc
+    sw	s4,40(sp)		// 1cc0
+    sw	s3,36(sp)		// 1cc4
+    addiu	a1,a1,4		// 1cc8
+    move	s3,a3		// 1ccc
+    move	s4,a2		// 1cd0
+    move	a3,a0		// 1cd4
+    li	a2,489		// 1cd8
+    move	a0,s0		// 1cdc
+    sh	v1,16(sp)		// 1ce0
+    sw	ra,44(sp)		// 1ce4
+    jal	func_1c30               /* only called from here */		// 1ce8
+    sw	s2,32(sp)		// 1cec
+    lui	v0,0xbfc3		// 1cf0
+    move	a0,s0		// 1cf4
+    addiu	a1,sp,16		// 1cf8
+    li	a2,2		// 1cfc
+    addiu	s2,v0,_offset_libc		// 1d00
+    li	a3,2		// 1d04
+    li	s0,1		// 1d08
+    jal	memcmp              // 1d0c
+    sh	s0,16(sp)		// 1d10
+    move	a0,s1		// 1d14
+    addiu	a1,s1,492		// 1d18
+    li	a2,492		// 1d1c
+    bnez	v0,__1d90		// 1d20
+    li	v1,24		// 1d24
+    li	a3,492		// 1d28
+    jal	func_abc		// 1d2c
+    sh	a3,16(sp)		// 1d30
+    addiu	a0,sp,16		// 1d34
+    addiu	a1,s1,13		// 1d38
+    li	a2,2		// 1d3c
+    move	a3,zero		// 1d40
+    bnez	v0,__1d90		// 1d44
+    li	v1,2		// 1d48
+    jal memcpy				// 1d4c
+    sb	s0,0(s4)		// 1d50
+    lhu	t1,16(sp)		// 1d54
+    lw	a0,24(s3)		// 1d58
+    addiu	t0,t1,16		// 1d5c
+    move	a1,zero		// 1d60
+    li	a2,32		// 1d64
+    li	a3,1		// 1d68
+    jal	memset		// 1d6c
+    sh	t0,16(sp)		// 1d70
+    lh	a2,16(sp)		// 1d74
+    lw	a0,24(s3)		// 1d78
+    addu	a1,a2,s1		// 1d7c
+    move	a3,zero		// 1d80
+    jal	memcpy			// 1d84
+    li	a2,30		// 1d88
+    move	v1,zero		// 1d8c
+
+	__1d90:
+    lw	ra,44(sp)		// 1d90
+    lw	s4,40(sp)		// 1d94
+    lw	s3,36(sp)		// 1d98
+    lw	s2,32(sp)		// 1d9c
+    lw	s1,28(sp)		// 1da0
+    lw	s0,24(sp)		// 1da4
+    move	v0,v1		// 1da8
+    jr	ra		// 1dac
+    addiu	sp,sp,48		// 1db0
+.end func_1ca0
+
+.globl func_1db4
+.ent func_1db4
+func_1db4:
+	/* a0: file length
+	 * a1: pInOutBuffer
+	 * a2: *num_sectors_1
+	 * a3: *num_sectors_2
+	 * on the stack: several pointers to zeroed memory (in initUseBuffer), as far as I can tell
+
+	 This function extracts something from pInOutBuffer which represents some number of sectors (twice)
+	 and returns them by writing to their addresses. Returns 0 on success.
+
+	 It presumably also does something to pInOutBuffer because the init buffer
+	 is later filled with data.
+	*/
+
+    addiu	sp,sp,-744
+    sw	s4,720(sp)
+    lw	s4,776(sp)
+    lui	a0,0xbfc3
+    addiu	t6,s4,1536
+    addiu	t5,s4,1664 // + 128
+    addiu	t0,s4,1792 // + 128
+    addiu	t1,s4,1920 // + 128
+    addiu	t2,s4,2048 // + 128
+    addiu	t3,s4,2176 // + 128
+    addiu	t4,s4,2304 // + 128
+    sw	s7,732(sp)
+    sw	s5,724(sp)
+    sw	s3,716(sp)
+    addiu	s5,a0,_offset_libc
+    sw	s1,708(sp)
+    sw	s0,704(sp)
+    move	s3,a1
+    move	a0,s4
+    move	a1,zero
+    move	s1,a2
+    move	s7,a3
+    li	a2,512
+    li	a3,1
+    addiu	s0,s4,512
+    sw	ra,740(sp)
+    sw	t6,256(sp)
+    sw	t5,260(sp)
+    sw	t0,640(sp)
+    sw	t1,124(sp)
+    sw	t2,128(sp)
+    sw	t3,680(sp)
+    sw	t4,684(sp)
+    sw	s8,736(sp)
+    sw	s6,728(sp)
+    sw	s2,712(sp)
+    sh	zero,24(sp)
+    sb	zero,672(sp)
+    sb	zero,673(sp)
+	jal  memset 
+    lw	s8,772(sp)
+    move	a0,s0
+    move	a1,zero
+    li	a2,512
+    jal memset 
+    li	a3,1
+
+    //lui	v1,0xbfc3		// safe
+
+	la s6, _firmware_signature_3498				// TODO check this actually works
+
+	/* 1e74 */
+    move	a0,s3
+    move	a1,s6
+    li	a2,16
+	jal memcmp /* 1e80:	09f8a002 	*/
+    li	a3,2
+    seb	v0,v0
+    bnez	v0,__1fa4
+    li	v1,3
+    lbu	t9,494(s3)
+    move	a0,s0
+    andi	a2,t9,0xf
+    sb	a2,0(s1)
+    lbu	t8,510(s3)
+    li	a2,1024
+    andi	a3,t8,0xf
+    sb	a3,0(s7)
+    lb	s2,0(s1)
+    move	a3,zero
+    sll	t7,s2,0x9
+    addu	a1,t7,s3
+    addiu	a1,a1,1024
+    jal memcpy /*1ec8:	09f8a002 	memcpy */
+    addiu	s2,sp,320
+
+	/* 1ed0 */
+
+    move	a0,s0		// 1ed0
+    addiu	a1,sp,248		// 1ed4
+    move	a2,s2		// 1ed8
+    jal	func_808              /* only called from here */		// 1edc
+    addiu	a3,sp,672		// 1ee0
+    bnez	v0,__1fa0		// 1ee4
+    move	s0,v0		// 1ee8
+    lb	ra,0(s1)		// 1eec
+    lb	v0,0(s7)		// 1ef0
+    move	a0,s4		// 1ef4
+    addu	s7,ra,v0		// 1ef8
+    sll	s1,s7,0x9		// 1efc
+    addu	s0,s1,s3		// 1f00
+    addiu	a1,s0,2560		// 1f04
+    li	a2,512		// 1f08
+    jal memcpy //		// 1f0c
+    move	a3,zero		// 1f10
+
+    move	a0,s4		// 1f14
+    move	a1,s8		// 1f18
+    addiu	a2,sp,673		// 1f1c
+    addiu	a3,sp,616		// 1f20
+    jal	func_1ca0           /* only called from here */		// 1f24
+    sw	s2,16(sp)		// 1f28
+    bnez	v0,__1fa0		// 1f2c
+    move	s0,v0		// 1f30
+    addiu	s2,sp,32		// 1f34
+    move	a0,s2		// 1f38
+    move	a1,zero		// 1f3c
+    li	a2,91		// 1f40
+    jal memset 		//		// 1f44
+    li	a3,1		// 1f48
+    move	a0,s2		// 1f4c
+    move	a1,s3		// 1f50
+    li	a2,42		// 1f54
+    jal memcpy		// 		// 1f58
+    move	a3,zero		// 1f5c
+    move	a1,s6		// 1f60
+    move	a0,s2		// 1f64
+    li	a2,16		// 1f68
+    jal memcmp 		// 1f6c
+    li	a3,2		// 1f70
+    seb	s6,v0		// 1f74
+    bnez	s6,__1fa0		// 1f78
+    li	s0,3		// 1f7c
+    lb	v1,56(sp)		// 1f80
+    li	t4,126		// 1f84
+    bne	v1,t4,__1fa0		// 1f88
+    li	s0,8		// 1f8c
+    lw	t2,52(sp)		// 1f90
+    li	t3,512		// 1f94
+    beq	t2,t3,__1fd8		// 1f98
+    li	s0,3		// 1f9c
+
+	__1fa0:
+    move	v1,s0		// 1fa0
+
+	__1fa4:
+    lw	ra,740(sp)		// 1fa4
+    lw	s8,736(sp)		// 1fa8
+    lw	s7,732(sp)		// 1fac
+    lw	s6,728(sp)		// 1fb0
+    lw	s5,724(sp)		// 1fb4
+    lw	s4,720(sp)		// 1fb8
+    lw	s3,716(sp)		// 1fbc
+    lw	s2,712(sp)		// 1fc0
+    lw	s1,708(sp)		// 1fc4
+    lw	s0,704(sp)		// 1fc8
+    move	v0,v1		// 1fcc
+    jr	ra		// 1fd0
+    addiu	sp,sp,744		// 1fd4
+
+	__1fd8:
+    lbu	t0,57(sp)		// 1fd8
+    li	t1,225		// 1fdc
+    bne	t0,t1,__1fa4		// 1fe0
+    move	v1,s0		// 1fe4
+	la a1, _signature_34b0
+    addiu	a0,sp,58		// 1ff0
+    li	a2,16		// 1ff4
+    jal memcmp // 1ff8
+    li	a3,2		// 1ffc
+    seb	t5,v0		// 2000
+    bnez	t5,__1fa4		// 2004
+    move	v1,s0		// 2008
+    addiu	s6,s3,42		// 200c
+    addiu	a0,sp,74		// 2010
+    move	a1,s6		// 2014
+    li	a2,49		// 2018
+    jal memcpy		// 201c
+    move	a3,zero		// 2020
+    lb	a1,90(sp)		// 2024
+    li	a0,3		// 2028
+    bne	a1,a0,__1fa0		// 202c
+    li	s0,5		// 2030
+    lw	a0,124(sp)		// 2034
+    move	a1,zero		// 2038
+    li	a2,32		// 203c
+    jal memset // 2040
+    li	a3,1		// 2044
+    lw	a0,128(sp)		// 2048
+    move	a1,zero		// 204c
+    li	a2,32		// 2050
+    jal memset // 2054
+    li	a3,1		// 2058
+    lw	a0,124(sp)		// 205c
+    addiu	a1,s3,91		// 2060
+    li	a2,30		// 2064
+    jal memcpy		// 2068
+    move	a3,zero		// 206c
+    lw	a0,128(sp)		// 2070
+    addiu	a1,s3,121		// 2074
+    li	a2,30		// 2078
+    jal memcpy		// 207c
+    move	a3,zero		// 2080
+    lb	a1,252(sp)		// 2084
+    jal	func_1a44        /* only called from here. Copies static data */		// 2088
+    addiu	a0,sp,680		// 208c
+    bnez	v0,__1fa0		// 2090
+    move	s0,v0		// 2094
+    addiu	s1,sp,91		// 2098
+    lw	a2,640(sp)		// 209c
+    move	a0,s1		// 20a0
+    jal	func_1a88       /* only called from here */		// 20a4
+    addiu	a1,sp,124		// 20a8
+    bnez	v0,__1fa0		// 20ac
+    move	s0,v0		// 20b0
+    lw	a0,764(sp)		// 20b4
+    move	a1,s1		// 20b8
+    li	a2,32		// 20bc
+    jal memcpy // 20c0
+    move	a3,zero		// 20c4
+    addiu	s0,s3,151		// 20c8
+    lw	a0,764(sp)		// 20cc
+    move	a2,s0		// 20d0
+    move	a1,zero		// 20d4
+    li	a3,361		// 20d8
+    addiu	s1,sp,132		// 20dc
+    jal	func_d80      /* only called from here */		// 20e0
+    sw	s8,16(sp)		// 20e4
+    move	a1,s0		// 20e8
+    move	a0,s1		// 20ec
+    li	a2,2		// 20f0
+    jal memcpy		// 20f4
+    move	a3,zero		// 20f8
+    li	a2,2		// 20fc
+    move	a1,s1		// 2100
+    addiu	a0,sp,24		// 2104
+    jal memcpy		// 2108
+    move	a3,zero		// 210c
+    lh	a2,24(sp)		// 2110
+    li	t7,251		// 2114
+    addiu	t8,a2,153		// 2118
+    li	s0,3		// 211c
+    bne	a2,t7,__1fa0		// 2120
+    seh	v1,t8		// 2124
+    addu	a1,v1,s3		// 2128
+    addiu	a0,sp,140		// 212c
+    li	a2,108		// 2130
+    jal memcpy		// 2134
+    move	a3,zero		// 2138
+    lb	t9,140(sp)		// 213c
+    li	s3,2		// 2140
+    bne	t9,s3,__1fa0		// 2144
+    li	s0,4		// 2148
+    la a1, _signature_34ac // 2150
+    addiu	a0,sp,141		// 2154
+    li	a2,4		// 2158
+    jal	memcmp		// 215c
+    li	a3,2		// 2160
+    seb	s7,v0		// 2164
+    bnez	s7,__1fa0		// 2168
+    li	s0,3		// 216c
+    la	a1, _signature_34a8		// 2174
+    addiu	a0,sp,145		// 2178
+    li	a2,4		// 217c
+    jal memcmp		// 2180
+    li	a3,2		// 2184
+    seb	v0,v0		// 2188
+    bnez	v0,__1fa0		// 218c
+    lb	v1,181(sp)		// 2190
+    li	t4,-66		// 2194
+    bne	v1,t4,__1fa0		// 2198
+    li	s0,5		// 219c
+    lw	a0,768(sp)		// 21a0
+    move	a1,zero		// 21a4
+    li	a2,512		// 21a8
+    jal	memset		// 21ac
+    li	a3,1		// 21b0
+    lw	t1,768(sp)		// 21b4
+    addiu	s7,sp,182		// 21b8
+    addiu	s3,t1,492		// 21bc
+    move	a3,zero		// 21c0
+    addiu	a0,s4,476		// 21c4
+    move	a1,s7		// 21c8
+    jal	memcpy		// 21cc
+    li	a2,16		// 21d0
+    move	a0,s4		// 21d4
+    li	a1,492		// 21d8
+    jal	func_97c_accum_to_pglbuffer		// 21dc
+    move	a2,s3		// 21e0
+    lw	t2,768(sp)		// 21e4
+    move	a1,s4		// 21e8
+    lbu	s0,500(t2)		// 21ec
+    move	a0,t2		// 21f0
+    addu	s1,s0,t2		// 21f4
+    move	a2,s0		// 21f8
+    jal	memcpy  // 21fc
+    move	a3,zero		// 2200
+    move	a1,s7		// 2204
+    move	a0,s1		// 2208
+    li	a2,16		// 220c
+    jal	memcpy		// 2210
+    move	a3,zero		// 2214
+    li	t3,476		// 2218
+    subu	a2,t3,s0		// 221c
+    addu	a1,s0,s4		// 2220
+    addiu	a0,s1,16		// 2224
+    jal	memcpy		// 2228
+    move	a3,zero		// 222c
+    lw	a2,768(sp)		// 2230
+    move	a0,s3		// 2234
+    li	a1,16		// 2238
+    li	a3,492		// 223c
+    jal	func_d2c		// 2240
+    sw	s8,16(sp)		// 2244
+    move	a0,s6		// 2248
+    addiu	a1,sp,228		// 224c
+    jal	func_abc		// 2250
+    li	a2,450		// 2254
+    bnez	v0,__1fa0		// 2258
+    li	s0,2		// 225c
+    addiu	a0,sp,324		// 2260
+    addiu	a1,sp,149		// 2264
+    li	a2,16		// 2268
+    jal memcmp	// 226c
+    li	a3,2		// 2270
+    seb	s0,v0		// 2274
+    beqz	s0,__2288		// 2278
+    lw	a0,760(sp)		// 227c
+    b	__1fa0		// 2280
+    li	s0,1		// 2284
+
+	__2288:
+    addiu	a1,sp,688		// 2288
+    li	a2,16		// 228c
+    li	a3,2		// 2290
+    sw	zero,688(sp)		// 2294
+    sw	zero,692(sp)		// 2298
+    sw	zero,696(sp)		// 229c
+    jal	memcmp		// 22a0
+    sw	zero,700(sp)		// 22a4
+    beqz	v0,__1fa4		// 22a8
+    move	v1,s0		// 22ac
+    lw	a0,760(sp)		// 22b0
+    addiu	a1,sp,165		// 22b4
+    li	a2,16		// 22b8
+    jal	memcmp		// 22bc
+    li	a3,2		// 22c0
+    seb	s4,v0		// 22c4
+    li	s0,10		// 22c8
+    b	__1fa0		// 22cc
+    movz	s0,s4,s4		// 22d0
+.end func_1db4
+
+.globl func_fw_decrypt_init
+.ent func_fw_decrypt_init
+func_fw_decrypt_init:
+	/* 22d4 */
+    addiu   sp,sp,-96
+    sw  s0,56(sp)
+    sw  ra,92(sp)
+    sw  s8,88(sp)
+    sw  s7,84(sp)
+    sw  s6,80(sp)
+    sw  s5,76(sp)
+    sw  s4,72(sp)
+    sw  s3,68(sp)
+    sw  s2,64(sp)
+    sw  s1,60(sp)
+
+	/* 2300 */
+    move    s0,a0
+    addiu	a1,a0,4			// a1 = inOutLen
+    lw	v1,4(a0)            /* = decrypt.inOutLen */
+    lw	s6,0(a0)            /* = pInOutBuffer */
+    lw	a0,8(a0)            /* = fileLength */
+    li	v0,18432            /* decrypt.InOutLen should be 18432 bytes */
+    sw	a1,44(sp)
+    sw	a0,48(sp)
+    lw	s7,12(s0)
+    lw	s3,16(s0)
+    lw	a0,20(s0)
+
+	/* 232c */
+    bne	v1,v0, __24dc_exit  /* decrypt.InOutLen wrong value? */
+    li	a1,48
+    li	a2,19888            /* decrypt.initusebufferlen */
+    bne	a0,a2, __24dc_exit  /* decrypt.initusebufferlen wrong value? */
+    lui	t3,0xbfc3
+    addiu	s5,t3, _offset_libc
+    move	a0,s3
+    move	a1,zero
+    li	a2,19888           /* decrypt.initusebufferlen */
+    jal	memset             /* memset() to zero initusebuffer*/
+    li	a3,1
+	
+	/* 2358 */
+    lw	a0,48(sp)          /* fileLength*/
+    addiu	t2,s3,32		// initusebuffer + 32
+    addiu	t1,s3,48		// initusebuffer + 48
+    addiu	t0,s3,17456     // initusebuffer + 17456
+    move	a1,s6			// pInOutBuffer
+    addiu	a3,sp,41
+    addiu	a2,sp,40
+    sw	t2,16(sp)			// initusebuffer + 32
+    sw	t1,24(sp)			// initusebuffer + 48
+    sw	t0,32(sp)			// initusebuffer + 17458
+    sw	s3,20(sp)			// initusebuffer
+    jal	func_1db4        /* only called from here: init? Uses 744 bytes of stack */
+    sw	s7,28(sp)			// pGLBuffer
+    addiu	a3,s3,16944  /* initusebuffer + 16944 */
+    addiu	s4,s3,560    /* initusebuffer + 560 */
+    sw	a3,52(sp)		/* initusebuffer + 16944 */
+    bnez	v0,__24dc_exit
+    move	a1,v0
+
+	/* 23a0 */
+    lw	t5,4(s0)		// inOutLen 		// 23a0
+    li	t4,16384 		// 23a4
+    addiu	s8,t5,-2048   // s8 = inOutLen - 2048		// 23a8
+    bne	s8,t4,__24dc_exit		// 23ac
+    li	a1,48		// 23b0
+
+    move	a0,s4		// 23b4
+    move	a1,zero		// 23b8
+    li	a2,16384		// 23bc
+	jal memset
+    li	a3,1		// 23c4
+
+    lb	t0,40(sp)		// byte_sp40 from func_1db4		// 23c8
+    addiu	s0,s6,512	// pInOutBuffer + 512		// 23cc
+    sll	a3,t0,0x9		// a3 = t0 << 9		// 23d0
+    addiu	s1,a3,512   // s1 = (t0 << 9) + 512		// 23d4
+    move	a1,s0		// 23d8
+    move	a2,s1		// 23dc
+    move	a0,s4		// 23e0
+    jal		memcpy
+    move	a3,zero		// 23e8
+
+    lb	a2,41(sp)		// 23ec
+    addu	a0,s0,s1    // a0 = pInOutBuffer + 512 + (40(sp) << 9 + 512)		// 23f0
+    sll	a1,a2,0x9				// 23f4
+    addiu	s0,a1,512   // s0 = (41(sp) << 9) + 512		// 23f8
+    addiu	s2,a0,1024  // s2 = (pInOutBuffer + 512 + (40(sp) << 9 + 512)) + 1024		// 23fc
+    addu	s1,s4,s1	// s1 = initusebuffer + 560 + (40(sp) << 9 + 512)		// 2400
+    move	a1,s2		// src = s2		// 2404
+    move	a2,s0		// length = s0		// 2408
+    move	a0,s1		// dest = s1		// 240c
+    jal		memcpy
+    move	a3,zero		// 2414
+
+    lb	v1,40(sp)		// 2418
+    lb	v0,41(sp)		// 241c
+    addu	s2,s2,s0   // previous pInOutBuffer address += (41(sp) << 9) + 512		// 2420
+    addu	ra,v1,v0   // ra = 40(sp) + 41(sp)		// 2424
+    sll	t9,ra,0x9      // t9 = combined sector lengths in bytes		// 2428
+    negu	t8,t9      // t8 =-t9		// 242c
+    addu	a0,s1,s0   // a0 = previous initusebuffer end + (40(sp) << 9) + 512 (dst)		// 2430
+    addiu	a1,s2,512     // add another sector buffer (src)		// 2434
+    addiu	a2,t8,15360   // length: our negative sector length plus 30 sectors		// 2438
+    jal		memcpy
+    move	a3,zero		// 2440
+    lw	s0,48(sp)			// s0 = fileLength		// 2444
+    li	t6,16				// t6=16		// 2448
+    sra	t7,s0,0x19			// t7 = fileLength >> 0x19 (=number of 32MB chunks minus 1)		// 244c
+    subu	v0,t6,t7		// v0 = 16 - t7, i.e. is file length under 512MB		// 2450
+    blezl	v0,__245c		// if it's under 512MB (likely), branch and execute delay slot		// 2454
+    li	v0,1				// this is only executed if branch not taken.		// 2458
+
+	__245c:
+    move	s0,s4			// s0 = initusebuffer + 560		// 245c
+    li	s1,16384			// s1 = 16384		// 2460
+    b	__247c		// 2464
+    sh	v0,42(sp)			// 42(sp) = 16 - (fileLength >> 0x19), so usually 16		// 2468
+
+	__246c:
+    lh	a2,42(sp)			// body of a while loop while s1 >= 512.		// 246c
+    jal	func_268c			// todo (this does some crypto).		// 2470
+    addiu	s1,s1,-512		// trim a sector off s1		// 2474
+    addiu	s0,s0,512		// add a sector to s0		// 2478
+
+	__247c:
+    slti	t1,s1,512		// t1 = (s1 < 512)?		// 247c
+    move	a0,s0			// a0 = initusebuffer + 560		// 2480
+    beqz	t1,__246c		// !(s1 < 512)? branch (taken)		// 2484
+    move	a1,s3			// a1 = initusebuffer		// 2488
+    bnez	s1,__2510		// s1 != 0? branch. (It's 16384, so we do)		// 248c
+    lw	a0,52(sp)			// a0 = initusebuffer + 16944		// 2490
+    move	a0,s6			// a0 = pInOutBuffer (why the immediate reassign?)		// 2494
+
+	// note we come here from 2544, where a0 is also set to s6. (Why the duplication?)
+	__2498:
+    move	a1,s4			// a1 = initusebuffer+560		// 2498
+    move	a2,s8			// a2 = inOutLen - 2048		// 249c
+    jal		memcpy
+    move	a3,zero		// 24a4
+    addiu	a0,s7,260		// a0 = pGLBuffer + 260		// 24a8
+    addiu	a1,sp,42		// src: 16 - (fileLength >> 0x19)		// 24ac
+    li	a2,2				// length 2, so copy the halfword only		// 24b0
+    jal		memcpy
+    move	a3,zero					// 24b8
+    move	a1,s3			// a1 = initusebuffer (src)		// 24bc
+    addiu	a0,s7,264		// a0 = pGLBuffer + 264		// 24c0
+    li	a2,32				// length 32 bytes		// 24c4
+    jal		memcpy
+    move	a3,zero		// 24cc
+	lw	s3,44(sp)			// s3 = address of pInOutLen		// 24d0
+    move	a1,zero			// return code		// 24d4
+    sw	s8,0(s3)			// s8 = pInOutLen		// 24d8
+
+__24dc_exit:
+    lw  ra,92(sp)
+    lw  s8,88(sp)
+    lw  s7,84(sp)
+    lw  s6,80(sp)
+    lw  s5,76(sp)
+    lw  s4,72(sp)
+    lw  s3,68(sp)
+    lw  s2,64(sp)
+    lw  s1,60(sp)
+    lw  s0,56(sp)
+    move    v0,a1
+    jr  ra
+    addiu   sp,sp,96
+
+	__2510:
+	// coming from 248c
+	// by this stage (thanks to the while loop), s1 is always < 512.
+	// this does the final sector's worth of key derivation.
+    move	a1,s0			// a1 = initusebuffer + 560		// 2510
+    move	a2,s1			// a2 < 512		// 2514
+    jal		memcpy // memcpy (a0 = initusebuffer + 16944)		// 2518
+    move	a3,zero		// 251c
+    lw	a0,52(sp)			// a0 = initusebuffer + 16944		// 2520
+    lh	a2,42(sp)			// a2 = 16 - (fileLength >> 0x19)		// 2524
+    jal	func_268c			// this does some crypto		// 2528
+    move	a1,s3			// a1 = initusebuffer (as input to func_268c)		// 252c
+    lw	a1,52(sp)			// a1 = initusebuffer + 16944		// 2530
+    move	a0,s0			// a0 = initusebuffer + 560		// 2534
+    move	a2,s1			// a2 < 512		// 2538
+    jal		memcpy				// memcpy		// 253c
+    move	a3,zero		// 2540
+    b	__2498		// 2544
+    move	a0,s6		// 2548
+	// end of function
+
+.end func_fw_decrypt_init
+
+/* TODO this was automatically generated and thus(?) suspect */
+.globl func_fw_decrypt_run
+.ent func_fw_decrypt_run
+func_fw_decrypt_run:
+    addiu sp,sp,-56                // 254c 
+    lui a3,0xbfc3                  // 2550 
+    lui v1,0xbfc3                  // 2554 
+    sw s3,36(sp)                   // 2558 
+    lui v0,0xbfc3                  // 255c 
+    la s3,__bss + 0x1520           // 2560 addiu rewrite
+    sw ra,48(sp)                   // 2564 
+    sw s5,44(sp)                   // 2568 
+    sw s4,40(sp)                   // 256c 
+    sw s2,32(sp)                   // 2570 
+    nop                            // 2574 addiu rewrite
+    sw s1,28(sp)                   // 2578 
+    sw s0,24(sp)                   // 257c 
+    la s5,__bss + 0x1320           // 2580 addiu rewrite
+    move s0,a2                     // 2584 
+    move s1,a0                     // 2588 
+    move s2,a1                     // 258c 
+    move a0,s3                     // 2590 
+    move a1,zero                   // 2594 
+    li a2,32                       // 2598 
+    jal memset                     // 259c 
+    li a3,1                        // 25a0 
+    move a0,s5                     // 25a4 
+    move a1,zero                   // 25a8 
+    li a2,512                      // 25ac 
+    jal memset                     // 25b0 
+    li a3,1                        // 25b4 
+    addiu a0,sp,16                 // 25b8 
+    addiu a1,s0,260                // 25bc 
+    li a2,2                        // 25c0 
+    jal memcpy                     // 25c4 
+    move a3,zero                   // 25c8 
+    move a0,s3                     // 25cc 
+    addiu a1,s0,264                // 25d0 
+    li a2,32                       // 25d4 
+    jal memcpy                     // 25d8 
+    move a3,zero                   // 25dc 
+    b __25fc                       // 25e0 
+    slti a2,s2,512                 // 25e4 
+
+    __25e8:
+    lh a2,16(sp)                   // 25e8 
+    jal func_268c                  // 25ec 
+    addiu s2,s2,-512               // 25f0 
+    addiu s1,s1,512                // 25f4 
+    slti a2,s2,512                 // 25f8 
+
+    __25fc:
+    move a0,s1                     // 25fc 
+    beqz a2,__25e8                 // 2600 
+    move a1,s3                     // 2604 
+    bnez s2,__2630                 // 2608 
+    lw ra,48(sp)                   // 260c 
+    lw s5,44(sp)                   // 2610 
+    lw s4,40(sp)                   // 2614 
+    lw s3,36(sp)                   // 2618 
+    lw s2,32(sp)                   // 261c 
+    lw s1,28(sp)                   // 2620 
+    lw s0,24(sp)                   // 2624 
+    jr ra                          // 2628 
+    addiu sp,sp,56                 // 262c 
+
+    __2630:
+    move a0,s5                     // 2630 
+    move a1,s1                     // 2634 
+    move a2,s2                     // 2638 
+    jal memcpy                     // 263c 
+    move a3,zero                   // 2640 
+    lh a2,16(sp)                   // 2644 
+    move a0,s5                     // 2648 
+    jal func_268c                  // 264c 
+    move a1,s3                     // 2650 
+    move a0,s1                     // 2654 
+    move a1,s5                     // 2658 
+    move a2,s2                     // 265c 
+    jal memcpy                     // 2660 
+    move a3,zero                   // 2664 
+    lw ra,48(sp)                   // 2668 
+    lw s5,44(sp)                   // 266c 
+    lw s4,40(sp)                   // 2670 
+    lw s3,36(sp)                   // 2674 
+    lw s2,32(sp)                   // 2678 
+    lw s1,28(sp)                   // 267c 
+    lw s0,24(sp)                   // 2680 
+    jr ra                          // 2684 
+    addiu sp,sp,56                 // 2688 
+
+.end func_fw_decrypt_run
+
+
+.globl func_268c
+.ent func_268c
+func_268c:
+    addiu	sp,sp,-64		// 268c
+    lui	t8,0xbfc3		// 2690
+    sw	s6,56(sp)		// 2694
+    sw	s4,48(sp)		// 2698
+    sw	s5,52(sp)		// 269c
+    sw	s3,44(sp)		// 26a0
+    sw	s2,40(sp)		// 26a4
+    sw	s1,36(sp)		// 26a8
+    sw	s0,32(sp)		// 26ac
+	la s6, _key_282c /* magic rodata key */		// 26b0
+    lw	s5,28(a1)		// 26b4
+    lw	v1,0(a1)		// 26b8
+    lw	v0,4(a1)		// 26bc
+    lw	t0,8(a1)		// 26c0
+    lw	t1,12(a1)		// 26c4
+    lw	t2,16(a1)		// 26c8
+    lw	t3,20(a1)		// 26cc
+    lw	t4,24(a1)		// 26d0
+	la  s4, _key_282c
+    lw	s3,28(s6)		// 26d8
+    lw	t5,4(s6)		// 26dc
+    lw	t6,8(s6)		// 26e0
+    lw	t7,12(s6)		// 26e4
+    lw	s0,16(s6)		// 26e8
+    lw	s1,20(s6)		// 26ec
+    lw	s2,24(s6)		// 26f0
+    xor	a3,s4,v1		// 26f4
+    xor	t5,t5,v0		// 26f8
+    xor	t6,t6,t0		// 26fc
+    xor	t7,t7,t1		// 2700
+    xor	s0,s0,t2		// 2704
+    xor	s1,s1,t3		// 2708
+    xor	s2,s2,t4		// 270c
+    xor	s3,s3,s5		// 2710
+    seh	s4,a2		// 2714
+    sw	a3,0(sp)		// 2718
+    move	s6,a0		// 271c
+    sw	t5,4(sp)		// 2720
+    sw	t6,8(sp)		// 2724
+    sw	t7,12(sp)		// 2728
+    sw	s0,16(sp)		// 272c
+    sw	s1,20(sp)		// 2730
+    sw	s2,24(sp)		// 2734
+    sw	s3,28(sp)		// 2738
+    blez	s4,__2808		// 273c
+	//
+    move	t8,zero		// 2740
+
+	__2744:
+    sll	v0,t8,0x13		// 2744
+    sra	t9,v0,0xe		// 2748
+    addu	v0,t9,s6 // v0 = data + t9		// 274c
+    lw	t4,28(v0)    //t4 = data[offset + 7];		// 2750
+    addiu	v1,t8,1		// offset += 1		// 2754
+    lw	a0,0(v0)		// a0 = data[offset];		// 2758
+    lw	a1,4(v0)		// 275c
+    lw	a2,8(v0)		// 2760
+    lw	a3,12(v0)		// 2764
+    lw	t0,16(v0)		// 2768
+    lw	t1,20(v0)		// 276c
+    lw	t2,24(v0)		// 2770
+    xor	t3,t5,s0	// t3 = buf[1] ^ buf[4]		// 2774
+    seh	t8,v1		// 2778
+    xor	a0,a0,t5	// a0 = data[offset] ^ buf[1]		// 277c
+    xor	v1,t4,t3	// v1 = data[offset + 7] ^ t3		// 2780
+    xor	a1,a1,t6	// a1 = data[offset + 1] ^ buf[2]		// 2784
+    xor	a2,a2,t7	// a2 = data[offset + 2] ^ buf[3]		// 2788
+    xor	a3,a3,s0	// a3 = data[offset + 3] ^ buf[4]		// 278c
+    xor	t0,t0,s1	// t0 = data[offset + 4] ^ buf[5]		// 2790
+    xor	t1,t1,s2	// t1 = data[offset + 5] ^ buf[6]		// 2794
+    xor	t2,t2,s3	// t2 = data[offset + 6] ^ buf[7]		// 2798
+    xor	t4,t4,s5	// t4 = data[offset + 7] ^ sbox[7]		// 279c
+    slt	t3,t8,s4	// t3 = offset < rodata[0]		// 27a0
+    move	t9,t5	// t9 = buf[1]		// 27a4
+    sw	v1,28(v0)	// data[offset + 7] ^= t3		// 27a8
+    move	t5,t6	// t5 = buf[2]		// 27ac
+    sw	a0,0(v0)	// data[offset] ^= buf[1]		// 27b0
+    move	t6,t7	// t6 = buf[3]		// 27b4
+    sw	a1,4(v0)	// data[offset + 1] ^= buf[2]		// 27b8
+    move	t7,s0   // t7 = buf[4]		// 27bc
+    sw	a2,8(v0)	// data[offset + 2] ^= buf[3]		// 27c0
+    move	s0,s1   // s0 = buf[5]		// 27c4
+    sw	a3,12(v0)	// data[offset + 3] ^= buf[4]		// 27c8
+    move	s1,s2	// s1 = buf[6]		// 27cc
+    sw	t0,16(v0)	// data[offset + 4] ^= buf[5]		// 27d0
+    move	s2,s3	// s2 = buf[7]		// 27d4
+    sw	t1,20(v0)	// data[offset + 5] ^= buf[6]		// 27d8
+    sw	t2,24(v0)	// data[offset + 6] ^= buf[7]		// 27dc
+    bnez	t3,__2744		// 27e0
+    move	s3,t4		// 27e4
+    sw	t4,28(sp)		// 27e8
+    sw	s2,24(sp)		// 27ec
+    sw	s1,20(sp)		// 27f0
+    sw	s0,16(sp)		// 27f4
+    sw	t7,12(sp)		// 27f8
+    sw	t6,8(sp)		// 27fc
+    sw	t5,4(sp)		// 2800
+    sw	t9,0(sp)		// 2804
+
+	// arrive here from 273c
+	__2808:
+    lw	s6,56(sp)		// 2808
+    lw	s5,52(sp)		// 280c
+    lw	s4,48(sp)		// 2810
+    lw	s3,44(sp)		// 2814
+    lw	s2,40(sp)		// 2818
+    lw	s1,36(sp)		// 281c
+    lw	s0,32(sp)		// 2820
+    jr	ra		// 2824
+    addiu	sp,sp,64		// 2828
+.end func_268c
+
+.data
+_key_282c:
+.byte 0xa2, 0x6e, 0x14, 0x42, 0x85, 0x8e, 0x2c, 0x89
+.byte 0x27, 0x6d, 0x9f, 0x9f, 0xc3, 0xed, 0x5f, 0x54
+.byte 0xca, 0xc0, 0xe5, 0x09, 0x61, 0x7e, 0xfa, 0x2d
+.byte 0xe6, 0x22, 0x53, 0x4e, 0xb9, 0x85, 0x91, 0xb1 // 2850
+
+_key_2950: // aka data_3000
+.byte 0x16, 0x2b, 0x01, 0xe4, 0x0e, 0x3d, 0xc1, 0xdf, 0x0f, 0x35, 0x8f, 0xf5, 0xe2, 0x48, 0xa0, 0x2e
+.byte 0x1c, 0x6a, 0x57, 0xea, 0x6d, 0x9a, 0xe2, 0x03, 0xec, 0xe8, 0x84, 0x9c, 0x87, 0xca, 0xba, 0xcf
+.byte 0xdb, 0x5c, 0x6f, 0xf2, 0x32, 0x72, 0xe9, 0x50, 0x42, 0x06, 0x1b, 0xe9, 0x9d, 0x8f, 0xa4, 0xff
+.byte 0x66, 0x64, 0x59, 0xb7, 0xd0, 0x15, 0x3c, 0x42, 0x27, 0x25, 0x52, 0x47, 0x83, 0x09, 0x7c, 0x55
+.byte 0x1d, 0xc1, 0x12, 0xfa, 0x7c, 0xaa, 0xf8, 0x60, 0xc6, 0x65, 0x3a, 0xf3, 0x13, 0x44, 0xa7, 0x5e
+.byte 0xc7, 0x22, 0x7e, 0x91, 0xdf, 0x98, 0xf2, 0x8a, 0x08, 0x2c, 0x32, 0x77, 0x6a, 0x72, 0xff, 0x3d
+.byte 0xa6, 0x13, 0x0c, 0xbe, 0x3e, 0x4b, 0xe9, 0x76, 0x35, 0x85, 0x93, 0x91, 0x9b, 0x25, 0x14, 0x10
+.byte 0x08, 0x49, 0x39, 0xa9, 0x9a, 0x9c, 0x06, 0x1c, 0x4b, 0xf9, 0xae, 0x12, 0x94, 0xfa, 0x08, 0x55
+.byte 0xaa, 0x05, 0x58, 0x10, 0x29, 0x80, 0x76, 0xe4, 0xac, 0x4b, 0x67, 0xdc, 0xdf, 0x87, 0x19, 0x6d
+.byte 0x42, 0x66, 0x7c, 0x8c, 0xf7, 0x8d, 0x01, 0x29, 0x35, 0xba, 0xc7, 0x60, 0x4d, 0xe1, 0xb7, 0xd3
+.byte 0xe7, 0xe3, 0xb0, 0x67, 0x3e, 0x38, 0x40, 0x67, 0x76, 0xd8, 0xa7, 0xd3, 0xd4, 0x72, 0xa4, 0x70
+.byte 0xb6, 0x31, 0x51, 0xa0, 0x40, 0x4f, 0xaf, 0xab, 0x52, 0x8c, 0xf7, 0xf8, 0x74, 0x98, 0xaf, 0xbe
+.byte 0x6e, 0x23, 0xd7, 0x47, 0xa1, 0x5d, 0x1b, 0x4e, 0xa2, 0x97, 0xd9, 0xc2, 0x26, 0x79, 0xb9, 0xf8
+.byte 0xae, 0x5e, 0x04, 0x6d, 0xd5, 0xd0, 0xa7, 0x98, 0x6a, 0xce, 0xaa, 0x5f, 0xe4, 0xf9, 0xb8, 0xd2
+.byte 0xbe, 0x1e, 0xcc, 0x55, 0xcb, 0x70, 0x0f, 0x6f, 0x81, 0x28, 0xcb, 0xf8, 0x8c, 0x5d, 0x7e, 0x55
+.byte 0xd3, 0x27, 0xc9, 0xa9, 0x85, 0xa6, 0xc0, 0xf5, 0x79, 0xed, 0xc0, 0x7b, 0x1c, 0x36, 0xc3, 0xbd
+.byte 0xa5, 0x8e, 0xa8, 0x77, 0x60, 0xe0, 0x39, 0xcd, 0x9a, 0x65, 0x60, 0x8b, 0x33, 0xfc, 0x2b, 0x49
+.byte 0xa8, 0xca, 0x67, 0xba, 0x44, 0xaf, 0xf9, 0x29, 0x5d, 0x71, 0x30, 0x85, 0xe0, 0xe5, 0x16, 0xe0
+.byte 0x25, 0x44, 0xc2, 0xab, 0x42, 0xf3, 0x48, 0x26, 0x01, 0x3f, 0x09, 0x59, 0xf5, 0x7f, 0xde, 0xce
+.byte 0x49, 0x23, 0x38, 0xc6, 0x55, 0xd1, 0x47, 0xc6, 0x5b, 0xee, 0x9b, 0x6a, 0x9d, 0x0d, 0x72, 0x3c
+.byte 0x36, 0x39, 0xf9, 0xdd, 0xf1, 0xd3, 0x84, 0x70, 0xe9, 0x05, 0x12, 0x10, 0x62, 0xcb, 0x6e, 0xbc
+.byte 0x3f, 0xcb, 0x34, 0x73, 0xf6, 0x6f, 0xc4, 0x17, 0x0d, 0xe8, 0xeb, 0x25, 0x5c, 0xdf, 0xa0, 0x86
+.byte 0x8c, 0xc3, 0xb9, 0x4a, 0xbb, 0x7e, 0x38, 0xc1, 0x17, 0x08, 0xd0, 0x93, 0x0f, 0x3e, 0xcf, 0x27
+.byte 0x71, 0xa0, 0x72, 0xe7, 0xee, 0x7b, 0x41, 0x33, 0x4d, 0xfb, 0xaf, 0x5c, 0x55, 0xf7, 0xdc, 0xd9
+.byte 0xf2, 0x14, 0x7d, 0xea, 0xe3, 0x08, 0xd6, 0xd3, 0xa0, 0xfa, 0x52, 0x17, 0x1b, 0x10, 0xce, 0x70
+.byte 0xb6, 0xb9, 0xcf, 0xb4, 0x25, 0x9b, 0x42, 0x53, 0x67, 0x2b, 0x57, 0x7c, 0xff, 0x72, 0xa1, 0x83
+.byte 0xcd, 0x08, 0xd3, 0x11, 0xae, 0x30, 0x9c, 0x0a, 0x01, 0x25, 0x73, 0x45, 0x7a, 0xfe, 0x78, 0xe9
+.byte 0xf6, 0x3f, 0x5d, 0x0a, 0x35, 0x9f, 0x45, 0x48, 0x04, 0x48, 0xfe, 0x81, 0xc2, 0xc4, 0x82, 0x41
+.byte 0xde, 0xa2, 0xb1, 0x67, 0x6a, 0x3b, 0x5b, 0x0c, 0x06, 0xb4, 0x6e, 0xe6, 0x0e, 0x15, 0xef, 0x12
+.byte 0x3c, 0x7c, 0xd7, 0x49, 0xf3, 0x9c, 0x5b, 0x06, 0xf1, 0x2b, 0x45, 0xec, 0x99, 0x45, 0xaf, 0x10
+.byte 0x17, 0x60, 0x66, 0x49, 0x85, 0x75, 0x02, 0x3d, 0xae, 0xe4, 0x15, 0xa8, 0xd7, 0xdf, 0xb7, 0x95
+.byte 0xa3, 0x2d, 0xb3, 0x55, 0x19, 0x46, 0x3d, 0x62, 0x88, 0x08, 0x66, 0xf9, 0x4a, 0xb3, 0xa3, 0x3e
+.byte 0x85, 0x79, 0x20, 0xaf, 0xed, 0xa7, 0x41, 0xa2, 0x8f, 0xa8, 0x84, 0x93, 0x46, 0x88, 0xb0, 0x1e
+.byte 0x88, 0x58, 0x0b, 0x16, 0xc6, 0x28, 0x4b, 0x01, 0x7d, 0x8d, 0x54, 0x61, 0x1d, 0x57, 0x94, 0xfb
+.byte 0x84, 0x6b, 0xea, 0xa4, 0x86, 0x98, 0x1b, 0x5e, 0xdb, 0x53, 0xcd, 0xf6, 0x0b, 0x44, 0xf0, 0xa9
+.byte 0xb0, 0xcd, 0x1f, 0xda, 0x5e, 0xd0, 0xea, 0xb1, 0xe1, 0x70, 0xdf, 0x16, 0x44, 0xc2, 0xd0, 0x97
+.byte 0xf9, 0xca, 0x88, 0x93, 0xf6, 0x4c, 0x12, 0xa3, 0x91, 0x2f, 0x16, 0x9f, 0x7b, 0xef, 0x2a, 0x7c
+.byte 0x47, 0xf1, 0xbf, 0x16, 0xd6, 0x7b, 0xfc, 0x49, 0x91, 0xd9, 0xee, 0x84, 0xa8, 0xed, 0x84, 0xfb
+.byte 0x2d, 0x84, 0x2d, 0x0c, 0x4e, 0xad, 0xee, 0x26, 0x81, 0xb2, 0x61, 0x27, 0x14, 0x3a, 0x9a, 0x32
+.byte 0x2f, 0xf6, 0xac, 0xa7, 0xc6, 0xaa, 0x57, 0x37, 0x02, 0x23, 0x94, 0x26, 0xd3, 0xe5, 0x12, 0x84
+.byte 0xdc, 0x53, 0x43, 0x76, 0x91, 0x79, 0xf6, 0x83, 0xef, 0x4a, 0x4c, 0xd8, 0x31, 0x76, 0x7d, 0xb4
+.byte 0xe3, 0xb2, 0x78, 0x5c, 0x9d, 0xf4, 0xf7, 0x71, 0xf9, 0xd7, 0xdb, 0x64, 0xad, 0x8b, 0x36, 0x62
+.byte 0x2c, 0xd5, 0x38, 0x32, 0x9e, 0x7b, 0xb3, 0xca, 0x83, 0xb3, 0x98, 0x78, 0x46, 0x9b, 0xf6, 0x69
+.byte 0xa0, 0x57, 0xdb, 0x82, 0x8a, 0x3b, 0xaa, 0x69, 0x01, 0x1a, 0xf4, 0x1d, 0x80, 0x8f, 0xa8, 0x19
+.byte 0x78, 0xe2, 0x56, 0x79, 0x78, 0x38, 0xb4, 0x09, 0x5c, 0x8d, 0x14, 0xf1, 0x35, 0x7a, 0x23, 0xa1
+.byte 0xe1, 0x83, 0xaa, 0xf9, 0xbe, 0x5b, 0x81, 0x3a, 0xdc, 0x83, 0x47, 0xf9, 0xd1, 0xe4, 0x24, 0x84
+.byte 0xfd, 0x51, 0xb8, 0x8a, 0xf5, 0xe3, 0x70, 0xee, 0xb4, 0xa6, 0x55, 0x57, 0xb5, 0xe3, 0xb9, 0x2e
+.byte 0xfa, 0x26, 0x48, 0x01, 0xcd, 0x4a, 0x79, 0x70, 0x61, 0x76, 0xd6, 0xe9, 0xcd, 0x40, 0x63, 0x64
+.byte 0x1f, 0xdd, 0xe4, 0x6e, 0x39, 0xb3, 0x3e, 0x3d, 0x28, 0xe4, 0xf6, 0x0b, 0x6c, 0x7a, 0xa9, 0x0d
+.byte 0xcd, 0xd4, 0x5e, 0x33, 0xf7, 0x03, 0xde, 0x74, 0x51, 0xd3, 0xe0, 0x69, 0x58, 0x48, 0x5f, 0x80
+.byte 0x8f, 0x73, 0x61, 0x16, 0xe7, 0x1c, 0x17, 0x34, 0x14, 0x7a, 0x93, 0xba, 0x3a, 0xbc, 0x21, 0x61
+.byte 0xa9, 0x54, 0xe7, 0x89, 0x76, 0xf7, 0xb5, 0x86, 0x18, 0x76, 0x30, 0x26, 0x43, 0x50, 0xe8, 0x91
+.byte 0x6b, 0xa8, 0xd9, 0x9a, 0x8f, 0xe1, 0x79, 0x9d, 0x9f, 0x13, 0xf7, 0x16, 0xf7, 0xe1, 0xeb, 0xd7
+.byte 0xd5, 0x5e, 0xa7, 0x45, 0x4a, 0x7e, 0x6e, 0x3b, 0x62, 0xaa, 0x85, 0xa2, 0xfb, 0xa1, 0x2f, 0x47
+.byte 0x9d, 0xcf, 0xf0, 0xcc, 0x91, 0xb9, 0x3c, 0xb4, 0x79, 0xe5, 0x68, 0x22, 0xaa, 0x1d, 0x2e, 0x5c
+.byte 0x86, 0x3b, 0x2a, 0x28, 0x3e, 0x88, 0xd1, 0xc2, 0xc9, 0x32, 0x3b, 0x97, 0xa7, 0xd7, 0x48, 0xc4
+.byte 0x65, 0xdd, 0x1b, 0xa2, 0xba, 0x20, 0xd4, 0x21, 0x38, 0x40, 0x0c, 0x18, 0x40, 0x77, 0x2e, 0x55
+.byte 0xb5, 0x78, 0x65, 0xc9, 0x2e, 0x2d, 0x5a, 0x43, 0x41, 0xd5, 0x9e, 0x71, 0x68, 0x76, 0x07, 0x66
+.byte 0xfc, 0x1c, 0x26, 0xdf, 0x18, 0xa7, 0xe4, 0x5a, 0x53, 0x9b, 0x50, 0x47, 0x76, 0xc5, 0xe1, 0xff
+.byte 0x4b, 0x10, 0x29, 0x1f, 0x5c, 0x57, 0x58, 0xc1, 0xc3, 0xb1, 0xf7, 0xdd, 0x24, 0xd1, 0xaf, 0x13
+.byte 0xb1, 0x13, 0xfb, 0x2a, 0x06, 0xcf, 0xc5, 0x47, 0x58, 0xa0, 0xbd, 0x0c, 0xf2, 0xbb, 0x3d, 0xcb
+.byte 0x01, 0x91, 0xa3, 0xc9, 0x4e, 0xb6, 0x76, 0x35, 0x22, 0xec, 0x84, 0x7c, 0xe1, 0x0b, 0xb9, 0xc4
+.byte 0xae, 0x1b, 0xf6, 0x84, 0xbf, 0x76, 0x40, 0x65, 0x6c, 0x1f, 0x2a, 0xbe, 0x01, 0x95, 0xbd, 0xaa
+.byte 0x09, 0xf2, 0x86, 0x46, 0xb1, 0x52, 0x6b, 0x24, 0x47, 0x8f, 0x4b, 0x4d, 0x98, 0x95, 0x56, 0x42
+
+_data_3400:
+/* g_crypt_key6 */
+.byte 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00 /* 3420 */
+
+_data_3420:
+.byte 0xa3, 0xe6, 0xfa, 0x56, 0x10, 0xc1, 0xe0, 0x56
+.byte 0x9b, 0xeb, 0x8a, 0xf1, 0x9b, 0xcd, 0xa8, 0x27
+.byte 0xc4, 0x67, 0x5a, 0x55, 0x0f, 0xf7, 0xb7, 0x19
+.byte 0xe8, 0xec, 0x7d, 0x53, 0xdb, 0x01, 0x00, 0x00 /* 3440 */
+
+_data_3440:
+.byte 0x26, 0x61, 0xad, 0xef, 0x6e, 0x9d, 0x4c, 0x0a  /* 3448 */
+.byte 0xf5, 0x6b, 0xc2, 0x19, 0xa4, 0x63, 0x95, 0x14  /* 3450 */
+.byte 0xf4, 0x2f, 0xf2, 0x29, 0xf1, 0x1a, 0x73, 0x7e  /* 3458 */
+.byte 0x3a, 0x85, 0xba, 0x32, 0x72, 0x01, 0x00, 0x00  /* 3460 */
+
+_data_3460:
+.byte 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+.byte 0x00, 0x00, 0x00, 0x00 /* 3484 */
+
+_data_3484:
+.byte 0x20, 0xf9, 0xd7, 0x56, 0x30, 0x24, 0x55, 0xa9
+.byte 0x7a, 0xd7, 0x25, 0xe5, 0xed, 0xf8, 0xb4, 0x36
+.byte 0x41, 0xc5, 0x51, 0xaf
+
+_firmware_signature_3498:
+.byte 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
+.byte 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x75   /* "3DUfw... */ /* 34a8 */
+
+_signature_34a8:
+.byte 0x08, 0x00, 0x00, 0x00
+
+_signature_34ac:
+.byte 0x08, 0x08, 0x00, 0x00
+
+_signature_34b0:
+.byte 0x3f, 0xad, 0xf8, 0xb0, 0x2e, 0xaf, 0x67, 0x49
+.byte 0xb9, 0x85, 0x5f, 0x63, 0x4e, 0x5e, 0x8e, 0x2e
+
+_unknown_data_2:
+/* Think this is OS-related */
+.byte 0xd4, 0x8a, 0xc2, 0xbf, 0x4c, 0x8d, 0xc2, 0xbf /* 34c8 */
+
+_data_34c8:
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* 34d0 */
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   /* 34d8 */
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   /* 34c0 */
+.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  /* 35c8 */
+
+.bss
+
+.lcomm __bss 5440
+

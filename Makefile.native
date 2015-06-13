@@ -1,0 +1,14 @@
+CC = gcc
+CFLAGS = -c -g -Wall 
+LDFLAGS = 
+
+decrypt_test: decrypt_impl.o decrypt_test.o
+	$(CC) $(LDFLAGS) -o decrypt_test $+
+
+%.o: %.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+clean:
+	rm -f *.o decrypt_test
+
+
