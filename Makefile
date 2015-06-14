@@ -1,9 +1,9 @@
 CC = musl-gcc
-CFLAGS = -c -g -march=mips32r2 -Wall -mno-plt -mno-shared -fno-pic -static -std=c99
+CFLAGS = -c -g -march=mips32r2 -Wall -mno-plt -mno-shared -fno-pic -static -std=c99 -G0 -mno-gpopt
 LDFLAGS = -Xassembler -non_shared -static
 
 #decrypt: decrypt_asm.o decrypt.o
-decrypt: decrypt_asm_manual.o decrypt.o
+decrypt: decrypt_asm_manual.o decrypt_impl.o decrypt.o
 	$(CC) $(LDFLAGS) -o decrypt $+
 
 test: test_asm.o test.o decrypt_impl.o

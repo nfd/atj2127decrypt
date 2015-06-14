@@ -8,14 +8,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-struct decrypt_struct {
-   unsigned char *pInOutBuffer;
-   long InOutLen;
-   long FileLength;
-   unsigned char *pGLBuffer;
-   unsigned char *initusebuffer;
-   long initusebufferlen;
-};
+#include "decrypt_impl.h"
 
 /* From SDK */
 typedef struct {
@@ -27,11 +20,6 @@ typedef struct {
 	uint32_t  sub_type;
 	uint32_t  checksum;
 } AFI_DIR_t;
-
-/* Scratch and i/o buffer sizes required by the assembly-language portion */
-#define DECRYPT_INOUT_LENGTH 18432
-#define DECRYPT_GL_LENGTH 300
-#define DECRYPT_INIT_LENGTH 19888
 
 /* Files to look for in the firmware image */
 const uint8_t fwimage_key_name[] = "FWIMAGE FW ";
@@ -216,7 +204,7 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir)
 		return -1;
 	}
 
-	ret = func_fw_decrypt_init(decrypt_info);
+	ret = func_fw_decrypt_init_c(decrypt_info);
 	if(ret != 0) {
 		printf("Firmware failed validity checks\n");
 		return ret;
