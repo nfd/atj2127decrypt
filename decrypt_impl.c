@@ -72,6 +72,11 @@ unsigned char firmware_directory_key[] = { // aka _key_2950 aka data_3000
 	0x09, 0xf2, 0x86, 0x46, 0xb1, 0x52, 0x6b, 0x24, 0x47, 0x8f, 0x4b, 0x4d, 0x98, 0x95, 0x56, 0x42,
 };
 
+// aka _key_282c (or __rodata_282c)
+uint32_t atj2127_key[] = {
+	0x42146ea2, 0x892c8e85, 0x9f9f6d27, 0x545fedc3,
+	0x09e5c0ca, 0x2dfa7e61, 0x4e5322e6, 0xb19185b9
+};
 
 void func_97c_c(uint8_t *encstart, int length, uint8_t *scratch)
 {
@@ -141,7 +146,7 @@ int func_b1c_c(uint8_t *enc)
 }
 
 struct inituse_detail {
-	uint8_t loc0[32];
+	uint8_t session_key[32];
 	uint8_t loc32[16];
 	uint8_t loc48[512];
 	uint8_t loc560[16384];
@@ -158,6 +163,45 @@ struct glbuffer_detail {
 	uint8_t key[32];
 	uint32_t unused_3;
 };
+
+/* Better name might be fw_decrypt_atj2127.
+ * Decrypts (32 * count) bytes in-place in buf using session_key.
+*/
+void func_268c_c(uint32_t *buf, uint32_t *session_key, int count)
+{
+	uint32_t key[8];
+	int i;
+
+	for(i = 0; i < 8; i++) {
+		key[i] = atj2127_key[i] ^ session_key[i];
+	}
+
+	while(count > 0) {
+		uint32_t rollover = buf[7] ^ session_key[7];
+
+		buf[0] ^= key[1];
+		buf[1] ^= key[2];
+		buf[2] ^= key[3];
+		buf[3] ^= key[4];
+		buf[4] ^= key[5];
+		buf[5] ^= key[6];
+		buf[6] ^= key[7];
+		buf[7] ^= key[1] ^ key[4];
+
+		key[1] = key[2];
+		key[2] = key[3];
+		key[3] = key[4];
+		key[4] = key[5];
+		key[5] = key[6];
+		key[6] = key[7];
+		key[7] = rollover;
+
+		buf += 8;
+		count -= 1;
+	}
+
+	return;
+}
 
 int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 {
@@ -224,13 +268,12 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	sectors_dst += sp_41_bytes;
 	memcpy(sectors_dst, sectors_src, (32 * 512) - sp_40_bytes - sp_41_bytes);
 
-	/* This determines the number of rounds of crypto to perform. For every
-	 * 32MB that the firmware is smaller than 512MB, do another round, but
-	 * always do at least one. This seems like it was designed to keep
-	 * decryption time constant, but it's odd (it's a one-off firmware upgrade
-	 * -- not exactly speed critical, and decryption time is a small fraction
-	 *  of total upgrade time anyway) and unsound (larger files get fewer
-	 *  rounds of encryption than smaller files).
+	/* This is really weird. This is passed to the decrypt-sector function and
+	 * determines how much of each 512-byte sector to decrypt, where for every
+	 * 32MB of size above the first 32MB, one 32 byte chunk of each sector
+	 * (starting from the end) will remain unencrypted, up to a maximum of 480
+	 * bytes of plaintext. Was this a speed-related thing? It just seems
+	 * completely bizarre.
 	*/
 	int16_t rounds_to_perform = 16 - (decrypt->FileLength >> 0x19);
 	if(rounds_to_perform <= 0)
@@ -241,7 +284,7 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	int length = 16 * 1024;
 
 	while(length >= 512) {
-		func_268c(current_sector, (uint8_t *)inituse, rounds_to_perform); // 246c
+		func_268c_c((uint32_t *)current_sector, (uint32_t *)inituse, rounds_to_perform); // 246c
 		length -= 512;
 		current_sector += 512;
 	}
@@ -250,7 +293,7 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	if(length != 0) { // 2510
 		// TODO: This is clearly dead code, so what's it for?
 		memcpy(inituse->loc16944, inituse->loc560, length);
-		func_268c(inituse->loc16944, (uint8_t *)inituse, rounds_to_perform);
+		func_268c_c((uint32_t *)(inituse->loc16944), (uint32_t *)inituse, rounds_to_perform);
 		memcpy(inituse->loc560, inituse->loc16944, length);
 	}
 

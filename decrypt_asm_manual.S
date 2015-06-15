@@ -1952,7 +1952,7 @@ func_fw_decrypt_init:
 
 	__246c:
     lh	a2,42(sp)			// body of a while loop while s1 >= 512.		// 246c
-    jal	func_268c			// todo (this does some crypto).		// 2470
+    jal	func_268c_c			// todo (this does some crypto).		// 2470
     addiu	s1,s1,-512		// trim a sector off s1		// 2474
     addiu	s0,s0,512		// add a sector to s0		// 2478
 
@@ -2010,7 +2010,7 @@ __24dc_exit:
     move	a3,zero		// 251c
     lw	a0,52(sp)			// a0 = initusebuffer + 16944		// 2520
     lh	a2,42(sp)			// a2 = 16 - (fileLength >> 0x19)		// 2524
-    jal	func_268c			// this does some crypto		// 2528
+    jal	func_268c_c			// this does some crypto		// 2528
     move	a1,s3			// a1 = initusebuffer (as input to func_268c)		// 252c
     lw	a1,52(sp)			// a1 = initusebuffer + 16944		// 2530
     move	a0,s0			// a0 = initusebuffer + 560		// 2534
@@ -2069,7 +2069,7 @@ func_fw_decrypt_run:
 
     __25e8:
     lh a2,16(sp)                   // 25e8 
-    jal func_268c                  // 25ec 
+    jal func_268c_c                  // 25ec 
     addiu s2,s2,-512               // 25f0 
     addiu s1,s1,512                // 25f4 
     slti a2,s2,512                 // 25f8 
@@ -2097,7 +2097,7 @@ func_fw_decrypt_run:
     move a3,zero                   // 2640 
     lh a2,16(sp)                   // 2644 
     move a0,s5                     // 2648 
-    jal func_268c                  // 264c 
+    jal func_268c_c                  // 264c 
     move a1,s3                     // 2650 
     move a0,s1                     // 2654 
     move a1,s5                     // 2658 
@@ -2120,6 +2120,7 @@ func_fw_decrypt_run:
 .globl func_268c
 .ent func_268c
 func_268c:
+	// This now has a (horrific) C implementation
     addiu	sp,sp,-64		// 268c
     lui	t8,0xbfc3		// 2690
     sw	s6,56(sp)		// 2694
@@ -2146,7 +2147,7 @@ func_268c:
     lw	s0,16(s6)		// 26e8
     lw	s1,20(s6)		// 26ec
     lw	s2,24(s6)		// 26f0
-    xor	a3,s4,v1		// 26f4
+    xor	a3,s4,v1		// 26f4 # key[0] ^ state[0]
     xor	t5,t5,v0		// 26f8
     xor	t6,t6,t0		// 26fc
     xor	t7,t7,t1		// 2700
@@ -2171,7 +2172,7 @@ func_268c:
 	__2744:
     sll	v0,t8,0x13		// 2744
     sra	t9,v0,0xe		// 2748
-    addu	v0,t9,s6 // v0 = data + t9		// 274c
+    addu	v0,t9,s6 // v0 moves up in 32 byte chunks // 274c
     lw	t4,28(v0)    //t4 = data[offset + 7];		// 2750
     addiu	v1,t8,1		// offset += 1		// 2754
     lw	a0,0(v0)		// a0 = data[offset];		// 2758
@@ -2181,35 +2182,35 @@ func_268c:
     lw	t0,16(v0)		// 2768
     lw	t1,20(v0)		// 276c
     lw	t2,24(v0)		// 2770
-    xor	t3,t5,s0	// t3 = buf[1] ^ buf[4]		// 2774
+    xor	t3,t5,s0	// t3 = scratch[1] ^ scratch[4]		// 2774
     seh	t8,v1		// 2778
-    xor	a0,a0,t5	// a0 = data[offset] ^ buf[1]		// 277c
+    xor	a0,a0,t5	// a0 = data[offset] ^ scratch[1]		// 277c
     xor	v1,t4,t3	// v1 = data[offset + 7] ^ t3		// 2780
-    xor	a1,a1,t6	// a1 = data[offset + 1] ^ buf[2]		// 2784
-    xor	a2,a2,t7	// a2 = data[offset + 2] ^ buf[3]		// 2788
-    xor	a3,a3,s0	// a3 = data[offset + 3] ^ buf[4]		// 278c
-    xor	t0,t0,s1	// t0 = data[offset + 4] ^ buf[5]		// 2790
-    xor	t1,t1,s2	// t1 = data[offset + 5] ^ buf[6]		// 2794
-    xor	t2,t2,s3	// t2 = data[offset + 6] ^ buf[7]		// 2798
-    xor	t4,t4,s5	// t4 = data[offset + 7] ^ sbox[7]		// 279c
+    xor	a1,a1,t6	// a1 = data[offset + 1] ^ scratch[2]		// 2784
+    xor	a2,a2,t7	// a2 = data[offset + 2] ^ scratch[3]		// 2788
+    xor	a3,a3,s0	// a3 = data[offset + 3] ^ scratch[4]		// 278c
+    xor	t0,t0,s1	// t0 = data[offset + 4] ^ scratch[5]		// 2790
+    xor	t1,t1,s2	// t1 = data[offset + 5] ^ scratch[6]		// 2794
+    xor	t2,t2,s3	// t2 = data[offset + 6] ^ scratch[7]		// 2798
+    xor	t4,t4,s5	// t4 = data[offset + 7] ^ rodatakey[7]		// 279c
     slt	t3,t8,s4	// t3 = offset < 16 - num_32mb_chunks_in_file (but at least 1) 27a0
-    move	t9,t5	// t9 = buf[1]		// 27a4
-    sw	v1,28(v0)	// data[offset + 7] ^= t3		// 27a8
-    move	t5,t6	// t5 = buf[2]		// 27ac
-    sw	a0,0(v0)	// data[offset] ^= buf[1]		// 27b0
-    move	t6,t7	// t6 = buf[3]		// 27b4
-    sw	a1,4(v0)	// data[offset + 1] ^= buf[2]		// 27b8
-    move	t7,s0   // t7 = buf[4]		// 27bc
-    sw	a2,8(v0)	// data[offset + 2] ^= buf[3]		// 27c0
-    move	s0,s1   // s0 = buf[5]		// 27c4
-    sw	a3,12(v0)	// data[offset + 3] ^= buf[4]		// 27c8
-    move	s1,s2	// s1 = buf[6]		// 27cc
-    sw	t0,16(v0)	// data[offset + 4] ^= buf[5]		// 27d0
-    move	s2,s3	// s2 = buf[7]		// 27d4
-    sw	t1,20(v0)	// data[offset + 5] ^= buf[6]		// 27d8
-    sw	t2,24(v0)	// data[offset + 6] ^= buf[7]		// 27dc
+    move	t9,t5	// unused: t9 = scratch[1]		// 27a4
+    sw	v1,28(v0)	// data[offset + 7] ^= previous-scratch[1] ^ scratch[4]// 27a8
+    move	t5,t6	// effectively-scratch[1] = scratch[2]		// 27ac
+    sw	a0,0(v0)	// data[offset] ^= previous-scratch[1]		// 27b0
+    move	t6,t7	// effectively-scratch[2] = scratch[3]		// 27b4
+    sw	a1,4(v0)	// data[offset + 1] ^= previous-scratch[2]		// 27b8
+    move	t7,s0   // effectively-scratch[3] = scratch[4]		// 27bc
+    sw	a2,8(v0)	// data[offset + 2] ^= previous-scratch[3]		// 27c0
+    move	s0,s1   // effectively-scratch[4] = scratch[5]		// 27c4
+    sw	a3,12(v0)	// data[offset + 3] ^= previous-scratch[4]		// 27c8
+    move	s1,s2	// effectively-scratch[5] = scratch[6]		// 27cc
+    sw	t0,16(v0)	// data[offset + 4] ^= previous-scratch[5]		// 27d0
+    move	s2,s3	// effectively-scratch[6] = scratch[7]		// 27d4
+    sw	t1,20(v0)	// data[offset + 5] ^= previous-scratch[6]		// 27d8
+    sw	t2,24(v0)	// data[offset + 6] ^= previous-scratch[7]		// 27dc
     bnez	t3,__2744		// 27e0
-    move	s3,t4		// 27e4
+    move	s3,t4		// scratch[7] = data[offset + 7] ^ rodatakey[7] // 27e4
     sw	t4,28(sp)		// 27e8
     sw	s2,24(sp)		// 27ec
     sw	s1,20(sp)		// 27f0

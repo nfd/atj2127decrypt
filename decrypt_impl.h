@@ -22,7 +22,8 @@ void func_97c_c(uint8_t *encstart, int length, uint8_t *scratch);
 int func_abc_c(uint8_t *encstart, uint8_t *kworking, int length);
 int func_b1c_c(uint8_t *enc);
 int func_1db4(int file_length, uint8_t *data, int8_t *sector_count_1, int8_t *sector_count_2, uint8_t *inituse_plus_32, uint8_t *inituse, uint8_t *inituse_plus_48, uint8_t *pGLBuffer, uint8_t *inituse_plus_17456);
-int func_268c(uint8_t *encrypted, uint8_t *working, int extra_512k_chunks);
+void func_268c(uint8_t *buf, uint8_t *session_key, int rounds);
+void func_268c_c(uint32_t *buf, uint32_t *session_key, int count);
 int func_fw_decrypt_init_c(struct decrypt_struct *decrypt);
 
 // readable names for 'external' interface
