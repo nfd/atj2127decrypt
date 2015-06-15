@@ -7,9 +7,9 @@
 .set noreorder
 .option pic0
 
-.globl func_808
-.ent func_808
-func_808:
+.globl func_808_asm
+.ent func_808_asm
+func_808_asm:
      addiu	sp,sp,-48		// 808
      sw	s2,32(sp)		// 80c
      sb	zero,0(a3)		// 810
@@ -105,7 +105,7 @@ func_808:
      move	v0,v1		// 970
      jr	ra		// 974
      addiu	sp,sp,48		// 978
-.end func_808
+.end func_808_asm
 
 .globl func_c14
 .ent func_c14
@@ -1567,7 +1567,7 @@ func_1db4:
     move	a0,s0		// 1ed0
     addiu	a1,sp,248		// 1ed4
     move	a2,s2		// 1ed8
-    jal	func_808              /* only called from here */		// 1edc
+    jal	func_808_c              /* only called from here */		// 1edc
     addiu	a3,sp,672		// 1ee0
     bnez	v0,__1fa0		// 1ee4
     move	s0,v0		// 1ee8

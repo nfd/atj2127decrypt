@@ -78,6 +78,49 @@ uint32_t atj2127_key[] = {
 	0x09e5c0ca, 0x2dfa7e61, 0x4e5322e6, 0xb19185b9
 };
 
+/* 
+ * In: buf: central directory block, encrypted 
+*/
+uint32_t func_808_c(uint8_t *buf, uint8_t *scratch1, uint8_t *scratch2, uint8_t *decrypted_ok)
+{
+	int idx;
+
+	*decrypted_ok = 0;
+	// Decrypt the firmware central directory block.
+	if(func_b1c_c(buf + 4) != 0) {
+		return 11;
+	}
+	*decrypted_ok = 1;
+
+	// These are some pretty crazy memcpy / set operations. They frequently overlap.
+	memcpy(scratch2, buf, 296);
+
+	idx = 906;
+	memcpy(scratch1, &buf[idx], 5);
+
+	idx += 5;
+	memset(&scratch1[8], 0, 32);
+
+	memset(&scratch1[12], 0, 32);
+
+	memcpy(&scratch1[8], &buf[idx], 30);
+
+	idx += 30;
+	memcpy(&scratch1[12], &buf[idx], 30);
+
+	idx += 30;
+	memcpy(&scratch1[16], &buf[idx], 16);
+
+	idx += 33;
+	memcpy(&scratch1[49], &buf[idx], 21);
+
+	if(scratch2[286] != 1 || scratch2[287] != 0) {
+		return 24;
+	} else {
+		return 0;
+	}
+}
+
 void func_97c_c(uint8_t *encstart, int length, uint8_t *scratch)
 {
 	int num_chunks = (length / KEY_LENGTH);
