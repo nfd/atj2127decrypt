@@ -2,8 +2,11 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "decrypt_impl.h"
+
+uint8_t __bss[5440];
 
 unsigned char firmware_directory_key[] = { // aka _key_2950 aka data_3000
 	0x16, 0x2b, 0x01, 0xe4, 0x0e, 0x3d, 0xc1, 0xdf, 0x0f, 0x35, 0x8f, 0xf5, 0xe2, 0x48, 0xa0, 0x2e,
@@ -77,6 +80,17 @@ uint32_t atj2127_key[] = {
 	0x42146ea2, 0x892c8e85, 0x9f9f6d27, 0x545fedc3,
 	0x09e5c0ca, 0x2dfa7e61, 0x4e5322e6, 0xb19185b9
 };
+
+
+// aka _data_3400 or __data + 400, g_crypt_key6
+uint8_t data_3400[] = {
+	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00,
+};
+
+void func_1b1c_c(uint32_t a0, uint8_t *a1, int length, uint32_t a3);
 
 /* 
  * In: buf: central directory block, encrypted 
@@ -186,6 +200,809 @@ int func_b1c_c(uint8_t *enc)
 	}
 	
 	return func_abc_c(enc - 1, enc + 1000, 1001);
+}
+
+void func_c14_c(uint8_t *key, uint32_t key_length, uint8_t *out)
+{
+	uint32_t a1, t1, v0, v1;
+	int index;
+
+	for(index = 0; index < 256; index ++) {
+		out[index] = index;
+	}
+
+	out[256] = 0;
+	out[257] = 0;
+	v1 = 0;
+	t1 = 0;
+
+	for(index = 0; index < 256; index ++) {
+		v0 = v1 + 1;     // c54 addiu v0,v1,1
+		
+		a1 = out[index];
+		t1 = (key[v1] + a1 + t1) & 0xff;
+		out[index] = out[t1];
+
+		out[t1] = a1;
+		v1 = (v0 % key_length) & 0xff;
+	}
+}
+
+void func_cac_c(uint8_t *arg1, uint32_t count, uint8_t *arg3)
+{
+	uint32_t t6;
+	uint8_t byte1, byte2;
+
+	byte1 = arg3[256];
+	byte2 = arg3[257];
+
+	for(int idx = 0; idx < count; idx++) {
+		uint8_t temp;
+		byte1++; // will wrap at 256
+
+		temp = arg3[byte1];
+		byte2 += temp;
+		
+		arg3[byte1] = arg3[byte2];
+		arg3[byte2] = temp;
+
+		t6 = (arg3[byte1] + temp) & 0xff;
+		arg1[idx] ^= arg3[t6];
+	}
+
+	arg3[257] = byte2;
+	arg3[256] = byte1;
+}
+
+void func_d2c_c(uint8_t *key, int key_length, uint32_t a2, uint32_t count, uint8_t *out)
+{
+	func_c14_c(key, key_length, out);     // d4c jal func_c14
+	func_cac_c((uint8_t *)a2, count, out);
+}
+
+void func_d78_c(uint8_t *key, int key_length, uint32_t a2, uint32_t count, uint8_t *out)
+{
+	return func_d2c_c(key, key_length, a2, count, out);
+}
+
+void func_d80_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint8_t *out)
+{
+	uint8_t scratch[32];
+
+	func_1b1c_c(a0, scratch, 32, a1);
+	func_d2c_c(scratch, 32, a2, a3, out);
+}
+
+/* a1 is a flag: zero or one */
+int32_t func_dd8_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, a3, t0, v0, v1, zero;
+	zero = 0;
+
+	v0 = 1;     // dd8 li v0,1
+	a3 = zero;     // ddc move a3,zero
+	if(a1 == v0) {
+		a1 = 7 << 0x2;     // e14 li v1,7
+		a2 = 7;     // e1c li a2,7
+	} else {
+		a1 = 15 << 0x2;     // de0 li v1,15
+		a2 = 15;     // de8 li a2,15
+	};     // de4 beq a1,v0,3604
+
+	v0 = a1 + a0;     // df0 addu v0,a1,a0
+	v1 = *((uint32_t *)(v0 + 0));     // df4 lw v1,0(v0)
+
+	__df8:
+	v0 = v0 + -4;     // dfc addiu v0,v0,-4
+	if(v1 != 0) {
+		goto __e20;
+	}
+
+	a2 = a2 + -1;     // e00 addiu a2,a2,-1
+	if(a2 >= 0) {
+		v1 = *((uint32_t *)(v0 + 0));     // e08 lw v1,0(v0)
+		goto __df8;
+	} else {
+		return a3;
+	}
+
+	__e20:
+	a0 = v1;     // e20 move a0,v1
+	a3 = a2 << 0x5;     // e24 sll a3,a2,0x5
+	v1 = 31;     // e28 li v1,31
+	a1 = 1;     // e30 li a1,1
+	goto __e3c;     // e2c b 3644
+
+	__e34:
+	if(v1 < 0) {
+		return a3;
+	}
+
+	__e3c:
+	t0 = a1 << v1;     // e3c sllv t0,a1,v1
+	a2 = a0 & t0;     // e40 and a2,a0,t0
+	if(a2 == 0) {
+		v1 = v1 + -1;     // e48 addiu v1,v1,-1
+		goto __e34;
+	} ;     // e44 beqzl a2,3636
+
+	a3 = a3 + v1;     // e4c addu a3,a3,v1
+	v0 = a3;     // e54 move v0,a3
+	return v0;     // e50 jr ra
+}
+
+uint32_t func_e58_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, a3, t0, t1, v0, v1, zero;
+	zero = 0;
+
+	//__e58:
+	a1 = a1 + 28;     // e58 addiu a1,a1,28
+	a0 = a0 + 28;     // e5c addiu a0,a0,28
+	t0 = zero;     // e60 move t0,zero
+	a3 = 7;     // e64 li a3,7
+	v1 = *((uint32_t *)(a0 + 0));     // e68 lw v1,0(a0)
+
+	__e6c:
+	t1 = *((uint32_t *)(a1 + 0));     // e6c lw t1,0(a1)
+	a3 = a3 + -1;     // e70 addiu a3,a3,-1
+	v0 = t1 < v1;     // e74 sltu v0,t1,v1
+	a2 = v1 < t1;     // e78 sltu a2,v1,t1
+	a0 = a0 + -4;     // e7c addiu a0,a0,-4
+	if(v0 != 0) {
+		a1 = a1 + -4;     // e84 addiu a1,a1,-4
+		goto __ea0;
+	} else {
+		a1 = a1 + -4;     // e84 addiu a1,a1,-4
+	};     // e80 bnez v0,3744
+
+	//__e88:
+	if(a2 != 0) {
+		t0 = -1;     // e8c li t0,-1
+		goto __eac;
+	} ;     // e88 bnezl a2,3756
+
+	//__e90:
+	if(a3 >= 0) {
+		v1 = *((uint32_t *)(a0 + 0));     // e94 lw v1,0(a0)
+		goto __e6c;
+	} ;     // e90 bgezl a3,3692
+
+	//__e98:
+	v0 = t0;     // e9c move v0,t0
+	return v0;     // e98 jr ra
+
+	__ea0:
+	t0 = 1;     // ea0 li t0,1
+	v0 = t0;     // ea8 move v0,t0
+	return v0;     // ea4 jr ra
+
+	__eac:
+	v0 = t0;     // eb0 move v0,t0
+	return v0;     
+}
+
+// this is func_eb4_c
+void copy_32_bytes(uint32_t *dst, uint32_t *src)
+{
+	uint32_t count = 8;
+
+	while(count--) {
+		*dst++ = *src++;
+	}
+}
+
+// this is func_ed8_c
+void clear_memory(uint32_t *dst, int words)
+{
+	while(words--) {
+		*dst++ = 0;
+	}
+}
+
+// this is func_ef8_c
+void xor_64_bytes(uint32_t *dst, uint32_t *src1, uint32_t *src2)
+{
+	int count = 16;
+
+	while(count--) {
+		*dst++ = *src1++ ^ *src2++;
+	}
+}
+
+void func_f28_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, a3, t0, t1, t2, v0, v1, zero;
+	zero = 0;
+
+	//__f28:
+	t1 = a0;     // f28 move t1,a0
+	t0 = a1;     // f2c move t0,a1
+	a3 = zero;     // f30 move a3,zero
+
+	__f34:
+	t2 = a3 << 0x2;     // f34 sll t2,a3,0x2
+	a2 = t2 + t0;     // f38 addu a2,t2,t0
+	v0 = t2 + t1;     // f3c addu v0,t2,t1
+	a1 = *((uint32_t *)(v0 + 0));     // f40 lw a1,0(v0)
+	v1 = *((uint32_t *)(a2 + 0));     // f44 lw v1,0(a2)
+	a3 = a3 + 1;     // f48 addiu a3,a3,1
+	a0 = (a3 < 8);     // f4c slti a0,a3,8
+	*((uint32_t *)(v0 + 0)) = v1;     // f50 sw v1,0(v0)
+	if(a0 != 0) {
+		*((uint32_t *)(a2 + 0)) = a1;     // f58 sw a1,0(a2)
+		goto __f34;
+	} else {
+		*((uint32_t *)(a2 + 0)) = a1;     // f58 sw a1,0(a2)
+	};     // f54 bnez a0,3892
+
+}
+
+void func_f64_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, a3, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
+	zero = 0;
+
+	t2 = (a1 < 0);     // f64 slti t2,a1,0
+	t0 = a1 + 31;     // f68 addiu t0,a1,31
+	if(t2 == 0) {
+		t0 = a1;
+	};     // f6c movz t0,a1,t2
+	t1 = t0 >> 0x5;     // f70 sra t1,t0,0x5
+	t2 = t1;     // f74 move t2,t1
+	a3 = t1 << 0x5;     // f78 sll a3,t1,0x5
+	t1 = a1 - a3;     // f7c subu t1,a1,a3
+	a2 = 1;     // f80 li a2,1
+	a1 = t2 << 0x2;     // f84 sll a1,t2,0x2
+	v0 = a2 << t1;     // f88 sllv v0,a2,t1
+	v1 = a1 + a0;     // f8c addu v1,a1,a0
+	t3 = v0 + -1;     // f90 addiu t3,v0,-1
+	v1 = v1 + 28;     // f94 addiu v1,v1,28
+	a2 = 7;     // f98 li a2,7
+	a1 = a0 + 28;     // f9c addiu a1,a0,28
+
+	__fa0:
+	t4 = *((uint32_t *)(a1 + 0));     // fa0 lw t4,0(a1)
+	a2 = a2 + -1;     // fa4 addiu a2,a2,-1
+	*((uint32_t *)(v1 + 0)) = t4;     // fa8 sw t4,0(v1)
+	a1 = a1 + -4;     // fac addiu a1,a1,-4
+	if((a2 & (1 << 31)) == 0) {
+		v1 = v1 + -4;     // fb4 addiu v1,v1,-4
+		goto __fa0;
+	} else {
+		v1 = v1 + -4;     // fb4 addiu v1,v1,-4
+	};     // fb0 bgez a2,4000
+
+	if(((t2 & (1 << 31)) != 0) || t2 == 0) {
+		t5 = 32;     // fbc li t5,32
+		goto __fdc;
+	} else {
+		t5 = 32;     // fbc li t5,32
+	};     // fb8 blez t2,4060
+
+	v1 = a0;     // fc0 move v1,a0
+	v0 = t2;     // fc4 move v0,t2
+
+	__fc8:
+	v0 = v0 + -1;     // fc8 addiu v0,v0,-1
+	*((uint32_t *)(v1 + 0)) = zero;     // fcc sw zero,0(v1)
+	if(v0 != 0) {
+		v1 = v1 + 4;     // fd4 addiu v1,v1,4
+		goto __fc8;
+	} else {
+		v1 = v1 + 4;     // fd4 addiu v1,v1,4
+	};     // fd0 bnez v0,4040
+
+	t5 = 32;     // fd8 li t5,32
+
+	__fdc:
+	t4 = t2 + 8;     // fdc addiu t4,t2,8
+	t0 = t5 - t1;     // fe0 subu t0,t5,t1
+	if(((t4 & (1 << 31)) != 0) || t4 == 0) {
+		a3 = zero;     // fe8 move a3,zero
+		goto __1028;
+	} else {
+		a3 = zero;     // fe8 move a3,zero
+	};     // fe4 blez t4,4136
+
+	a2 = t4;     // fec move a2,t4
+	a1 = a0;     // ff0 move a1,a0
+
+	__ff4:
+	t8 = *((uint32_t *)(a1 + 0));     // ff4 lw t8,0(a1)
+	a2 = a2 + -1;     // ff8 addiu a2,a2,-1
+	t9 = t8 << t1;     // ffc sllv t9,t8,t1
+	t7 = t9 | a3;     // 1000 or t7,t9,a3
+	t6 = t8 >> t0;     // 1004 srlv t6,t8,t0
+	*((uint32_t *)(a1 + 0)) = t7;     // 1008 sw t7,0(a1)
+	a3 = t6 & t3;     // 100c and a3,t6,t3
+	if(a2 != 0) {
+		a1 = a1 + 4;     // 1014 addiu a1,a1,4
+		goto __ff4;
+	} else {
+		a1 = a1 + 4;     // 1014 addiu a1,a1,4
+	};     // 1010 bnez a2,4084
+
+	if(a3 == 0) {
+		v1 = t4 << 0x2;     // 101c sll v1,t4,0x2
+		goto __1028;
+	} else {
+		v1 = t4 << 0x2;     // 101c sll v1,t4,0x2
+	};     // 1018 beqz a3,4136
+
+	t3 = v1 + a0;     // 1020 addu t3,v1,a0
+	*((uint32_t *)(t3 + 0)) = a3;     // 1024 sw a3,0(t3)
+
+	__1028:
+	return;
+}
+
+void func_1030_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, s0, s1, s2, s3, s4, s5, v0;
+
+	s1 = (uint32_t)__bss + 0x320;     // 103c la s1,__bss + 0x320
+	s4 = a0;     // 1048 move s4,a0
+	s0 = a1;     // 104c move s0,a1
+	a0 = s1;     // 1050 move a0,s1
+	a1 = 16;     // 1054 li a1,16
+	clear_memory((void *)a0, a1);
+	a0 = s4;     // 106c move a0,s4
+	a1 = 8;     // 1074 li a1,8
+	clear_memory((void *)a0, a1);
+	a2 = (0xbfc3) << 16;     // 1078 lui a2,0xbfc3
+	s5 = (uint32_t)__bss + 0x10a0;     // 107c la s5,__bss + 0x10a0
+	a0 = 1;     // 1080 li a0,1
+	*((uint32_t *)(s4 + 0)) = a0;     // 1084 sw a0,0(s4)
+	a1 = 8;     // 1088 li a1,8
+	a0 = s5;     // 1090 move a0,s5
+	clear_memory((void *)a0, a1);
+	s2 = (uint32_t)__bss + 0x20;     // 1098 la s2,__bss + 0x20
+	a1 = s0;     // 109c move a1,s0
+	a0 = s2;     // 10a4 move a0,s2
+	copy_32_bytes((void *)a0, (void *)a1);
+	v0 = (0xbfc3) << 16;     // 10a8 lui v0,0xbfc3
+	s3 = (uint32_t)__bss + 0x8a0;     // 10ac la s3,__bss + 0x8a0
+	a1 = (0xbfc3) << 16;     // 10b0 lui a1,0xbfc3
+	a1 = (uint32_t)data_3400;     // 10b4 la a1,__data + 0x400
+	a0 = s3;     // 10bc move a0,s3
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = s2;     // 10c4 move a0,s2
+	goto __1138;     // 10c0 b 4408
+
+	__10c8:
+	a0 = s3;     // 10c8 move a0,s3
+	a1 = 1;     // 10d0 li a1,1
+	s0 = s0 - func_dd8_c(a0, a1);     // 10d4 subu s0,s0,v0
+	a0 = s2;     // 10d8 move a0,s2
+	if(((s0 & (1 << 31)) != 0)) {
+		a1 = s3;     // 10e0 move a1,s3
+		goto __116c;
+	} else {
+		a1 = s3;     // 10e0 move a1,s3
+	};     // 10dc bltz s0,4460
+
+	a0 = s1;     // 10e4 move a0,s1
+
+	__10e8:
+	a1 = s3;     // 10ec move a1,s3
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = s1;     // 10f0 move a0,s1
+	a1 = s0;     // 10f8 move a1,s0
+	func_f64_c(a0, a1);     // 10f4 jal func_f64
+	a2 = s1;     // 10fc move a2,s1
+	a0 = s2;     // 1100 move a0,s2
+	a1 = s2;     // 1108 move a1,s2
+	xor_64_bytes((void *)a0, (void *)a1, (void *)a2);
+	a0 = s1;     // 110c move a0,s1
+	a1 = s5;     // 1114 move a1,s5
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = s1;     // 1118 move a0,s1
+	a1 = s0;     // 1120 move a1,s0
+	func_f64_c(a0, a1);     // 111c jal func_f64
+	a0 = s4;     // 1124 move a0,s4
+	a1 = s4;     // 1128 move a1,s4
+	a2 = s1;     // 1130 move a2,s1
+	xor_64_bytes((void *)a0, (void *)a1, (void *)a2);
+	a0 = s2;     // 1134 move a0,s2
+
+	__1138:
+	a1 = 1;     // 113c li a1,1
+	v0 = func_dd8_c(a0, a1);     // 1138 jal func_dd8
+	if(v0 != 0) {
+		s0 = v0;     // 1144 move s0,v0
+		goto __10c8;
+	} else {
+		s0 = v0;     // 1144 move s0,v0
+	};     // 1140 bnez v0,4296
+
+	return;     // 1164 jr ra
+
+	__116c:
+	s0 = -s0;     // 1170 negu s0,s0
+	func_f28_c(a0, a1);     // 116c jal func_f28
+	a0 = s4;     // 1174 move a0,s4
+	a1 = s5;     // 117c move a1,s5
+	func_f28_c(a0, a1);     // 1178 jal func_f28
+	a0 = s1;     // 1184 move a0,s1
+	goto __10e8;     // 1180 b 4328
+}
+
+void func_1188_c(uint32_t a0)
+{
+	uint32_t a1, a2, a3, s0, t0, t1, t2, t3, v0, v1, zero;
+	zero = 0;
+
+	a1 = zero;     // 118c move a1,zero
+	s0 = a0;     // 119c move s0,a0
+	v0 = func_dd8_c(a0, a1);
+	a0 = v0 + 31;     // 11a0 addiu a0,v0,31
+	v1 = (((int32_t)v0) < 0);     // 11a4 slti v1,v0,0
+	if(v1 != 0) {
+		v0 = a0;
+	};     // 11a8 movn v0,a0,v1
+	v0 = v0 >> 0x5;     // 11ac sra v0,v0,0x5
+	a3 = v0 + 1;     // 11b0 addiu a3,v0,1
+	if(((a3 & (1 << 31)) != 0) || a3 == 0) {
+		a2 = zero;     // 11b8 move a2,zero
+		goto __11fc;
+	} else {
+		a2 = zero;     // 11b8 move a2,zero
+	};     // 11b4 blez a3,4600
+
+	a1 = a3;     // 11bc move a1,a3
+	a0 = s0;     // 11c0 move a0,s0
+
+	__11c4:
+	t0 = *((uint32_t *)(a0 + 0));     // 11c4 lw t0,0(a0)
+	a1 = a1 + -1;     // 11c8 addiu a1,a1,-1
+	t2 = t0 << 0x1;     // 11cc sll t2,t0,0x1
+	t1 = t2 | a2;     // 11d0 or t1,t2,a2
+	*((uint32_t *)(a0 + 0)) = t1;     // 11d4 sw t1,0(a0)
+	a2 = t0 >> 0x1f;     // 11d8 srl a2,t0,0x1f
+	if(a1 != 0) {
+		a0 = a0 + 4;     // 11e0 addiu a0,a0,4
+		goto __11c4;
+	} else {
+		a0 = a0 + 4;     // 11e0 addiu a0,a0,4
+	};     // 11dc bnez a1,4548
+
+	if(a2 == 0) {
+		goto __11fc;
+	}
+
+	t3 = a3 << 0x2;     // 11ec sll t3,a3,0x2
+	a1 = t3 + s0;     // 11f0 addu a1,t3,s0
+	*((uint32_t *)(a1 + 0)) = a2;     // 11f4 sw a2,0(a1)
+
+	__11fc:
+	return;     // 1200 jr ra
+}
+
+void func_1208_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t s0, s1, s2, s3, v0, zero;
+	zero = 0;
+
+	a0 = a1;     // 120c move a0,a1
+	s2 = a1;     // 1214 move s2,a1
+	a1 = zero;     // 1218 move a1,zero
+	s3 = a2;     // 1224 move s3,a2
+	v0 = func_dd8_c(a0, a1);     // 122c jal func_dd8
+	s0 = v0 + -233;     // 1234 addiu s0,v0,-233
+	a0 = s2;     // 1238 move a0,s2
+	a1 = s3;     // 1240 move a1,s3
+	func_e58_c(a0, a1);     // 123c jal func_e58
+	if(((s0 & (1 << 31)) != 0)) {
+		goto __129c;
+	}
+
+	s1 = (uint32_t)__bss + 0xc20;     // 124c la s1,__bss + 0xc20
+	a0 = s1;     // 1250 move a0,s1
+
+	__1254:
+	a1 = 16;     // 1258 li a1,16
+	clear_memory((void *)a0, a1);     // 1254 jal func_ed8
+	a0 = s1;     // 125c move a0,s1
+	a1 = s3;     // 1264 move a1,s3
+	copy_32_bytes((void *)a0, (void *)a1);     // 1260 jal func_eb4
+	a1 = s0;     // 1268 move a1,s0
+	a0 = s1;     // 1270 move a0,s1
+	func_f64_c(a0, a1);     // 126c jal func_f64
+	a0 = s2;     // 1274 move a0,s2
+	a1 = s2;     // 1278 move a1,s2
+	a2 = s1;     // 1280 move a2,s1
+	xor_64_bytes((void *)a0, (void *)a1, (void *)a2);     // 127c jal func_ef8
+	a0 = s2;     // 1284 move a0,s2
+	a1 = zero;     // 128c move a1,zero
+	v0 = func_dd8_c(a0, a1);     // 1288 jal func_dd8
+	s0 = v0 + -233;     // 1290 addiu s0,v0,-233
+	if((s0 & (1 << 31)) == 0) {
+		a0 = s1;     // 1298 move a0,s1
+		goto __1254;
+	} else {
+		a0 = s1;     // 1298 move a0,s1
+	};     // 1294 bgez s0,4692
+
+	__129c:
+	return;     // 12b0 jr ra
+}
+
+void func_12b8_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t a3, s0, s1, s2, s3, s4, t0, t1, t2, t3, t4, t5, t6, v0, zero;
+	zero = 0;
+
+	s4 = (uint32_t)__bss + 0x1220;     // 12c4 la s4,__bss + 0x1220
+	s3 = a0;     // 12d0 move s3,a0
+	s0 = a1;     // 12d4 move s0,a1
+	a0 = s4;     // 12d8 move a0,s4
+	a1 = 8;     // 12dc li a1,8
+	s1 = a2;     // 12f0 move s1,a2
+	clear_memory((void *)a0, a1);
+	v0 = (0xbfc3) << 16;     // 12f4 lui v0,0xbfc3
+	s2 = (uint32_t)__bss + 0x420;     // 12f8 la s2,__bss + 0x420
+	a0 = s2;     // 12fc move a0,s2
+	a1 = 16;     // 1304 li a1,16
+	clear_memory((void *)a0, a1);
+	a1 = s0;     // 1308 move a1,s0
+	a0 = s4;     // 1310 move a0,s4
+	copy_32_bytes((void *)a0, (void *)a1);
+	a1 = s1;     // 1314 move a1,s1
+	a0 = s2;     // 131c move a0,s2
+	copy_32_bytes((void *)a0, (void *)a1);
+	s0 = 1;     // 1320 li s0,1
+	t3 = 8;     // 1324 li t3,8
+	s1 = zero;     // 1328 move s1,zero
+	t2 = (((int32_t)zero) < ((int32_t)t3));     // 132c slt t2,zero,t3
+
+	__1330:
+	t0 = s4;     // 1330 move t0,s4
+	a3 = 7;     // 1334 li a3,7
+	t1 = zero;     // 1338 move t1,zero
+
+	__133c:
+	a1 = *((uint32_t *)(t0 + 0));     // 133c lw a1,0(t0)
+	a0 = a1 & s0;     // 1340 and a0,a1,s0
+	if(a0 == 0) {
+		a3 = a3 + -1;     // 1348 addiu a3,a3,-1
+		goto __1384;
+	} ;     // 1344 beqzl a0,4996
+
+	if(t2 == 0) {
+		a3 = a3 + -1;     // 1350 addiu a3,a3,-1
+		goto __1384;
+	} ;     // 134c beqzl t2,4996
+
+	a2 = s2;     // 1354 move a2,s2
+	a0 = t1 + s3;     // 1358 addu a0,t1,s3
+	a1 = t3;     // 135c move a1,t3
+
+	__1360:
+	t5 = *((uint32_t *)(a0 + 0));     // 1360 lw t5,0(a0)
+	t6 = *((uint32_t *)(a2 + 0));     // 1364 lw t6,0(a2)
+	a1 = a1 + -1;     // 1368 addiu a1,a1,-1
+	t4 = t5 ^ t6;     // 136c xor t4,t5,t6
+	*((uint32_t *)(a0 + 0)) = t4;     // 1370 sw t4,0(a0)
+	a2 = a2 + 4;     // 1374 addiu a2,a2,4
+	if(a1 != 0) {
+		a0 = a0 + 4;     // 137c addiu a0,a0,4
+		goto __1360;
+	} else {
+		a0 = a0 + 4;     // 137c addiu a0,a0,4
+	};     // 1378 bnez a1,4960
+
+	a3 = a3 + -1;     // 1380 addiu a3,a3,-1
+
+	__1384:
+	t0 = t0 + 4;     // 1384 addiu t0,t0,4
+	if((a3 & (1 << 31)) == 0) {
+		t1 = t1 + 4;     // 138c addiu t1,t1,4
+		goto __133c;
+	} else {
+		t1 = t1 + 4;     // 138c addiu t1,t1,4
+	};     // 1388 bgez a3,4924
+
+	a2 = 31;     // 1390 li a2,31
+	if(s1 == a2) {
+		s1 = s1 + 1;     // 1398 addiu s1,s1,1
+		goto __13cc;
+	} ;     // 1394 beql s1,a2,5068
+
+	a0 = s2;     // 13a0 move a0,s2
+	func_1188_c(a0);     // 139c jal func_1188
+	a0 = s2;     // 13a4 move a0,s2
+	a1 = zero;     // 13ac move a1,zero
+	v0 = func_dd8_c(a0, a1);     // 13a8 jal func_dd8
+	t0 = v0 + 31;     // 13b0 addiu t0,v0,31
+	t1 = (((int32_t)v0) < 0);     // 13b4 slti t1,v0,0
+	if(t1 != 0) {
+		v0 = t0;
+	};     // 13b8 movn v0,t0,t1
+	a3 = v0 >> 0x5;     // 13bc sra a3,v0,0x5
+	s0 = s0 << 0x1;     // 13c0 sll s0,s0,0x1
+	t3 = a3 + 1;     // 13c4 addiu t3,a3,1
+	s1 = s1 + 1;     // 13c8 addiu s1,s1,1
+
+	__13cc:
+	t2 = (((int32_t)s1) < 32);     // 13cc slti t2,s1,32
+	if(t2 != 0) {
+		t2 = (((int32_t)zero) < ((int32_t)t3));     // 13d4 slt t2,zero,t3
+		goto __1330;
+	} ;     // 13d0 bnezl t2,4912
+
+	return;     // 13f0 jr ra
+}
+
+/* this xors 8 words from a1 and a2 and stores the result in a0 */
+void func_13f8_c(uint32_t *out, uint32_t *in_1, uint32_t *in_2)
+{
+	for(int i = 0; i < 8; i++) {
+		*out++ = *in_1++ ^ *in_2++;
+	}
+}
+
+void func_1428_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, a3, t0, t1, t2, t3, t4, t5, t6, v0, v1, zero;
+	zero = 0;
+
+	t0 = a0;     // 1428 move t0,a0
+	t1 = *((uint32_t *)(a1 + 4));     // 142c lw t1,4(a1)
+	a3 = zero;     // 1430 move a3,zero
+	a2 = *((uint32_t *)(a1 + 0));     // 1434 lw a2,0(a1)
+
+	__1438:
+	a1 = t0 + a3;     // 1438 addu a1,t0,a3
+	v1 = *((uint8_t*)(0 + a2));     // 143c lbu v1,0(a2)
+	t2 = *((uint8_t*)(0 + a1));     // 1440 lbu t2,0(a1)
+	a3 = a3 + 1;     // 1444 addiu a3,a3,1
+	v0 = t2 ^ v1;     // 1448 xor v0,t2,v1
+	a0 = (((int32_t)a3) < 29);     // 144c slti a0,a3,29
+	*((uint8_t *)(a1 + 0)) = (v0 & 0xff);     // 1450 sb v0,0(a1)
+	if(a0 != 0) {
+		a2 = a2 + 1;     // 1458 addiu a2,a2,1
+		goto __1438;
+	} else {
+		a2 = a2 + 1;     // 1458 addiu a2,a2,1
+	};     // 1454 bnez a0,5176
+
+	a2 = t1;     // 145c move a2,t1
+	a3 = 29;     // 1460 li a3,29
+
+	__1464:
+	t3 = t0 + a3;     // 1464 addu t3,t0,a3
+	t6 = *((uint8_t*)(0 + a2));     // 1468 lbu t6,0(a2)
+	t5 = *((uint8_t*)(0 + t3));     // 146c lbu t5,0(t3)
+	a3 = a3 + 1;     // 1470 addiu a3,a3,1
+	t4 = t5 ^ t6;     // 1474 xor t4,t5,t6
+	t1 = (((int32_t)a3) < 32);     // 1478 slti t1,a3,32
+	*((uint8_t *)(t3 + 0)) = (t4 & 0xff);     // 147c sb t4,0(t3)
+	if(t1 != 0) {
+		a2 = a2 + 1;     // 1484 addiu a2,a2,1
+		goto __1464;
+	} else {
+		a2 = a2 + 1;     // 1484 addiu a2,a2,1
+	};     // 1480 bnez t1,5220
+
+	return;     // 1488 jr rao
+}
+
+void func_1490_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t s0, s1, s2, s3, s4, s5, s6, s7;
+
+	s7 = a0;     // 14b8 move s7,a0
+	a0 = *((uint32_t *)(a2 + 0));     // 14bc lw a0,0(a2)
+	s6 = a2;     // 14c0 move s6,a2
+	s5 = a1;     // 14c4 move s5,a1
+	a1 = 8;     // 14cc li a1,8
+	clear_memory((void *)a0, a1);
+	a0 = *((uint32_t *)(s6 + 4));     // 14d0 lw a0,4(s6)
+	a1 = 8;     // 14d8 li a1,8
+	clear_memory((void *)a0, a1);
+	s2 = (uint32_t)__bss + 0x120;     // 14e0 la s2,__bss + 0x120
+	a0 = s2;     // 14e4 move a0,s2
+	a1 = 16;     // 14ec li a1,16
+	clear_memory((void *)a0, a1);
+	s1 = (uint32_t)__bss + 0xe20;     // 14f4 la s1,__bss + 0xe20
+	a0 = s1;     // 14f8 move a0,s1
+	a1 = 16;     // 1500 li a1,16
+	clear_memory((void *)a0, a1);
+	a1 = (0xbfc3) << 16;     // 1504 lui a1,0xbfc3
+	s3 = (uint32_t)__bss + 0x520;     // 1508 la s3,__bss + 0x520
+	a2 = *((uint32_t *)(s5 + 4));     // 150c lw a2,4(s5)
+	a1 = *((uint32_t *)(s7 + 4));     // 1510 lw a1,4(s7)
+	a0 = s3;     // 1518 move a0,s3
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a0 = (0xbfc3) << 16;     // 151c lui a0,0xbfc3
+	s4 = (uint32_t)__bss + 0x620;     // 1520 la s4,__bss + 0x620
+	a2 = *((uint32_t *)(s5 + 0));     // 1524 lw a2,0(s5)
+	a1 = *((uint32_t *)(s7 + 0));     // 1528 lw a1,0(s7)
+	a0 = s4;     // 1530 move a0,s4
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a0 = s1;     // 1534 move a0,s1
+	a1 = s4;     // 153c move a1,s4
+	func_1030_c(a0, a1);
+	s0 = (uint32_t)__bss + 0xd20;     // 1544 la s0,__bss + 0xd20
+	a0 = s0;     // 1548 move a0,s0
+	a1 = 16;     // 1550 li a1,16
+	clear_memory((void *)a0, a1);
+	a0 = s0;     // 1554 move a0,s0
+	a1 = s1;     // 1558 move a1,s1
+	a2 = s3;     // 1560 move a2,s3
+	func_12b8_c(a0, a1, a2);
+	s5 = (uint32_t)data_3400;     // 1568 la s5,__data + 0x400
+	a0 = s0;     // 156c move a0,s0
+	a1 = s0;     // 1570 move a1,s0
+	a2 = s5;     // 1578 move a2,s5
+	func_1208_c(a0, a1, a2);
+	a2 = (0xbfc3) << 16;     // 157c lui a2,0xbfc3
+	a2 = (uint32_t)__bss + 0x0;     // 1580 la a2,__bss + 0x0
+	a0 = s3;     // 1584 move a0,s3
+	a1 = s0;     // 158c move a1,s0
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a0 = s2;     // 1590 move a0,s2
+	a1 = 16;     // 1598 li a1,16
+	clear_memory((void *)a0, a1);
+	a0 = s2;     // 159c move a0,s2
+	a1 = s0;     // 15a0 move a1,s0
+	a2 = s0;     // 15a8 move a2,s0
+	func_12b8_c(a0, a1, a2);
+	a0 = s2;     // 15ac move a0,s2
+	a1 = s2;     // 15b0 move a1,s2
+	a2 = s5;     // 15b8 move a2,s5
+	func_1208_c(a0, a1, a2);
+	a0 = s1;     // 15bc move a0,s1
+	a1 = s3;     // 15c0 move a1,s3
+	a2 = s2;     // 15c8 move a2,s2
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a0 = *((uint32_t *)(s6 + 0));     // 15cc lw a0,0(s6)
+	a1 = s1;     // 15d0 move a1,s1
+	a2 = s4;     // 15d8 move a2,s4
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a1 = *((uint32_t *)(s7 + 0));     // 15dc lw a1,0(s7)
+	a2 = *((uint32_t *)(s6 + 0));     // 15e0 lw a2,0(s6)
+	a0 = s3;     // 15e8 move a0,s3
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a2 = *((uint32_t *)(s7 + 4));     // 15ec lw a2,4(s7)
+	a1 = *((uint32_t *)(s6 + 0));     // 15f0 lw a1,0(s6)
+	a0 = s4;     // 15f8 move a0,s4
+	func_13f8_c((uint32_t *)a0, (uint32_t *)a1, (uint32_t *) a2);
+	a0 = s1;     // 15fc move a0,s1
+	a1 = 16;     // 1604 li a1,16
+	clear_memory((void *)a0, a1);
+	a0 = s1;     // 1608 move a0,s1
+	a1 = s3;     // 160c move a1,s3
+	a2 = s0;     // 1614 move a2,s0
+	func_12b8_c(a0, a1, a2);
+	a0 = s1;     // 1618 move a0,s1
+	a1 = s1;     // 161c move a1,s1
+	a2 = s5;     // 1624 move a2,s5
+	func_1208_c(a0, a1, a2);
+	a0 = *((uint32_t *)(s6 + 4));     // 1628 lw a0,4(s6)
+	a1 = s1;     // 162c move a1,s1
+	a2 = s4;     // 1630 move a2,s4
+
+	/* *a0 = *a1 ^ *a2  (for 32 bytes) */
+	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
+}
+
+void func_1b1c_c(uint32_t a0, uint8_t *a1, int length, uint32_t a3)
+{
+	uint32_t a2, s1, v0, v1;
+
+	memcpy(a1, (void *)a0, length);     // 1b48 jal memcpy
+
+	s1 = (uint32_t) a1;     // 1b28 move s1,a1
+	a0 = s1;     // 1b3c move a0,s1
+	a2 = ((a3 & 0xf0) >> 4) + 16;     // 1b54 addiu a2,a3,16
+	v1 = a2 + s1;     // 1b58 addu v1,a2,s1
+	v0 = *((uint8_t*)(0 + v1));     // 1b5c lbu v0,0(v1)
+	a3 = (a3 & 0xf) + s1;     // 1b64 addu s0,a1,s1
+	a0 = *((uint8_t*)(0 + a3));     // 1b68 lbu a0,0(s0)
+	*((uint8_t *)(a3 + 0)) = (v0 & 0xff);     // 1b70 sb v0,0(s0)
+	*((uint8_t *)(v1 + 0)) = (a0 & 0xff);     // 1b84 sb a0,0(v1)
 }
 
 struct inituse_detail {

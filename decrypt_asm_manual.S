@@ -107,9 +107,9 @@ func_808_asm:
      addiu	sp,sp,48		// 978
 .end func_808_asm
 
-.globl func_c14
-.ent func_c14
-func_c14:
+.globl func_c14_asm
+.ent func_c14_asm
+func_c14_asm:
      move	t4,a0		// c14
      move	t3,a1		// c18
      move	t2,a2		// c1c
@@ -152,11 +152,11 @@ func_c14:
      andi	v1,a3,0xff		// ca0
      jr	ra		// ca4
      nop		// ca8
-.end func_c14
+.end func_c14_asm
 
-.globl func_cac
-.ent func_cac
-func_cac:
+.globl func_cac_asm
+.ent func_cac_asm
+func_cac_asm:
      move	t1,a2		// cac
      move	t3,a1		// cb0
      move	t4,a0		// cb4
@@ -193,11 +193,11 @@ func_cac:
      sb	a3,257(t1)		// d20
      jr	ra		// d24
      sb	t0,256(t1)		// d28
-.end func_cac
+.end func_cac_asm
 
-.globl func_d80
-.ent func_d80
-func_d80:
+.globl func_d80_asm
+.ent func_d80_asm
+func_d80_asm:
      addiu	sp,sp,-72		// d80
      sw	s1,60(sp)		// d84
      sw	s0,56(sp)		// d88
@@ -206,25 +206,25 @@ func_d80:
      move	a3,a1		// d94
      li	a2,32		// d98
      sw	ra,64(sp)		// d9c
-     jal	func_1b1c     /* Only called from here */		// da0
+     jal	func_1b1c_c     /* Only called from here */		// da0
      addiu	a1,sp,24		// da4
      lw	v0,88(sp)		// da8
      move	a2,s0		// dac
      move	a3,s1		// db0
      addiu	a0,sp,24		// db4
      li	a1,32		// db8
-     jal	func_d2c		// dbc
+     jal	func_d2c_c		// dbc
      sw	v0,16(sp)		// dc0
      lw	ra,64(sp)		// dc4
      lw	s1,60(sp)		// dc8
      lw	s0,56(sp)		// dcc
      jr	ra		// dd0
      addiu	sp,sp,72		// dd4
-.end func_d80
+.end func_d80_asm
 
-.globl func_d2c
-.ent func_d2c
-func_d2c:
+.globl func_d2c_asm
+.ent func_d2c_asm
+func_d2c_asm:
      addiu	sp,sp,-32		// d2c
      sw	s0,16(sp)		// d30
      lw	s0,48(sp)		// d34
@@ -233,7 +233,7 @@ func_d2c:
      move	s2,a3		// d40
      move	s1,a2		// d44
      sw	ra,28(sp)		// d48
-     jal	func_c14      /* Only called from here */		// d4c
+     jal	func_c14_c      /* Only called from here */		// d4c
      move	a2,s0		// d50
      move	a0,s1		// d54
      move	a1,s2		// d58
@@ -242,20 +242,20 @@ func_d2c:
      lw	s2,24(sp)		// d64
      lw	s1,20(sp)		// d68
      lw	s0,16(sp)		// d6c
-     j	func_cac       /* Only called from here */		// d70
+     j	func_cac_c       /* Only called from here */		// d70
      addiu	sp,sp,32		// d74
-.end func_d2c
+.end func_d2c_asm
 
-.globl func_d78
-.ent func_d78
-func_d78:
-     j	func_d2c  		// d78
+.globl func_d78_asm
+.ent func_d78_asm
+func_d78_asm:
+     j	func_d2c_c  		// d78
      nop		// d7c
-.end func_d78
+.end func_d78_asm
 
-.globl func_dd8
-.ent func_dd8
-func_dd8:
+.globl func_dd8_asm
+.ent func_dd8_asm
+func_dd8_asm:
      li	v0,1		// dd8
      move	a3,zero		// ddc
      li	v1,15		// de0
@@ -302,11 +302,11 @@ func_dd8:
      addu	a3,a3,v1		// e4c
      jr	ra		// e50
      move	v0,a3		// e54
-.end func_dd8
+.end func_dd8_asm
 
-.globl func_e58
-.ent func_e58
-func_e58:
+.globl func_e58_asm
+.ent func_e58_asm
+func_e58_asm:
      addiu	a1,a1,28		// e58
      addiu	a0,a0,28		// e5c
      move	t0,zero		// e60
@@ -336,11 +336,11 @@ func_e58:
 	 __eac:
      jr	ra		// eac
      move	v0,t0		// eb0
-.end func_e58
+.end func_e58_asm
 
-.globl func_eb4_copy_32_bytes
-.ent func_eb4_copy_32_bytes
-func_eb4_copy_32_bytes:   /* ptr in a0 gets 32 bytes from ptr in a1 */
+.globl copy_32_bytes_asm
+.ent copy_32_bytes_asm
+copy_32_bytes_asm:   /* ptr in a0 gets 32 bytes from ptr in a1 */
      li	v1,7		// eb4
 
 	 __eb8:
@@ -352,11 +352,11 @@ func_eb4_copy_32_bytes:   /* ptr in a0 gets 32 bytes from ptr in a1 */
      addiu	a0,a0,4		// ecc
      jr	ra		// ed0
      nop		// ed4
-.end func_eb4_copy_32_bytes
+.end copy_32_bytes_asm
 
-.globl func_ed8_zero_memory
-.ent func_ed8_zero_memory
-func_ed8_zero_memory:
+.globl clear_memory_asm
+.ent clear_memory_asm
+clear_memory_asm:
      blez	a1,__ef0		// ed8
      nop		// edc
 
@@ -369,11 +369,11 @@ func_ed8_zero_memory:
 	 __ef0:
      jr	ra		// ef0
      nop		// ef4
-.end func_ed8_zero_memory
+.end clear_memory_asm
 
-.globl func_ef8_xor_64_bytes
-.ent func_ef8_xor_64_bytes
-func_ef8_xor_64_bytes:   /* ptr in a0 gets *a1 xor *a2 for 64 bytes */
+.globl xor_64_bytes_asm
+.ent xor_64_bytes_asm
+xor_64_bytes_asm:   /* ptr in a0 gets *a1 xor *a2 for 64 bytes */
      li	a3,15		// ef8
 
 	 __efc:
@@ -388,11 +388,11 @@ func_ef8_xor_64_bytes:   /* ptr in a0 gets *a1 xor *a2 for 64 bytes */
      addiu	a2,a2,4		// f1c
      jr	ra		// f20
      nop		// f24
-.end func_ef8_xor_64_bytes
+.end xor_64_bytes_asm
 
-.globl func_f28
-.ent func_f28
-func_f28:
+.globl func_f28_asm
+.ent func_f28_asm
+func_f28_asm:
      move	t1,a0		// f28
      move	t0,a1		// f2c
      move	a3,zero		// f30
@@ -410,11 +410,11 @@ func_f28:
      sw	a1,0(a2)		// f58
      jr	ra		// f5c
      nop		// f60
-.end func_f28
+.end func_f28_asm
 
-.globl func_f64
-.ent func_f64
-func_f64:
+.globl func_f64_asm
+.ent func_f64_asm
+func_f64_asm:
      slti	t2,a1,0		// f64
      addiu	t0,a1,31		// f68
      movz	t0,a1,t2		// f6c
@@ -476,11 +476,11 @@ func_f64:
 	__1028:
     jr	ra		// 1028
     nop		// 102c
-.end func_f64
+.end func_f64_asm
 
-.globl func_1030
-.ent func_1030
-func_1030:
+.globl func_1030_asm
+.ent func_1030_asm
+func_1030_asm:
     addiu	sp,sp,-48		// 1030
     lui	a3,0xbfc3		// 1034
     sw	s1,20(sp)		// 1038
@@ -494,34 +494,34 @@ func_1030:
     sw	ra,40(sp)		// 1058
     sw	s5,36(sp)		// 105c
     sw	s3,28(sp)		// 1060
-    jal	func_ed8_zero_memory		// 1064
+    jal	clear_memory		// 1064
     sw	s2,24(sp)		// 1068
     move	a0,s4		// 106c
-    jal	func_ed8_zero_memory		// 1070
+    jal	clear_memory		// 1070
     li	a1,8		// 1074
     lui	a2,0xbfc3		// 1078
 	la s5, __bss + 0x1080
     li	a0,1		// 1080
     sw	a0,0(s4)		// 1084
     li	a1,8		// 1088
-    jal	func_ed8_zero_memory		// 108c
+    jal	clear_memory		// 108c
     move	a0,s5		// 1090
     lui	v1,0xbfc3		// 1094
     la	s2, __bss + 0x0020 // 1098
     move	a1,s0		// 109c
-    jal	func_eb4_copy_32_bytes		// 10a0
+    jal	copy_32_bytes		// 10a0
     move	a0,s2		// 10a4
     lui	v0,0xbfc3		// 10a8
 	la s3, __bss + 0x08a0
 	la a1, _data_3400
-    jal	func_eb4_copy_32_bytes		// 10b8
+    jal	copy_32_bytes		// 10b8
     move	a0,s3		// 10bc
     b	__1138		// 10c0
     move	a0,s2		// 10c4
 
 	__10c8:
     move	a0,s3		// 10c8
-    jal	func_dd8		// 10cc
+    jal	func_dd8_c		// 10cc
     li	a1,1		// 10d0
     subu	s0,s0,v0		// 10d4
     move	a0,s2		// 10d8
@@ -530,29 +530,29 @@ func_1030:
     move	a0,s1		// 10e4
 
 	__10e8:
-    jal	func_eb4_copy_32_bytes		// 10e8
+    jal	copy_32_bytes		// 10e8
     move	a1,s3		// 10ec
     move	a0,s1		// 10f0
-    jal	func_f64		// 10f4
+    jal	func_f64_c		// 10f4
     move	a1,s0		// 10f8
     move	a2,s1		// 10fc
     move	a0,s2		// 1100
-    jal	func_ef8_xor_64_bytes		// 1104
+    jal	xor_64_bytes		// 1104
     move	a1,s2		// 1108
     move	a0,s1		// 110c
-    jal	func_eb4_copy_32_bytes		// 1110
+    jal	copy_32_bytes		// 1110
     move	a1,s5		// 1114
     move	a0,s1		// 1118
-    jal	func_f64		// 111c
+    jal	func_f64_c		// 111c
     move	a1,s0		// 1120
     move	a0,s4		// 1124
     move	a1,s4		// 1128
-    jal	func_ef8_xor_64_bytes		// 112c
+    jal	xor_64_bytes		// 112c
     move	a2,s1		// 1130
     move	a0,s2		// 1134
 
 	__1138:
-    jal	func_dd8		// 1138
+    jal	func_dd8_c		// 1138
     li	a1,1		// 113c
     bnez	v0,__10c8		// 1140
     move	s0,v0		// 1144
@@ -567,23 +567,23 @@ func_1030:
     addiu	sp,sp,48		// 1168
 
 	__116c:
-    jal	func_f28      /* only called here and 4 lines down */		// 116c
+    jal	func_f28_c      /* only called here and 4 lines down */		// 116c
     negu	s0,s0		// 1170
     move	a0,s4		// 1174
-    jal	func_f28      /* only called here and 4 lines up */		// 1178
+    jal	func_f28_c      /* only called here and 4 lines up */		// 1178
     move	a1,s5		// 117c
     b	__10e8		// 1180
     move	a0,s1		// 1184
-.end func_1030
+.end func_1030_asm
 
-.globl func_1188
-.ent func_1188
-func_1188:
+.globl func_1188_asm
+.ent func_1188_asm
+func_1188_asm:
     addiu	sp,sp,-24		// 1188
     move	a1,zero		// 118c
     sw	s0,16(sp)		// 1190
     sw	ra,20(sp)		// 1194
-    jal	func_dd8		// 1198
+    jal	func_dd8_c		// 1198
     move	s0,a0		// 119c
     addiu	a0,v0,31		// 11a0
     slti	v1,v0,0		// 11a4
@@ -617,11 +617,11 @@ func_1188:
     lw	s0,16(sp)		// 11fc
     jr	ra		// 1200
     addiu	sp,sp,24		// 1204
-.end func_1188
+.end func_1188_asm
 
-.globl func_1208
-.ent func_1208
-func_1208:
+.globl func_1208_asm
+.ent func_1208_asm
+func_1208_asm:
     addiu	sp,sp,-40		// 1208
     move	a0,a1		// 120c
     sw	s2,24(sp)		// 1210
@@ -631,11 +631,11 @@ func_1208:
     sw	s0,16(sp)		// 1220
     move	s3,a2		// 1224
     sw	ra,32(sp)		// 1228
-    jal	func_dd8		// 122c
+    jal	func_dd8_c		// 122c
     sw	s1,20(sp)		// 1230
     addiu	s0,v0,-233		// 1234
     move	a0,s2		// 1238
-    jal	func_e58                /* only called from here */		// 123c
+    jal	func_e58_c                /* only called from here */		// 123c
     move	a1,s3		// 1240
     bltz	s0,__129c		// 1244
     lui	v0,0xbfc3		// 1248
@@ -643,20 +643,20 @@ func_1208:
     move	a0,s1		// 1250
 
 	__1254:
-    jal	func_ed8_zero_memory		// 1254
+    jal	clear_memory		// 1254
     li	a1,16		// 1258
     move	a0,s1		// 125c
-    jal	func_eb4_copy_32_bytes		// 1260
+    jal	copy_32_bytes		// 1260
     move	a1,s3		// 1264
     move	a1,s0		// 1268
-    jal	func_f64		// 126c
+    jal	func_f64_c		// 126c
     move	a0,s1		// 1270
     move	a0,s2		// 1274
     move	a1,s2		// 1278
-    jal	func_ef8_xor_64_bytes		// 127c
+    jal	xor_64_bytes		// 127c
     move	a2,s1		// 1280
     move	a0,s2		// 1284
-    jal	func_dd8		// 1288
+    jal	func_dd8_c		// 1288
     move	a1,zero		// 128c
     addiu	s0,v0,-233		// 1290
     bgez	s0,__1254		// 1294
@@ -670,9 +670,9 @@ func_1208:
     lw	s0,16(sp)		// 12ac
     jr	ra		// 12b0
     addiu	sp,sp,40		// 12b4
-.end func_1208
+.end func_1208_asm
 
-func_12b8:
+func_12b8_asm:
     addiu	sp,sp,-40		// 12b8
     lui	v1,0xbfc3		// 12bc
     sw	s4,32(sp)		// 12c0
@@ -686,18 +686,18 @@ func_12b8:
     sw	ra,36(sp)		// 12e0
     sw	s2,24(sp)		// 12e4
     sw	s1,20(sp)		// 12e8
-    jal	func_ed8_zero_memory		// 12ec
+    jal	clear_memory		// 12ec
     move	s1,a2		// 12f0
     lui	v0,0xbfc3		// 12f4
 	la s2, __bss + 0x0420
     move	a0,s2		// 12fc
-    jal	func_ed8_zero_memory		// 1300
+    jal	clear_memory		// 1300
     li	a1,16		// 1304
     move	a1,s0		// 1308
-    jal	func_eb4_copy_32_bytes		// 130c
+    jal	copy_32_bytes		// 130c
     move	a0,s4		// 1310
     move	a1,s1		// 1314
-    jal	func_eb4_copy_32_bytes		// 1318
+    jal	copy_32_bytes		// 1318
     move	a0,s2		// 131c
     li	s0,1		// 1320
     li	t3,8		// 1324
@@ -738,10 +738,10 @@ func_12b8:
     li	a2,31		// 1390
     beql	s1,a2,__13cc		// 1394
     addiu	s1,s1,1		// 1398
-    jal	func_1188        /* only called from here */		// 139c
+    jal	func_1188_c        /* only called from here */		// 139c
     move	a0,s2		// 13a0
     move	a0,s2		// 13a4
-    jal	func_dd8		// 13a8
+    jal	func_dd8_c		// 13a8
     move	a1,zero		// 13ac
     addiu	t0,v0,31		// 13b0
     slti	t1,v0,0		// 13b4
@@ -764,7 +764,7 @@ func_12b8:
     jr	ra		// 13f0
     addiu	sp,sp,40		// 13f4
 
-func_13f8_xor_32_bytes:
+func_13f8_asm:
     li	a3,7		// 13f8
 
 	__13fc:
@@ -780,9 +780,9 @@ func_13f8_xor_32_bytes:
     jr	ra		// 1420
     nop		// 1424
 
-.globl func_1428
-.ent func_1428
-func_1428:
+.globl func_1428_asm
+.ent func_1428_asm
+func_1428_asm:
     move	t0,a0		// 1428
     lw	t1,4(a1)		// 142c
     move	a3,zero		// 1430
@@ -813,11 +813,11 @@ func_1428:
     addiu	a2,a2,1		// 1484
     jr	ra		// 1488
     nop		// 148c
-.end func_1428
+.end func_1428_asm
 
-.globl func_1490
-.ent func_1490
-func_1490:
+.globl func_1490_asm
+.ent func_1490_asm
+func_1490_asm:
     addiu	sp,sp,-56		// 1490
     sw	ra,48(sp)		// 1494
     sw	s7,44(sp)		// 1498
@@ -832,91 +832,91 @@ func_1490:
     lw	a0,0(a2)		// 14bc
     move	s6,a2		// 14c0
     move	s5,a1		// 14c4
-    jal	func_ed8_zero_memory		// 14c8
+    jal	clear_memory		// 14c8
     li	a1,8		// 14cc
     lw	a0,4(s6)		// 14d0
-    jal	func_ed8_zero_memory		// 14d4
+    jal	clear_memory		// 14d4
     li	a1,8		// 14d8
     lui	t0,0xbfc3		// 14dc
 	la s2, __bss + 0x0120
     move	a0,s2		// 14e4
-    jal	func_ed8_zero_memory		// 14e8
+    jal	clear_memory		// 14e8
     li	a1,16		// 14ec
     lui	a3,0xbfc3		// 14f0
 	la s1, __bss + 0x0e20
     move	a0,s1		// 14f8
-    jal	func_ed8_zero_memory		// 14fc
+    jal	clear_memory		// 14fc
     li	a1,16		// 1500
     lui	a1,0xbfc3		// 1504
 	la s3, __bss + 0x0520
     lw	a2,4(s5)		// 150c
     lw	a1,4(s7)		// 1510
-    jal	func_13f8_xor_32_bytes		// 1514
+    jal	func_13f8_c		// 1514
     move	a0,s3		// 1518
     lui	a0,0xbfc3		// 151c
 	la s4, __bss + 0x0620
     lw	a2,0(s5)		// 1524
     lw	a1,0(s7)		// 1528
-    jal	func_13f8_xor_32_bytes		// 152c
+    jal	func_13f8_c		// 152c
     move	a0,s4		// 1530
     move	a0,s1		// 1534
-    jal	func_1030    /* called in one other place */		// 1538
+    jal	func_1030_c    /* called in one other place */		// 1538
     move	a1,s4		// 153c
     lui	v1,0xbfc3		// 1540
 	la s0, __bss + 0x0d20
     move	a0,s0		// 1548
-    jal	func_ed8_zero_memory		// 154c
+    jal	clear_memory		// 154c
     li	a1,16		// 1550
     move	a0,s0		// 1554
     move	a1,s1		// 1558
-    jal	func_12b8		// 155c
+    jal	func_12b8_c		// 155c
     move	a2,s3		// 1560
 	la s5, _data_3400
     move	a0,s0		// 156c
     move	a1,s0		// 1570
-    jal	func_1208		// 1574
+    jal	func_1208_c		// 1574
     move	a2,s5		// 1578
     la	a2,_data_34c8 // 1580
     move	a0,s3		// 1584
-    jal	func_13f8_xor_32_bytes		// 1588
+    jal	func_13f8_c		// 1588
     move	a1,s0		// 158c
     move	a0,s2		// 1590
-    jal	func_ed8_zero_memory		// 1594
+    jal	clear_memory		// 1594
     li	a1,16		// 1598
     move	a0,s2		// 159c
     move	a1,s0		// 15a0
-    jal	func_12b8		// 15a4
+    jal	func_12b8_c		// 15a4
     move	a2,s0		// 15a8
     move	a0,s2		// 15ac
     move	a1,s2		// 15b0
-    jal	func_1208		// 15b4
+    jal	func_1208_c		// 15b4
     move	a2,s5		// 15b8
     move	a0,s1		// 15bc
     move	a1,s3		// 15c0
-    jal	func_13f8_xor_32_bytes		// 15c4
+    jal	func_13f8_c		// 15c4
     move	a2,s2		// 15c8
     lw	a0,0(s6)		// 15cc
     move	a1,s1		// 15d0
-    jal	func_13f8_xor_32_bytes		// 15d4
+    jal	func_13f8_c		// 15d4
     move	a2,s4		// 15d8
     lw	a1,0(s7)		// 15dc
     lw	a2,0(s6)		// 15e0
-    jal	func_13f8_xor_32_bytes		// 15e4
+    jal	func_13f8_c		// 15e4
     move	a0,s3		// 15e8
     lw	a2,4(s7)		// 15ec
     lw	a1,0(s6)		// 15f0
-    jal	func_13f8_xor_32_bytes		// 15f4
+    jal	func_13f8_c		// 15f4
     move	a0,s4		// 15f8
     move	a0,s1		// 15fc
-    jal	func_ed8_zero_memory		// 1600
+    jal	clear_memory		// 1600
     li	a1,16		// 1604
     move	a0,s1		// 1608
     move	a1,s3		// 160c
-    jal	func_12b8		// 1610
+    jal	func_12b8_c		// 1610
     move	a2,s0		// 1614
     move	a0,s1		// 1618
     move	a1,s1		// 161c
-    jal	func_1208		// 1620
+    jal	func_1208_c		// 1620
     move	a2,s5		// 1624
     lw	a0,4(s6)		// 1628
     move	a1,s1		// 162c
@@ -930,9 +930,11 @@ func_1490:
     lw	s2,24(sp)		// 164c
     lw	s1,20(sp)		// 1650
     lw	s0,16(sp)		// 1654
-    j	func_13f8_xor_32_bytes		// 1658
+    j	func_13f8_c		// 1658
     addiu	sp,sp,56		// 165c
-.end func_1490
+.end func_1490_asm
+
+// finished
 
 .global func_1660
 .ent func_1660
@@ -950,95 +952,95 @@ func_1660:
     move	s7,a0		// 1688
     lw	a0,0(a1)		// 168c
     move	s6,a1		// 1690
-    jal	func_ed8_zero_memory		// 1694
+    jal	clear_memory		// 1694
     li	a1,8		// 1698
     lw	a0,4(s6)		// 169c
-    jal	func_ed8_zero_memory		// 16a0
+    jal	clear_memory		// 16a0
     li	a1,8		// 16a4
     lui	t1,0xbfc3		// 16a8
     //addiu	s3,t1,-25544		// 16ac
 	la s3, __bss + 0x0720
     move	a0,s3		// 16b0
-    jal	func_ed8_zero_memory		// 16b4
+    jal	clear_memory		// 16b4
     li	a1,16		// 16b8
     lui	t0,0xbfc3		// 16bc
     la	s4, __bss + 0x0fa0 // 16c0
     move	a0,s4		// 16c4
-    jal	func_ed8_zero_memory		// 16c8
+    jal	clear_memory		// 16c8
     li	a1,16		// 16cc
     lui	a3,0xbfc3		// 16d0
     la	s2, __bss + 0x0b20		// 16d4
     move	a0,s2		// 16d8
-    jal	func_ed8_zero_memory		// 16dc
+    jal	clear_memory		// 16dc
     li	a1,16		// 16e0
     lw	a1,0(s7)		// 16e4
-    jal	func_1030    /* called in one other place */		// 16e8
+    jal	func_1030_c    /* called in one other place */		// 16e8
     move	a0,s2		// 16ec
     lui	a1,0xbfc3		// 16f0
     la	s1, __bss + 0x09a0		// 16f4
     move	a0,s1		// 16f8
-    jal	func_ed8_zero_memory		// 16fc
+    jal	clear_memory		// 16fc
     li	a1,16		// 1700
     lw	a2,4(s7)		// 1704
     move	a0,s1		// 1708
-    jal	func_12b8		// 170c
+    jal	func_12b8_c		// 170c
     move	a1,s2		// 1710
 	la s5, _data_3400 /* g_crypt_key6 */
     move	a1,s1		// 171c
     move	a0,s1		// 1720
-    jal	func_1208		// 1724
+    jal	func_1208_c		// 1724
     move	a2,s5		// 1728
     lui	v1,0xbfc3		// 172c
 	la s0, __bss + 0x0220
     lw	a1,0(s7)		// 1734
     move	a0,s0		// 1738
-    jal	func_13f8_xor_32_bytes		// 173c
+    jal	func_13f8_c		// 173c
     move	a2,s1		// 1740
 	la a2, _data_34c8
     move	a0,s2		// 174c
-    jal	func_13f8_xor_32_bytes		// 1750
+    jal	func_13f8_c		// 1750
     move	a1,s0		// 1754
     move	a0,s3		// 1758
-    jal	func_ed8_zero_memory		// 175c
+    jal	clear_memory		// 175c
     li	a1,16		// 1760
     move	a0,s3		// 1764
     move	a1,s0		// 1768
-    jal	func_12b8		// 176c
+    jal	func_12b8_c		// 176c
     move	a2,s0		// 1770
     move	a0,s3		// 1774
     move	a1,s3		// 1778
-    jal	func_1208		// 177c
+    jal	func_1208_c		// 177c
     move	a2,s5		// 1780
     lw	a0,0(s6)		// 1784
     move	a2,s3		// 1788
-    jal	func_13f8_xor_32_bytes		// 178c
+    jal	func_13f8_c		// 178c
     move	a1,s2		// 1790
     move	a0,s1		// 1794
-    jal	func_ed8_zero_memory		// 1798
+    jal	clear_memory		// 1798
     li	a1,16		// 179c
 	la a2, _data_3460
     move	a1,s0		// 17a4
     move	a0,s2		// 17a8
-    jal	func_13f8_xor_32_bytes		// 17ac
+    jal	func_13f8_c		// 17ac
 	nop
     lw	a2,0(s6)		// 17b4
     move	a0,s1		// 17b8
-    jal	func_12b8		// 17bc
+    jal	func_12b8_c		// 17bc
     move	a1,s2		// 17c0
     move	a2,s5		// 17c4
     move	a0,s1		// 17c8
-    jal	func_1208		// 17cc
+    jal	func_1208_c		// 17cc
     move	a1,s1		// 17d0
     move	a0,s4		// 17d4
-    jal	func_ed8_zero_memory		// 17d8
+    jal	clear_memory		// 17d8
     li	a1,16		// 17dc
     lw	a1,0(s7)		// 17e0
     move	a0,s4		// 17e4
-    jal	func_12b8		// 17e8
+    jal	func_12b8_c		// 17e8
     move	a2,a1		// 17ec
     move	a0,s4		// 17f0
     move	a1,s4		// 17f4
-    jal	func_1208		// 17f8
+    jal	func_1208_c		// 17f8
     move	a2,s5		// 17fc
     lw	a0,4(s6)		// 1800
     move	a1,s1		// 1804
@@ -1052,7 +1054,7 @@ func_1660:
     lw	s2,24(sp)		// 1824
     lw	s1,20(sp)		// 1828
     lw	s0,16(sp)		// 182c
-    j	func_13f8_xor_32_bytes		// 1830
+    j	func_13f8_c		// 1830
     addiu	sp,sp,56		// 1834
 .end func_1660
 
@@ -1078,19 +1080,19 @@ func_1838:
     move	s3,a1		// 1874
     li	a1,8		// 1878
     sw	t3,16(sp)		// 187c
-    jal	func_ed8_zero_memory		// 1880
+    jal	clear_memory		// 1880
     sw	t1,20(sp)		// 1884
     lw	a0,4(s1)		// 1888
-    jal	func_ed8_zero_memory		// 188c
+    jal	clear_memory		// 188c
     li	a1,8		// 1890
     lw	a0,16(sp)		// 1894
-    jal	func_ed8_zero_memory		// 1898
+    jal	clear_memory		// 1898
     li	a1,8		// 189c
     lw	a0,20(sp)		// 18a0
-    jal	func_ed8_zero_memory		// 18a4
+    jal	clear_memory		// 18a4
     li	a1,8		// 18a8
     move	a0,s4		// 18ac
-    jal	func_dd8		// 18b0
+    jal	func_dd8_c		// 18b0
     li	a1,1		// 18b4
     slti	a1,v0,0		// 18b8
     addiu	a0,v0,31		// 18bc
@@ -1104,14 +1106,14 @@ func_1838:
     sll	v1,v0,0x5		// 18dc
     subu	s0,a3,v1		// 18e0
     lw	s2,0(a2)		// 18e4
-    jal	func_eb4_copy_32_bytes		// 18e8
+    jal	copy_32_bytes		// 18e8
     addiu	s5,v0,-1		// 18ec
     lw	a0,20(sp)		// 18f0
     lw	a1,4(s3)		// 18f4
     addiu	s0,s0,-1		// 18f8
 
 	__18fc:
-    jal	func_eb4_copy_32_bytes		// 18fc
+    jal	copy_32_bytes		// 18fc
     nop		// 1900
 
 	__1904:
@@ -1120,10 +1122,10 @@ func_1838:
     jal	func_1660    /* only called here and below */		// 190c
     move	a1,s1		// 1910
     lw	a0,16(sp)		// 1914
-    jal	func_eb4_copy_32_bytes		// 1918
+    jal	copy_32_bytes		// 1918
     lw	a1,0(s1)		// 191c
     lw	a0,20(sp)		// 1920
-    jal	func_eb4_copy_32_bytes		// 1924
+    jal	copy_32_bytes		// 1924
     lw	a1,4(s1)		// 1928
     li	t7,1		// 192c
     sllv	t6,t7,s0		// 1930
@@ -1133,10 +1135,10 @@ func_1838:
     move	a2,s1		// 1940
     beqz	t5,__1904		// 1944
     addiu	s0,s0,-1		// 1948
-    jal	func_1490   /* only called here and below */		// 194c
+    jal	func_1490_c   /* only called here and below */		// 194c
     nop		// 1950
     lw	a0,16(sp)		// 1954
-    jal	func_eb4_copy_32_bytes		// 1958
+    jal	copy_32_bytes		// 1958
     lw	a1,0(s1)		// 195c
     lw	a0,20(sp)		// 1960
     b	__18fc		// 1964
@@ -1163,10 +1165,10 @@ func_1838:
     jal	func_1660    /* only called here and above */		// 1990
     move	a1,s1		// 1994
     lw	a0,16(sp)		// 1998
-    jal	func_eb4_copy_32_bytes		// 199c
+    jal	copy_32_bytes		// 199c
     lw	a1,0(s1)		// 19a0
     lw	a0,20(sp)		// 19a4
-    jal	func_eb4_copy_32_bytes		// 19a8
+    jal	copy_32_bytes		// 19a8
     lw	a1,4(s1)		// 19ac
     li	ra,1		// 19b0
     sllv	t9,ra,s0		// 19b4
@@ -1176,13 +1178,13 @@ func_1838:
     move	a2,s1		// 19c4
     beqz	t8,__1984		// 19c8
     addiu	s0,s0,-1		// 19cc
-    jal	func_1490   /* only called here and above */		// 19d0
+    jal	func_1490_c   /* only called here and above */		// 19d0
     nop		// 19d4
     lw	a0,16(sp)		// 19d8
-    jal	func_eb4_copy_32_bytes		// 19dc
+    jal	copy_32_bytes		// 19dc
     lw	a1,0(s1)		// 19e0
     lw	a0,20(sp)		// 19e4
-    jal	func_eb4_copy_32_bytes		// 19e8
+    jal	copy_32_bytes		// 19e8
     lw	a1,4(s1)		// 19ec
     bgez	s0,__1990		// 19f0
     addiu	a0,sp,16		// 19f4
@@ -1194,10 +1196,10 @@ func_1838:
 
 	__1a04:
     lw	a0,0(s1)		// 1a04
-    jal	func_eb4_copy_32_bytes		// 1a08
+    jal	copy_32_bytes		// 1a08
     lw	a1,16(sp)		// 1a0c
     lw	a0,4(s1)		// 1a10
-    jal	func_eb4_copy_32_bytes		// 1a14
+    jal	copy_32_bytes		// 1a14
     lw	a1,20(sp)		// 1a18
     lw	ra,48(sp)		// 1a1c
     lw	s5,44(sp)		// 1a20
@@ -1221,11 +1223,11 @@ func_1a44:
     move	s0,a0		// 1a54
     lw	a0,0(a0)		// 1a58
 	la a1, _data_3440
-    jal	func_eb4_copy_32_bytes		// 1a5c
+    jal	copy_32_bytes		// 1a5c
 	nop
     lw	a0,4(s0)		// 1a64
 	la a1, _data_3420
-    jal	func_eb4_copy_32_bytes		// 1a6c
+    jal	copy_32_bytes		// 1a6c
 	nop
     lw	ra,20(sp)		// 1a74
     lw	s0,16(sp)		// 1a78
@@ -1252,10 +1254,10 @@ func_1a88:
     sw	v0,20(sp)		// 1ab8
     sw	v1,16(sp)		// 1abc
     sw	s0,24(sp)		// 1ac0
-    jal	func_ed8_zero_memory		// 1ac4
+    jal	clear_memory		// 1ac4
     move	s0,a2		// 1ac8
     lw	a0,20(sp)		// 1acc
-    jal	func_ed8_zero_memory		// 1ad0
+    jal	clear_memory		// 1ad0
     li	a1,8		// 1ad4
     move	a0,s0		// 1ad8
     move	a1,s1		// 1adc
@@ -1265,7 +1267,7 @@ func_1a88:
     move	a0,s2		// 1aec
     bnez	v0,__1b00		// 1af0
     addiu	a1,sp,16		// 1af4
-    jal	func_1428 /* only called from here */		// 1af8
+    jal	func_1428_c /* only called from here */		// 1af8
     nop		// 1afc
 
 	__1b00:
@@ -1384,7 +1386,7 @@ func_1c30:
     move	a3,s0		// 1c74
     addiu	a0,sp,24		// 1c78
     li	a1,20		// 1c7c
-    jal	func_d78      /* only called from here. nb is effectively func_d2c */		// 1c80
+    jal	func_d78_c      /* only called from here. nb is effectively func_d2c */		// 1c80
     sw	s2,16(sp)		// 1c84
     lw	ra,60(sp)		// 1c88
     lw	s2,56(sp)		// 1c8c
@@ -1702,7 +1704,7 @@ func_1db4:
     move	a1,zero		// 20d4
     li	a3,361		// 20d8
     addiu	s1,sp,132		// 20dc
-    jal	func_d80      /* only called from here */		// 20e0
+    jal	func_d80_c      /* only called from here */		// 20e0
     sw	s8,16(sp)		// 20e4
     move	a1,s0		// 20e8
     move	a0,s1		// 20ec
@@ -1788,7 +1790,7 @@ func_1db4:
     move	a0,s3		// 2234
     li	a1,16		// 2238
     li	a3,492		// 223c
-    jal	func_d2c		// 2240
+    jal	func_d2c_c		// 2240
     sw	s8,16(sp)		// 2244
     move	a0,s6		// 2248
     addiu	a1,sp,228		// 224c
@@ -2295,7 +2297,7 @@ _data_34c8:
 .byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   /* 34c0 */
 .byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  /* 35c8 */
 
-.bss
+//.bss
 
-.lcomm __bss 5440
+//.lcomm __bss 5440
 

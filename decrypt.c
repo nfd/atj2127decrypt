@@ -261,13 +261,14 @@ int dump_firmware(char *filename_in)
 
 	/* Create output directory */
 	if(access(output_dir, W_OK) != -1) {
-		printf("Output directory %s already exists. Exiting without doing anything\n", output_dir);
-		return -1;
-	}
-
-	if(mkdir(output_dir, 0777) != 0) {
-		perror("mkdir");
-		return -1;
+		//printf("Output directory %s already exists. Exiting without doing anything\n", output_dir);
+		//return -1;
+		printf("Output directory %s exists and its contents will be overwritten.\n", output_dir);
+	} else {
+		if(mkdir(output_dir, 0777) != 0) {
+			perror("mkdir");
+			return -1;
+		}
 	}
 
 	fd_in = open(filename_in, O_RDONLY);
