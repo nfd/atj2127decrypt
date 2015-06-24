@@ -90,6 +90,56 @@ uint8_t data_3400[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00,
 };
 
+// data + 420
+uint8_t data_3420[] = {
+	0xa3, 0xe6, 0xfa, 0x56, 0x10, 0xc1, 0xe0, 0x56,
+	0x9b, 0xeb, 0x8a, 0xf1, 0x9b, 0xcd, 0xa8, 0x27,
+	0xc4, 0x67, 0x5a, 0x55, 0x0f, 0xf7, 0xb7, 0x19,
+	0xe8, 0xec, 0x7d, 0x53, 0xdb, 0x01, 0x00, 0x00 /* 3440 */
+};
+
+uint8_t data_3440[] = {
+	0x26, 0x61, 0xad, 0xef, 0x6e, 0x9d, 0x4c, 0x0a,
+	0xf5, 0x6b, 0xc2, 0x19, 0xa4, 0x63, 0x95, 0x14,
+	0xf4, 0x2f, 0xf2, 0x29, 0xf1, 0x1a, 0x73, 0x7e,
+	0x3a, 0x85, 0xba, 0x32, 0x72, 0x01, 0x00, 0x00  /* 3460 */
+};
+
+// aka _data_3460 or __data + 460
+uint8_t data_3460[] = {
+	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00 /* 3484 */
+};
+
+
+// aka _data_3484 or __data + 484
+uint8_t data_3484[] = {
+	0x20, 0xf9, 0xd7, 0x56, 0x30, 0x24, 0x55, 0xa9,
+	0x7a, 0xd7, 0x25, 0xe5, 0xed, 0xf8, 0xb4, 0x36,
+	0x41, 0xc5, 0x51, 0xaf
+};
+
+uint8_t firmware_signature_3498[] = {
+	0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+	0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x75   /* "3DUfw... */ /* 34a8 */
+};
+
+uint8_t signature_34b0[] = {
+	0x3f, 0xad, 0xf8, 0xb0, 0x2e, 0xaf, 0x67, 0x49,
+	0xb9, 0x85, 0x5f, 0x63, 0x4e, 0x5e, 0x8e, 0x2e
+};
+
+uint8_t signature_34ac[] = {
+	0x08, 0x08, 0x00, 0x00
+};
+
+uint8_t signature_34a8[] = {
+	0x08, 0x00, 0x00, 0x00
+};
+
 void func_1b1c_c(uint32_t a0, uint8_t *a1, int length, uint32_t a3);
 
 /* 
@@ -589,7 +639,7 @@ void func_1030_c(uint32_t a0, uint32_t a1)
 	copy_32_bytes((void *)a0, (void *)a1);
 	a0 = s1;     // 10f0 move a0,s1
 	a1 = s0;     // 10f8 move a1,s0
-	func_f64_c(a0, a1);     // 10f4 jal func_f64
+	func_f64_c(a0, a1);
 	a2 = s1;     // 10fc move a2,s1
 	a0 = s2;     // 1100 move a0,s2
 	a1 = s2;     // 1108 move a1,s2
@@ -599,7 +649,7 @@ void func_1030_c(uint32_t a0, uint32_t a1)
 	copy_32_bytes((void *)a0, (void *)a1);
 	a0 = s1;     // 1118 move a0,s1
 	a1 = s0;     // 1120 move a1,s0
-	func_f64_c(a0, a1);     // 111c jal func_f64
+	func_f64_c(a0, a1);
 	a0 = s4;     // 1124 move a0,s4
 	a1 = s4;     // 1128 move a1,s4
 	a2 = s1;     // 1130 move a2,s1
@@ -608,7 +658,7 @@ void func_1030_c(uint32_t a0, uint32_t a1)
 
 	__1138:
 	a1 = 1;     // 113c li a1,1
-	v0 = func_dd8_c(a0, a1);     // 1138 jal func_dd8
+	v0 = func_dd8_c(a0, a1);
 	if(v0 != 0) {
 		s0 = v0;     // 1144 move s0,v0
 		goto __10c8;
@@ -988,6 +1038,328 @@ void func_1490_c(uint32_t a0, uint32_t a1, uint32_t a2)
 	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
 }
 
+void func_1660_c(uint32_t a0, uint32_t a1)
+{
+	uint32_t a2, s0, s1, s2, s3, s4, s5, s6, s7;
+
+	s7 = a0;     // 1688 move s7,a0
+	a0 = *((uint32_t *)(a1 + 0));     // 168c lw a0,0(a1)
+	s6 = a1;     // 1690 move s6,a1
+	a1 = 8;     // 1698 li a1,8
+	clear_memory((void *)a0, a1);
+	a0 = *((uint32_t *)(s6 + 4));     // 169c lw a0,4(s6)
+	a1 = 8;     // 16a4 li a1,8
+	clear_memory((void *)a0, a1);
+	s3 = (uint32_t)__bss + 0x720;     // 16ac la s3,__bss + 0x720
+	a0 = s3;     // 16b0 move a0,s3
+	a1 = 16;     // 16b8 li a1,16
+	clear_memory((void *)a0, a1);
+	s4 = (uint32_t)__bss + 0xfa0;     // 16c0 la s4,__bss + 0xfa0
+	a0 = s4;     // 16c4 move a0,s4
+	a1 = 16;     // 16cc li a1,16
+	clear_memory((void *)a0, a1);
+	s2 = (uint32_t)__bss + 0xb20;     // 16d4 la s2,__bss + 0xb20
+	a0 = s2;     // 16d8 move a0,s2
+	a1 = 16;     // 16e0 li a1,16
+	clear_memory((void *)a0, a1);
+	a1 = *((uint32_t *)(s7 + 0));     // 16e4 lw a1,0(s7)
+	a0 = s2;     // 16ec move a0,s2
+	func_1030_c(a0, a1);
+	a1 = (0xbfc3) << 16;     // 16f0 lui a1,0xbfc3
+	s1 = (uint32_t)__bss + 0x9a0;     // 16f4 la s1,__bss + 0x9a0
+	a0 = s1;     // 16f8 move a0,s1
+	a1 = 16;     // 1700 li a1,16
+	clear_memory((void *)a0, a1);
+	a2 = *((uint32_t *)(s7 + 4));     // 1704 lw a2,4(s7)
+	a0 = s1;     // 1708 move a0,s1
+	a1 = s2;     // 1710 move a1,s2
+	func_12b8_c(a0, a1, a2);
+	a0 = (0xbfc3) << 16;     // 1714 lui a0,0xbfc3
+	s5 = (uint32_t)data_3400;     // 1718 la s5,__data + 0x400
+	a1 = s1;     // 171c move a1,s1
+	a0 = s1;     // 1720 move a0,s1
+	a2 = s5;     // 1728 move a2,s5
+	func_1208_c(a0, a1, a2);
+	s0 = (uint32_t)__bss + 0x220;     // 1730 la s0,__bss + 0x220
+	a1 = *((uint32_t *)(s7 + 0));     // 1734 lw a1,0(s7)
+	a0 = s0;     // 1738 move a0,s0
+	a2 = s1;     // 1740 move a2,s1
+	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
+	a2 = (uint32_t)__bss + 0x0;     // 1748 la a2,__bss + 0x0
+	a0 = s2;     // 174c move a0,s2
+	a1 = s0;     // 1754 move a1,s0
+	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
+	a0 = s3;     // 1758 move a0,s3
+	a1 = 16;     // 1760 li a1,16
+	clear_memory((void *)a0, a1);
+	a0 = s3;     // 1764 move a0,s3
+	a1 = s0;     // 1768 move a1,s0
+	a2 = s0;     // 1770 move a2,s0
+	func_12b8_c(a0, a1, a2);
+	a0 = s3;     // 1774 move a0,s3
+	a1 = s3;     // 1778 move a1,s3
+	a2 = s5;     // 1780 move a2,s5
+	func_1208_c(a0, a1, a2);
+	a0 = *((uint32_t *)(s6 + 0));     // 1784 lw a0,0(s6)
+	a2 = s3;     // 1788 move a2,s3
+	a1 = s2;     // 1790 move a1,s2
+	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
+	a0 = s1;     // 1794 move a0,s1
+	a1 = 16;     // 179c li a1,16
+	clear_memory((void *)a0, a1);
+	a2 = (0xbfc3) << 16;     // 17a0 lui a2,0xbfc3
+	a1 = s0;     // 17a4 move a1,s0
+	a0 = s2;     // 17a8 move a0,s2
+	a2 = (uint32_t)data_3460;     // 17ac la a2,__data + 0x460
+	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
+	a2 = *((uint32_t *)(s6 + 0));     // 17b4 lw a2,0(s6)
+	a0 = s1;     // 17b8 move a0,s1
+	a1 = s2;     // 17c0 move a1,s2
+	func_12b8_c(a0, a1, a2);
+	a2 = s5;     // 17c4 move a2,s5
+	a0 = s1;     // 17c8 move a0,s1
+	a1 = s1;     // 17d0 move a1,s1
+	func_1208_c(a0, a1, a2);
+	a0 = s4;     // 17d4 move a0,s4
+	a1 = 16;     // 17dc li a1,16
+	clear_memory((void *)a0, a1);
+	a1 = *((uint32_t *)(s7 + 0));     // 17e0 lw a1,0(s7)
+	a0 = s4;     // 17e4 move a0,s4
+	a2 = a1;     // 17ec move a2,a1
+	func_12b8_c(a0, a1, a2);
+	a0 = s4;     // 17f0 move a0,s4
+	a1 = s4;     // 17f4 move a1,s4
+	a2 = s5;     // 17fc move a2,s5
+	func_1208_c(a0, a1, a2);
+	a0 = *((uint32_t *)(s6 + 4));     // 1800 lw a0,4(s6)
+	a1 = s1;     // 1804 move a1,s1
+	a2 = s4;     // 1808 move a2,s4
+	func_13f8_c((void *)a0, (void *)a1, (void *)a2);
+}
+
+int func_1838_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t a3, ra, s0, s1, s2, s3, s4, s5, sp, t0, t1, t3, t5, t6, t7, t8, t9, v0, v1;
+	uint32_t stack[14];
+	sp = (uint32_t)stack;
+
+	s4 = a0;     // 1860 move s4,a0
+	a0 = *((uint32_t *)(a2 + 0));     // 1864 lw a0,0(a2)
+	s1 = a2;     // 1868 move s1,a2
+	t3 = (uint32_t)__bss + 0x820;     // 186c la t3,__bss + 0x820
+	t1 = (uint32_t)__bss + 0xaa0;     // 1870 la t1,__bss + 0xaa0
+	s3 = a1;     // 1874 move s3,a1
+	a1 = 8;     // 1878 li a1,8
+	*((uint32_t *)(sp + 16)) = t3;     // 187c sw t3,16(sp)
+	*((uint32_t *)(sp + 20)) = t1;     // 1884 sw t1,20(sp)
+	clear_memory((void *)a0, a1);
+	a0 = *((uint32_t *)(s1 + 4));     // 1888 lw a0,4(s1)
+	a1 = 8;     // 1890 li a1,8
+	clear_memory((void *)a0, a1);
+	a0 = *((uint32_t *)(sp + 16));     // 1894 lw a0,16(sp)
+	a1 = 8;     // 189c li a1,8
+	clear_memory((void *)a0, a1);
+	a0 = *((uint32_t *)(sp + 20));     // 18a0 lw a0,20(sp)
+	a1 = 8;     // 18a8 li a1,8
+	clear_memory((void *)a0, a1);
+	a0 = s4;     // 18ac move a0,s4
+	a1 = 1;     // 18b4 li a1,1
+	v0 = func_dd8_c(a0, a1);
+	a1 = (((int32_t)v0) < 0);     // 18b8 slti a1,v0,0
+	a0 = v0 + 31;     // 18bc addiu a0,v0,31
+	if(a1 == 0) {
+		a0 = v0;
+	};     // 18c0 movz a0,v0,a1
+	a3 = v0;     // 18c4 move a3,v0
+	v0 = a0 >> 0x5;     // 18c8 sra v0,a0,0x5
+	t0 = v0 << 0x2;     // 18cc sll t0,v0,0x2
+	a0 = *((uint32_t *)(sp + 16));     // 18d0 lw a0,16(sp)
+	a1 = *((uint32_t *)(s3 + 0));     // 18d4 lw a1,0(s3)
+	a2 = t0 + s4;     // 18d8 addu a2,t0,s4
+	v1 = v0 << 0x5;     // 18dc sll v1,v0,0x5
+	s0 = a3 - v1;     // 18e0 subu s0,a3,v1
+	s2 = *((uint32_t *)(a2 + 0));     // 18e4 lw s2,0(a2)
+	s5 = v0 + -1;     // 18ec addiu s5,v0,-1
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = *((uint32_t *)(sp + 20));     // 18f0 lw a0,20(sp)
+	a1 = *((uint32_t *)(s3 + 4));     // 18f4 lw a1,4(s3)
+	s0 = s0 + -1;     // 18f8 addiu s0,s0,-1
+
+	__18fc:
+	copy_32_bytes((void *)a0, (void *)a1);
+
+	__1904:
+	if(((s0 & (1 << 31)) != 0)) {
+		a0 = sp + 16;     // 1908 addiu a0,sp,16
+		goto __196c;
+	} else {
+		a0 = sp + 16;     // 1908 addiu a0,sp,16
+	};     // 1904 bltz s0,6508
+
+	a1 = s1;     // 1910 move a1,s1
+	func_1660_c(a0, a1);
+	a0 = *((uint32_t *)(sp + 16));     // 1914 lw a0,16(sp)
+	a1 = *((uint32_t *)(s1 + 0));     // 191c lw a1,0(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = *((uint32_t *)(sp + 20));     // 1920 lw a0,20(sp)
+	a1 = *((uint32_t *)(s1 + 4));     // 1928 lw a1,4(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	t7 = 1;     // 192c li t7,1
+	t6 = t7 << s0;     // 1930 sllv t6,t7,s0
+	t5 = t6 & s2;     // 1934 and t5,t6,s2
+	a0 = sp + 16;     // 1938 addiu a0,sp,16
+	a1 = s3;     // 193c move a1,s3
+	a2 = s1;     // 1940 move a2,s1
+	if(t5 == 0) {
+		s0 = s0 + -1;     // 1948 addiu s0,s0,-1
+		goto __1904;
+	} else {
+		s0 = s0 + -1;     // 1948 addiu s0,s0,-1
+	};     // 1944 beqz t5,6404
+
+	func_1490_c(a0, a1, a2);
+	a0 = *((uint32_t *)(sp + 16));     // 1954 lw a0,16(sp)
+	a1 = *((uint32_t *)(s1 + 0));     // 195c lw a1,0(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = *((uint32_t *)(sp + 20));     // 1960 lw a0,20(sp)
+	a1 = *((uint32_t *)(s1 + 4));     // 1968 lw a1,4(s1)
+	goto __18fc;     // 1964 b 6396
+
+	__196c:
+	if(((s5 & (1 << 31)) != 0)) {
+		s2 = s5 << 0x2;     // 1970 sll s2,s5,0x2
+		goto __1a04;
+	} else {
+		s2 = s5 << 0x2;     // 1970 sll s2,s5,0x2
+	};     // 196c bltz s5,6660
+
+	s4 = s2 + s4;     // 1974 addu s4,s2,s4
+
+	__1978:
+	s2 = *((uint32_t *)(s4 + 0));     // 1978 lw s2,0(s4)
+	s0 = 31;     // 1980 li s0,31
+	goto __198c;     // 197c b 6540
+
+	__1984:
+	if(((s0 & (1 << 31)) != 0)) {
+		s5 = s5 + -1;     // 1988 addiu s5,s5,-1
+		goto __19fc;
+	} ;     // 1984 bltzl s0,6652
+
+	__198c:
+	a0 = sp + 16;     // 198c addiu a0,sp,16
+
+	__1990:
+	a1 = s1;     // 1994 move a1,s1
+	func_1660_c(a0, a1);
+	a0 = *((uint32_t *)(sp + 16));     // 1998 lw a0,16(sp)
+	a1 = *((uint32_t *)(s1 + 0));     // 19a0 lw a1,0(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = *((uint32_t *)(sp + 20));     // 19a4 lw a0,20(sp)
+	a1 = *((uint32_t *)(s1 + 4));     // 19ac lw a1,4(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	ra = 1;     // 19b0 li ra,1
+	t9 = ra << s0;     // 19b4 sllv t9,ra,s0
+	t8 = t9 & s2;     // 19b8 and t8,t9,s2
+	a0 = sp + 16;     // 19bc addiu a0,sp,16
+	a1 = s3;     // 19c0 move a1,s3
+	a2 = s1;     // 19c4 move a2,s1
+	if(t8 == 0) {
+		s0 = s0 + -1;     // 19cc addiu s0,s0,-1
+		goto __1984;
+	} else {
+		s0 = s0 + -1;     // 19cc addiu s0,s0,-1
+	};     // 19c8 beqz t8,6532
+
+	func_1490_c(a0, a1, a2);
+	a0 = *((uint32_t *)(sp + 16));     // 19d8 lw a0,16(sp)
+	a1 = *((uint32_t *)(s1 + 0));     // 19e0 lw a1,0(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = *((uint32_t *)(sp + 20));     // 19e4 lw a0,20(sp)
+	a1 = *((uint32_t *)(s1 + 4));     // 19ec lw a1,4(s1)
+	copy_32_bytes((void *)a0, (void *)a1);
+	if((s0 & (1 << 31)) == 0) {
+		a0 = sp + 16;     // 19f4 addiu a0,sp,16
+		goto __1990;
+	} else {
+		a0 = sp + 16;     // 19f4 addiu a0,sp,16
+	};     // 19f0 bgez s0,6544
+
+	s5 = s5 + -1;     // 19f8 addiu s5,s5,-1
+
+	__19fc:
+	if((s5 & (1 << 31)) == 0) {
+		s4 = s4 + -4;     // 1a00 addiu s4,s4,-4
+		goto __1978;
+	} else {
+		s4 = s4 + -4;     // 1a00 addiu s4,s4,-4
+	};     // 19fc bgez s5,6520
+
+	__1a04:
+	a0 = *((uint32_t *)(s1 + 0));     // 1a04 lw a0,0(s1)
+	a1 = *((uint32_t *)(sp + 16));     // 1a0c lw a1,16(sp)
+	copy_32_bytes((void *)a0, (void *)a1);
+	a0 = *((uint32_t *)(s1 + 4));     // 1a10 lw a0,4(s1)
+	a1 = *((uint32_t *)(sp + 20));     // 1a18 lw a1,20(sp)
+	copy_32_bytes((void *)a0, (void *)a1);
+	v0 = 0;
+	return v0;     // 1a3c jr ra
+}
+
+int func_1a44_c(uint32_t a0)
+{
+	uint32_t a1, s0, v0;
+
+	s0 = a0;     // 1a54 move s0,a0
+	a0 = *((uint32_t *)(a0 + 0));     // 1a58 lw a0,0(a0)
+	a1 = (uint32_t)data_3440;     // 1a5c la a1,__data + 0x440
+	copy_32_bytes((void *)a0, (void *)a1);     // 1a60 jal func_eb4
+	a0 = *((uint32_t *)(s0 + 4));     // 1a64 lw a0,4(s0)
+	a1 = (uint32_t)data_3420;     // 1a6c la a1,__data + 0x420
+	copy_32_bytes((void *)a0, (void *)a1);     // 1a60 jal func_eb4
+	v0 = 0;     // 1a7c move v0,zero
+	return v0;     // 1a80 jr ra
+}
+
+int func_1a88_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t s0, s1, s2, sp, v0, v1;
+	uint32_t stack[10];
+	sp = (uint32_t)stack;
+
+	v1 = (uint32_t)__bss + 0xf20;     // 1a90 la v1,__bss + 0xf20
+	v0 = (uint32_t)__bss + 0x11a0;     // 1a98 la v0,__bss + 0x11a0
+	s2 = a0;     // 1aa4 move s2,a0
+	s1 = a1;     // 1aa8 move s1,a1
+	a0 = v1;     // 1aac move a0,v1
+	a1 = 8;     // 1ab0 li a1,8
+	*((uint32_t *)(sp + 20)) = v0;     // 1ab8 sw v0,20(sp)
+	*((uint32_t *)(sp + 16)) = v1;     // 1abc sw v1,16(sp)
+	s0 = a2;     // 1ac8 move s0,a2
+	clear_memory((void *)a0, a1);
+	a0 = *((uint32_t *)(sp + 20));     // 1acc lw a0,20(sp)
+	a1 = 8;     // 1ad4 li a1,8
+	clear_memory((void *)a0, a1);
+	a0 = s0;     // 1ad8 move a0,s0
+	a1 = s1;     // 1adc move a1,s1
+	a2 = sp + 16;     // 1ae4 addiu a2,sp,16
+	v0 = func_1838_c(a0, a1, a2);
+	s0 = v0;     // 1ae8 move s0,v0
+	a0 = s2;     // 1aec move a0,s2
+	if(v0 != 0) {
+		a1 = sp + 16;     // 1af4 addiu a1,sp,16
+		goto __1b00;
+	} else {
+		a1 = sp + 16;     // 1af4 addiu a1,sp,16
+	};     // 1af0 bnez v0,6912
+
+	func_1428_c(a0, a1);
+
+	__1b00:
+	v0 = s0;     // 1b00 move v0,s0
+	return v0;     // 1b14 jr ra
+}
+
 void func_1b1c_c(uint32_t a0, uint8_t *a1, int length, uint32_t a3)
 {
 	uint32_t a2, s1, v0, v1;
@@ -1003,6 +1375,630 @@ void func_1b1c_c(uint32_t a0, uint8_t *a1, int length, uint32_t a3)
 	a0 = *((uint8_t*)(0 + a3));     // 1b68 lbu a0,0(s0)
 	*((uint8_t *)(a3 + 0)) = (v0 & 0xff);     // 1b70 sb v0,0(s0)
 	*((uint8_t *)(v1 + 0)) = (a0 & 0xff);     // 1b84 sb a0,0(v1)
+}
+
+void func_1b88_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t v0, a3, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v1, zero;
+	zero = 0;
+
+	t4 = (uint32_t)data_3484;     // 1b8c la t4,__data + 0x484
+	t5 = a1;     // 1b90 move t5,a1
+	t3 = a0;     // 1b94 move t3,a0
+	t1 = zero;     // 1b98 move t1,zero
+	t0 = a1;     // 1b9c move t0,a1
+	t2 = t4;     // 1ba0 move t2,t4
+	a3 = a2;     // 1ba4 move a3,a2
+
+	__1ba8:
+	a0 = t3 + t1;     // 1ba8 addu a0,t3,t1
+	t9 = *((uint8_t*)(0 + t2));     // 1bac lbu t9,0(t2)
+	t8 = *((uint8_t*)(0 + a0));     // 1bb0 lbu t8,0(a0)
+	t1 = t1 + 1;     // 1bb4 addiu t1,t1,1
+	t7 = t8 ^ t9;     // 1bb8 xor t7,t8,t9
+	*((uint8_t *)(a3 + 0)) = (t7 & 0xff);     // 1bbc sb t7,0(a3)
+	v1 = *((uint8_t*)(0 + t0));     // 1bc0 lbu v1,0(t0)
+	a1 = (((int32_t)t1) < 16);     // 1bc4 slti a1,t1,16
+	t6 = t7 ^ v1;     // 1bc8 xor t6,t7,v1
+	*((uint8_t *)(a0 + 0)) = (t6 & 0xff);     // 1bcc sb t6,0(a0)
+	a3 = a3 + 1;     // 1bd0 addiu a3,a3,1
+	t2 = t2 + 1;     // 1bd4 addiu t2,t2,1
+	if(a1 != 0) {
+		t0 = t0 + 1;     // 1bdc addiu t0,t0,1
+		goto __1ba8;
+	} else {
+		t0 = t0 + 1;     // 1bdc addiu t0,t0,1
+	};     // 1bd8 bnez a1,7080
+
+	a3 = t5 + 16;     // 1be0 addiu a3,t5,16
+	t1 = t4 + 16;     // 1be4 addiu t1,t4,16
+	a2 = a2 + 16;     // 1be8 addiu a2,a2,16
+	t0 = 16;     // 1bec li t0,16
+
+	__1bf0:
+	t4 = t3 + t0;     // 1bf0 addu t4,t3,t0
+	t6 = *((uint8_t*)(0 + t1));     // 1bf4 lbu t6,0(t1)
+	a0 = *((uint8_t*)(0 + t4));     // 1bf8 lbu a0,0(t4)
+	t0 = t0 + 1;     // 1bfc addiu t0,t0,1
+	v0 = a0 ^ t6;     // 1c00 xor v0,a0,t6
+	*((uint8_t *)(a2 + 0)) = (v0 & 0xff);     // 1c04 sb v0,0(a2)
+	a1 = *((uint8_t*)(-16 + a3));     // 1c08 lbu a1,-16(a3)
+	t2 = (((int32_t)t0) < 20);     // 1c0c slti t2,t0,20
+	t5 = v0 ^ a1;     // 1c10 xor t5,v0,a1
+	*((uint8_t *)(t4 + 0)) = (t5 & 0xff);     // 1c14 sb t5,0(t4)
+	a2 = a2 + 1;     // 1c18 addiu a2,a2,1
+	t1 = t1 + 1;     // 1c1c addiu t1,t1,1
+	if(t2 != 0) {
+		a3 = a3 + 1;     // 1c24 addiu a3,a3,1
+		goto __1bf0;
+	} else {
+		a3 = a3 + 1;     // 1c24 addiu a3,a3,1
+	};     // 1c20 bnez t2,7152
+
+	return;     // 1c28 jr ra
+}
+
+void func_1c30_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
+{
+	uint32_t s0, s1, s2, sp, zero;
+	zero = 0;
+	uint32_t stack[16];
+	sp = (uint32_t)stack;
+
+	s1 = a0;     // 1c3c move s1,a0
+	s0 = a2;     // 1c40 move s0,a2
+	a0 = a0 + a2;     // 1c44 addu a0,a0,a2
+	a2 = sp + 24;     // 1c48 addiu a2,sp,24
+	*((uint32_t *)(sp + 24)) = zero;     // 1c54 sw zero,24(sp)
+	s2 = a3;     // 1c58 move s2,a3
+	*((uint32_t *)(sp + 28)) = zero;     // 1c5c sw zero,28(sp)
+	*((uint32_t *)(sp + 32)) = zero;     // 1c60 sw zero,32(sp)
+	*((uint32_t *)(sp + 36)) = zero;     // 1c64 sw zero,36(sp)
+	*((uint32_t *)(sp + 40)) = zero;     // 1c6c sw zero,40(sp)
+	func_1b88_c(a0, a1, a2);
+	a2 = s1;     // 1c70 move a2,s1
+	a3 = s0;     // 1c74 move a3,s0
+	a0 = sp + 24;     // 1c78 addiu a0,sp,24
+	a1 = 20;     // 1c7c li a1,20
+	func_d78_c((uint8_t *)a0, a1, a2, a3, (void *)s2);
+	return;     // 1c98 jr ra
+}
+
+int func_1ca0_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4)
+{
+	uint32_t s0, s1, s3, s4, sp, t0, t1, v0, v1, zero;
+	zero = 0;
+	uint32_t stack[12];
+	sp = (uint32_t)stack;
+
+	s1 = a0;     // 1ca8 move s1,a0
+	a0 = a1;     // 1cac move a0,a1
+	a1 = a4; //*((uint32_t *)(sp + 64));     // 1cb0 lw a1,64(sp)
+	s0 = s1 + 3;     // 1cb8 addiu s0,s1,3
+	v1 = 489;     // 1cbc li v1,489
+	a1 = a1 + 4;     // 1cc8 addiu a1,a1,4
+	s3 = a3;     // 1ccc move s3,a3
+	s4 = a2;     // 1cd0 move s4,a2
+	a3 = a0;     // 1cd4 move a3,a0
+	a2 = 489;     // 1cd8 li a2,489
+	a0 = s0;     // 1cdc move a0,s0
+	*((uint16_t *)(sp + 16)) = (v1 & 0xffff);     // 1ce0 sh v1,16(sp)
+	func_1c30_c(a0, a1, a2, a3);
+	a0 = s0;     // 1cf4 move a0,s0
+	a1 = sp + 16;     // 1cf8 addiu a1,sp,16
+	a2 = 2;     // 1cfc li a2,2
+	a3 = 2;     // 1d04 li a3,2
+	s0 = 1;     // 1d08 li s0,1
+	*((uint16_t *)(sp + 16)) = (s0 & 0xffff);     // 1d10 sh s0,16(sp)
+	v0 = memcmp((void *)a0, (void *)a1, a2);     // 1d0c jal memcmp
+	a0 = s1;     // 1d14 move a0,s1
+	a1 = s1 + 492;     // 1d18 addiu a1,s1,492
+	a2 = 492;     // 1d1c li a2,492
+	if(v0 != 0) {
+		v1 = 24;     // 1d24 li v1,24
+		goto __1d90;
+	} else {
+		v1 = 24;     // 1d24 li v1,24
+	};     // 1d20 bnez v0,7568
+
+	a3 = 492;     // 1d28 li a3,492
+	*((uint16_t *)(sp + 16)) = (a3 & 0xffff);     // 1d30 sh a3,16(sp)
+	v0 = func_abc_c((void *)a0, (void *)a1, a2);
+	a0 = sp + 16;     // 1d34 addiu a0,sp,16
+	a1 = s1 + 13;     // 1d38 addiu a1,s1,13
+	a2 = 2;     // 1d3c li a2,2
+	a3 = zero;     // 1d40 move a3,zero
+	if(v0 != 0) {
+		v1 = 2;     // 1d48 li v1,2
+		goto __1d90;
+	} else {
+		v1 = 2;     // 1d48 li v1,2
+	};     // 1d44 bnez v0,7568
+
+	*((uint8_t *)(s4 + 0)) = (s0 & 0xff);     // 1d50 sb s0,0(s4)
+	memcpy((void *)a0, (void *)a1, a2);     // 1d4c jal memcpy
+	t1 = *((uint16_t*)(16 + sp));     // 1d54 lhu t1,16(sp)
+	a0 = *((uint32_t *)(s3 + 24));     // 1d58 lw a0,24(s3)
+	t0 = t1 + 16;     // 1d5c addiu t0,t1,16
+	a1 = zero;     // 1d60 move a1,zero
+	a2 = 32;     // 1d64 li a2,32
+	a3 = 1;     // 1d68 li a3,1
+	*((uint16_t *)(sp + 16)) = (t0 & 0xffff);     // 1d70 sh t0,16(sp)
+	memset((void *)a0, a1, a2);     // 1d6c jal memset
+	a2 = *((int16_t*)(16 + sp));     // 1d74 lh a2,16(sp)
+	a0 = *((uint32_t *)(s3 + 24));     // 1d78 lw a0,24(s3)
+	a1 = a2 + s1;     // 1d7c addu a1,a2,s1
+	a3 = zero;     // 1d80 move a3,zero
+	a2 = 30;     // 1d88 li a2,30
+	memcpy((void *)a0, (void *)a1, a2);     // 1d84 jal memcpy
+	v1 = zero;     // 1d8c move v1,zero
+
+	__1d90:
+	v0 = v1;     // 1da8 move v0,v1
+	return v0;     // 1dac jr ra
+}
+
+int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t a7, uint32_t a8)
+{
+	int32_t ra, s0, s1, s2, s3, s4, s5, s6, s7, s8, sp, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
+	zero = 0;
+	uint32_t stack[196];
+	sp = (uint32_t)stack;
+
+	// sp offset by -744
+	*((uint32_t*)(sp + 744 + 16)) = a4;
+	*((uint32_t*)(sp + 744 + 20)) = a5;
+	*((uint32_t*)(sp + 744 + 24)) = a6;
+	*((uint32_t*)(sp + 744 + 28)) = a7;
+	*((uint32_t*)(sp + 744 + 32)) = a8;
+
+	*((uint32_t *)(sp + 720)) = s4;     // 1db8 sw s4,720(sp)
+	s4 = *((uint32_t *)(sp + 776));     // 1dbc lw s4,776(sp)
+	a0 = (0xbfc3) << 16;     // 1dc0 lui a0,0xbfc3
+	t6 = s4 + 1536;     // 1dc4 addiu t6,s4,1536
+	t5 = s4 + 1664;     // 1dc8 addiu t5,s4,1664
+	t0 = s4 + 1792;     // 1dcc addiu t0,s4,1792
+	t1 = s4 + 1920;     // 1dd0 addiu t1,s4,1920
+	t2 = s4 + 2048;     // 1dd4 addiu t2,s4,2048
+	t3 = s4 + 2176;     // 1dd8 addiu t3,s4,2176
+	t4 = s4 + 2304;     // 1ddc addiu t4,s4,2304
+	*((uint32_t *)(sp + 732)) = s7;     // 1de0 sw s7,732(sp)
+	*((uint32_t *)(sp + 724)) = s5;     // 1de4 sw s5,724(sp)
+	*((uint32_t *)(sp + 716)) = s3;     // 1de8 sw s3,716(sp)
+	*((uint32_t *)(sp + 708)) = s1;     // 1df0 sw s1,708(sp)
+	*((uint32_t *)(sp + 704)) = s0;     // 1df4 sw s0,704(sp)
+	s3 = a1;     // 1df8 move s3,a1
+	a0 = s4;     // 1dfc move a0,s4
+	a1 = zero;     // 1e00 move a1,zero
+	s1 = a2;     // 1e04 move s1,a2
+	s7 = a3;     // 1e08 move s7,a3
+	a2 = 512;     // 1e0c li a2,512
+	a3 = 1;     // 1e10 li a3,1
+	s0 = s4 + 512;     // 1e14 addiu s0,s4,512
+	*((uint32_t *)(sp + 740)) = ra;     // 1e18 sw ra,740(sp)
+	*((uint32_t *)(sp + 256)) = t6;     // 1e1c sw t6,256(sp)
+	*((uint32_t *)(sp + 260)) = t5;     // 1e20 sw t5,260(sp)
+	*((uint32_t *)(sp + 640)) = t0;     // 1e24 sw t0,640(sp)
+	*((uint32_t *)(sp + 124)) = t1;     // 1e28 sw t1,124(sp)
+	*((uint32_t *)(sp + 128)) = t2;     // 1e2c sw t2,128(sp)
+	*((uint32_t *)(sp + 680)) = t3;     // 1e30 sw t3,680(sp)
+	*((uint32_t *)(sp + 684)) = t4;     // 1e34 sw t4,684(sp)
+	*((uint32_t *)(sp + 736)) = s8;     // 1e38 sw s8,736(sp)
+	*((uint32_t *)(sp + 728)) = s6;     // 1e3c sw s6,728(sp)
+	*((uint32_t *)(sp + 712)) = s2;     // 1e40 sw s2,712(sp)
+	*((uint16_t *)(sp + 24)) = (zero & 0xffff);     // 1e44 sh zero,24(sp)
+	*((uint8_t *)(sp + 672)) = (zero & 0xff);     // 1e48 sb zero,672(sp)
+	*((uint8_t *)(sp + 673)) = (zero & 0xff);     // 1e4c sb zero,673(sp)
+	s8 = *((uint32_t *)(sp + 772));     // 1e54 lw s8,772(sp)
+	memset((void *)a0, a1, a2);
+	a0 = s0;     // 1e58 move a0,s0
+	a1 = zero;     // 1e5c move a1,zero
+	a2 = 512;     // 1e60 li a2,512
+	a3 = 1;     // 1e68 li a3,1
+	memset((void *)a0, a1, a2);
+	v1 = (0xbfc3) << 16;     // 1e6c lui v1,0xbfc3
+	s6 = (uint32_t)firmware_signature_3498;     // 1e70 la s6,__data + 0x498
+	a0 = s3;     // 1e74 move a0,s3
+	a1 = s6;     // 1e78 move a1,s6
+	a2 = 16;     // 1e7c li a2,16
+	a3 = 2;     // 1e84 li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	v0 = (int8_t)v0;     // 1e88 seb v0,v0
+	if(v0 != 0) {
+		v1 = 3;     // 1e90 li v1,3
+		goto __1fa4;
+	} else {
+		v1 = 3;     // 1e90 li v1,3
+	};     // 1e8c bnez v0,8100
+
+	__1e94:
+	t9 = *((uint8_t*)(494 + s3));     // 1e94 lbu t9,494(s3)
+	a0 = s0;     // 1e98 move a0,s0
+	a2 = t9 & 0xf;     // 1e9c andi a2,t9,0xf
+	*((uint8_t *)(s1 + 0)) = (a2 & 0xff);     // 1ea0 sb a2,0(s1)
+	t8 = *((uint8_t*)(510 + s3));     // 1ea4 lbu t8,510(s3)
+	a2 = 1024;     // 1ea8 li a2,1024
+	a3 = t8 & 0xf;     // 1eac andi a3,t8,0xf
+	*((uint8_t *)(s7 + 0)) = (a3 & 0xff);     // 1eb0 sb a3,0(s7)
+	s2 = *((uint8_t *)(s1 + 0));     // 1eb4 lb s2,0(s1)
+	a3 = zero;     // 1eb8 move a3,zero
+	t7 = s2 << 0x9;     // 1ebc sll t7,s2,0x9
+	a1 = t7 + s3;     // 1ec0 addu a1,t7,s3
+	a1 = a1 + 1024;     // 1ec4 addiu a1,a1,1024
+	s2 = sp + 320;     // 1ecc addiu s2,sp,320
+	memcpy((void *)a0, (void *)a1, a2);
+	a0 = s0;     // 1ed0 move a0,s0
+	a1 = sp + 248;     // 1ed4 addiu a1,sp,248
+	a2 = s2;     // 1ed8 move a2,s2
+	a3 = sp + 672;     // 1ee0 addiu a3,sp,672
+	v0 = func_808_c((void *)a0, (void *)a1, (void *)a2, (void *)a3);
+	if(v0 != 0) {
+		s0 = v0;     // 1ee8 move s0,v0
+		goto __1fa0;
+	} else {
+		s0 = v0;     // 1ee8 move s0,v0
+	};     // 1ee4 bnez v0,8096
+
+	__1eec:
+	ra = *((uint8_t *)(s1 + 0));     // 1eec lb ra,0(s1)
+	v0 = *((uint8_t *)(s7 + 0));     // 1ef0 lb v0,0(s7)
+	a0 = s4;     // 1ef4 move a0,s4
+	s7 = ra + v0;     // 1ef8 addu s7,ra,v0
+	s1 = s7 << 0x9;     // 1efc sll s1,s7,0x9
+	s0 = s1 + s3;     // 1f00 addu s0,s1,s3
+	a1 = s0 + 2560;     // 1f04 addiu a1,s0,2560
+	a2 = 512;     // 1f08 li a2,512
+	a3 = zero;     // 1f10 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a0 = s4;     // 1f14 move a0,s4
+	a1 = s8;     // 1f18 move a1,s8
+	a2 = sp + 673;     // 1f1c addiu a2,sp,673
+	a3 = sp + 616;     // 1f20 addiu a3,sp,616
+	*((uint32_t *)(sp + 16)) = s2;     // 1f28 sw s2,16(sp)
+	v0 = func_1ca0_c(a0, a1, a2, a3, s2);
+	if(v0 != 0) {
+		s0 = v0;     // 1f30 move s0,v0
+		goto __1fa0;
+	} else {
+		s0 = v0;     // 1f30 move s0,v0
+	};     // 1f2c bnez v0,8096
+
+	__1f34:
+	s2 = sp + 32;     // 1f34 addiu s2,sp,32
+	a0 = s2;     // 1f38 move a0,s2
+	a1 = zero;     // 1f3c move a1,zero
+	a2 = 91;     // 1f40 li a2,91
+	a3 = 1;     // 1f48 li a3,1
+	memset((void *)a0, a1, a2);
+	a0 = s2;     // 1f4c move a0,s2
+	a1 = s3;     // 1f50 move a1,s3
+	a2 = 42;     // 1f54 li a2,42
+	a3 = zero;     // 1f5c move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a1 = s6;     // 1f60 move a1,s6
+	a0 = s2;     // 1f64 move a0,s2
+	a2 = 16;     // 1f68 li a2,16
+	a3 = 2;     // 1f70 li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	s6 = (int8_t)v0;     // 1f74 seb s6,v0
+	if(s6 != 0) {
+		s0 = 3;     // 1f7c li s0,3
+		goto __1fa0;
+	} else {
+		s0 = 3;     // 1f7c li s0,3
+	};     // 1f78 bnez s6,8096
+
+	__1f80:
+	v1 = *((uint8_t *)(sp + 56));     // 1f80 lb v1,56(sp)
+	t4 = 126;     // 1f84 li t4,126
+	if(v1 != t4) {
+		s0 = 8;     // 1f8c li s0,8
+		goto __1fa0;
+	} else {
+		s0 = 8;     // 1f8c li s0,8
+	};     // 1f88 bne v1,t4,8096
+
+	__1f90:
+	t2 = *((uint32_t *)(sp + 52));     // 1f90 lw t2,52(sp)
+	t3 = 512;     // 1f94 li t3,512
+	if(t2 == t3) {
+		s0 = 3;     // 1f9c li s0,3
+		goto __1fd8;
+	} else {
+		s0 = 3;     // 1f9c li s0,3
+	};     // 1f98 beq t2,t3,8152
+
+	__1fa0:
+	v1 = s0;     // 1fa0 move v1,s0
+
+	__1fa4:
+	ra = *((uint32_t *)(sp + 740));     // 1fa4 lw ra,740(sp)
+	s8 = *((uint32_t *)(sp + 736));     // 1fa8 lw s8,736(sp)
+	s7 = *((uint32_t *)(sp + 732));     // 1fac lw s7,732(sp)
+	s6 = *((uint32_t *)(sp + 728));     // 1fb0 lw s6,728(sp)
+	s5 = *((uint32_t *)(sp + 724));     // 1fb4 lw s5,724(sp)
+	s4 = *((uint32_t *)(sp + 720));     // 1fb8 lw s4,720(sp)
+	s3 = *((uint32_t *)(sp + 716));     // 1fbc lw s3,716(sp)
+	s2 = *((uint32_t *)(sp + 712));     // 1fc0 lw s2,712(sp)
+	s1 = *((uint32_t *)(sp + 708));     // 1fc4 lw s1,708(sp)
+	s0 = *((uint32_t *)(sp + 704));     // 1fc8 lw s0,704(sp)
+	v0 = v1;     // 1fcc move v0,v1
+	return v0;     // 1fd0 jr ra
+
+	__1fd8:
+	t0 = *((uint8_t*)(57 + sp));     // 1fd8 lbu t0,57(sp)
+	t1 = 225;     // 1fdc li t1,225
+	if(t0 != t1) {
+		v1 = s0;     // 1fe4 move v1,s0
+		goto __1fa4;
+	} else {
+		v1 = s0;     // 1fe4 move v1,s0
+	};     // 1fe0 bne t0,t1,8100
+
+	__1fe8:
+	t6 = (0xbfc3) << 16;     // 1fe8 lui t6,0xbfc3
+	a1 = (uint32_t)signature_34b0;     // 1fec la a1,__data + 0x4b0
+	a0 = sp + 58;     // 1ff0 addiu a0,sp,58
+	a2 = 16;     // 1ff4 li a2,16
+	a3 = 2;     // 1ffc li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	t5 = (int8_t)v0;     // 2000 seb t5,v0
+	if(t5 != 0) {
+		v1 = s0;     // 2008 move v1,s0
+		goto __1fa4;
+	} else {
+		v1 = s0;     // 2008 move v1,s0
+	};     // 2004 bnez t5,8100
+
+	__200c:
+	s6 = s3 + 42;     // 200c addiu s6,s3,42
+	a0 = sp + 74;     // 2010 addiu a0,sp,74
+	a1 = s6;     // 2014 move a1,s6
+	a2 = 49;     // 2018 li a2,49
+	a3 = zero;     // 2020 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a1 = *((uint8_t *)(sp + 90));     // 2024 lb a1,90(sp)
+	a0 = 3;     // 2028 li a0,3
+	if(a1 != a0) {
+		s0 = 5;     // 2030 li s0,5
+		goto __1fa0;
+	} else {
+		s0 = 5;     // 2030 li s0,5
+	};     // 202c bne a1,a0,8096
+
+	__2034:
+	a0 = *((uint32_t *)(sp + 124));     // 2034 lw a0,124(sp)
+	a1 = zero;     // 2038 move a1,zero
+	a2 = 32;     // 203c li a2,32
+	a3 = 1;     // 2044 li a3,1
+	memset((void *)a0, a1, a2);
+	a0 = *((uint32_t *)(sp + 128));     // 2048 lw a0,128(sp)
+	a1 = zero;     // 204c move a1,zero
+	a2 = 32;     // 2050 li a2,32
+	a3 = 1;     // 2058 li a3,1
+	memset((void *)a0, a1, a2);
+	a0 = *((uint32_t *)(sp + 124));     // 205c lw a0,124(sp)
+	a1 = s3 + 91;     // 2060 addiu a1,s3,91
+	a2 = 30;     // 2064 li a2,30
+	a3 = zero;     // 206c move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a0 = *((uint32_t *)(sp + 128));     // 2070 lw a0,128(sp)
+	a1 = s3 + 121;     // 2074 addiu a1,s3,121
+	a2 = 30;     // 2078 li a2,30
+	a3 = zero;     // 2080 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a1 = *((uint8_t *)(sp + 252));     // 2084 lb a1,252(sp)
+	a0 = sp + 680;     // 208c addiu a0,sp,680
+	v0 = func_1a44_c(a0);
+	if(v0 != 0) {
+		s0 = v0;     // 2094 move s0,v0
+		goto __1fa0;
+	} else {
+		s0 = v0;     // 2094 move s0,v0
+	};     // 2090 bnez v0,8096
+
+	__2098:
+	s1 = sp + 91;     // 2098 addiu s1,sp,91
+	a2 = *((uint32_t *)(sp + 640));     // 209c lw a2,640(sp)
+	a0 = s1;     // 20a0 move a0,s1
+	a1 = sp + 124;     // 20a8 addiu a1,sp,124
+	v0 = func_1a88_c(a0, a1, a2);
+	if(v0 != 0) {
+		s0 = v0;     // 20b0 move s0,v0
+		goto __1fa0;
+	} else {
+		s0 = v0;     // 20b0 move s0,v0
+	};     // 20ac bnez v0,8096
+
+	__20b4:
+	a0 = *((uint32_t *)(sp + 764));     // 20b4 lw a0,764(sp)
+	a1 = s1;     // 20b8 move a1,s1
+	a2 = 32;     // 20bc li a2,32
+	a3 = zero;     // 20c4 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	s0 = s3 + 151;     // 20c8 addiu s0,s3,151
+	a0 = *((uint32_t *)(sp + 764));     // 20cc lw a0,764(sp)
+	a2 = s0;     // 20d0 move a2,s0
+	a1 = zero;     // 20d4 move a1,zero
+	a3 = 361;     // 20d8 li a3,361
+	s1 = sp + 132;     // 20dc addiu s1,sp,132
+	*((uint32_t *)(sp + 16)) = s8;     // 20e4 sw s8,16(sp)
+	func_d80_c(a0, a1, a2, a3, s8);
+	a1 = s0;     // 20e8 move a1,s0
+	a0 = s1;     // 20ec move a0,s1
+	a2 = 2;     // 20f0 li a2,2
+	a3 = zero;     // 20f8 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a2 = 2;     // 20fc li a2,2
+	a1 = s1;     // 2100 move a1,s1
+	a0 = sp + 24;     // 2104 addiu a0,sp,24
+	a3 = zero;     // 210c move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a2 = *((int16_t*)(24 + sp));     // 2110 lh a2,24(sp)
+	t7 = 251;     // 2114 li t7,251
+	t8 = a2 + 153;     // 2118 addiu t8,a2,153
+	s0 = 3;     // 211c li s0,3
+	if(a2 != t7) {
+		v1 = (int32_t)(((int16_t)t8));     // 2124 seh v1,t8
+		goto __1fa0;
+	} else {
+		v1 = (int32_t)(((int16_t)t8));     // 2124 seh v1,t8
+	};     // 2120 bne a2,t7,8096
+
+	__2128:
+	a1 = v1 + s3;     // 2128 addu a1,v1,s3
+	a0 = sp + 140;     // 212c addiu a0,sp,140
+	a2 = 108;     // 2130 li a2,108
+	a3 = zero;     // 2138 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	t9 = *((uint8_t *)(sp + 140));     // 213c lb t9,140(sp)
+	s3 = 2;     // 2140 li s3,2
+	if(t9 != s3) {
+		s0 = 4;     // 2148 li s0,4
+		goto __1fa0;
+	} else {
+		s0 = 4;     // 2148 li s0,4
+	};     // 2144 bne t9,s3,8096
+
+	__214c:
+	ra = (0xbfc3) << 16;     // 214c lui ra,0xbfc3
+	a1 = (uint32_t)signature_34ac;     // 2150 la a1,__data + 0x4ac
+	a0 = sp + 141;     // 2154 addiu a0,sp,141
+	a2 = 4;     // 2158 li a2,4
+	a3 = 2;     // 2160 li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	s7 = (int8_t)v0;     // 2164 seb s7,v0
+	if(s7 != 0) {
+		s0 = 3;     // 216c li s0,3
+		goto __1fa0;
+	} else {
+		s0 = 3;     // 216c li s0,3
+	};     // 2168 bnez s7,8096
+
+	__2170:
+	s2 = (0xbfc3) << 16;     // 2170 lui s2,0xbfc3
+	a1 = (uint32_t)signature_34a8;     // 2174 la a1,__data + 0x4a8
+	a0 = sp + 145;     // 2178 addiu a0,sp,145
+	a2 = 4;     // 217c li a2,4
+	a3 = 2;     // 2184 li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	v0 = (int8_t)v0;     // 2188 seb v0,v0
+	if(v0 != 0) {
+		v1 = *((int8_t *)(sp + 181));     // 2190 lb v1,181(sp)
+		goto __1fa0;
+	} else {
+		v1 = *((int8_t *)(sp + 181));     // 2190 lb v1,181(sp)
+	};     // 218c bnez v0,8096
+
+	__2194:
+	t4 = -66;     // 2194 li t4,-66
+	if(v1 != t4) {
+		s0 = 5;     // 219c li s0,5
+		goto __1fa0;
+	} else {
+		s0 = 5;     // 219c li s0,5
+	};     // 2198 bne v1,t4,8096
+
+	__21a0:
+	a0 = *((uint32_t *)(sp + 768));     // 21a0 lw a0,768(sp)
+	a1 = zero;     // 21a4 move a1,zero
+	a2 = 512;     // 21a8 li a2,512
+	a3 = 1;     // 21b0 li a3,1
+	memset((void *)a0, a1, a2);
+	t1 = *((uint32_t *)(sp + 768));     // 21b4 lw t1,768(sp)
+	s7 = sp + 182;     // 21b8 addiu s7,sp,182
+	s3 = t1 + 492;     // 21bc addiu s3,t1,492
+	a3 = zero;     // 21c0 move a3,zero
+	a0 = s4 + 476;     // 21c4 addiu a0,s4,476
+	a1 = s7;     // 21c8 move a1,s7
+	a2 = 16;     // 21d0 li a2,16
+	memcpy((void *)a0, (void *)a1, a2);
+	a0 = s4;     // 21d4 move a0,s4
+	a1 = 492;     // 21d8 li a1,492
+	a2 = s3;     // 21e0 move a2,s3
+	func_97c_c((void *)a0, a1, (void *)a2);
+	t2 = *((uint32_t *)(sp + 768));     // 21e4 lw t2,768(sp)
+	a1 = s4;     // 21e8 move a1,s4
+	s0 = *((uint8_t*)(500 + t2));     // 21ec lbu s0,500(t2)
+	a0 = t2;     // 21f0 move a0,t2
+	s1 = s0 + t2;     // 21f4 addu s1,s0,t2
+	a2 = s0;     // 21f8 move a2,s0
+	a3 = zero;     // 2200 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a1 = s7;     // 2204 move a1,s7
+	a0 = s1;     // 2208 move a0,s1
+	a2 = 16;     // 220c li a2,16
+	a3 = zero;     // 2214 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	t3 = 476;     // 2218 li t3,476
+	a2 = t3 - s0;     // 221c subu a2,t3,s0
+	a1 = s0 + s4;     // 2220 addu a1,s0,s4
+	a0 = s1 + 16;     // 2224 addiu a0,s1,16
+	a3 = zero;     // 222c move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);
+	a2 = *((uint32_t *)(sp + 768));     // 2230 lw a2,768(sp)
+	a0 = s3;     // 2234 move a0,s3
+	a1 = 16;     // 2238 li a1,16
+	a3 = 492;     // 223c li a3,492
+	*((uint32_t *)(sp + 16)) = s8;     // 2244 sw s8,16(sp)
+	func_d2c_c((void *)a0, a1, a2, a3, (void *)s8);
+	a0 = s6;     // 2248 move a0,s6
+	a1 = sp + 228;     // 224c addiu a1,sp,228
+	a2 = 450;     // 2254 li a2,450
+	v0 = func_abc_c((void *)a0, (void *)a1, a2);
+	if(v0 != 0) {
+		s0 = 2;     // 225c li s0,2
+		goto __1fa0;
+	} else {
+		s0 = 2;     // 225c li s0,2
+	};     // 2258 bnez v0,8096
+
+	__2260:
+	a0 = sp + 324;     // 2260 addiu a0,sp,324
+	a1 = sp + 149;     // 2264 addiu a1,sp,149
+	a2 = 16;     // 2268 li a2,16
+	a3 = 2;     // 2270 li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	s0 = (int8_t)v0;     // 2274 seb s0,v0
+	if(s0 == 0) {
+		a0 = *((uint32_t *)(sp + 760));     // 227c lw a0,760(sp)
+		goto __2288;
+	} else {
+		a0 = *((uint32_t *)(sp + 760));     // 227c lw a0,760(sp)
+	};     // 2278 beqz s0,8840
+
+	__2280:
+	s0 = 1;     // 2284 li s0,1
+	goto __1fa0;     // 2280 b 8096
+
+	__2288:
+	a1 = sp + 688;     // 2288 addiu a1,sp,688
+	a2 = 16;     // 228c li a2,16
+	a3 = 2;     // 2290 li a3,2
+	*((uint32_t *)(sp + 688)) = zero;     // 2294 sw zero,688(sp)
+	*((uint32_t *)(sp + 692)) = zero;     // 2298 sw zero,692(sp)
+	*((uint32_t *)(sp + 696)) = zero;     // 229c sw zero,696(sp)
+	*((uint32_t *)(sp + 700)) = zero;     // 22a4 sw zero,700(sp)
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	if(v0 == 0) {
+		v1 = s0;     // 22ac move v1,s0
+		goto __1fa4;
+	} else {
+		v1 = s0;     // 22ac move v1,s0
+	};     // 22a8 beqz v0,8100
+
+	__22b0:
+	a0 = *((uint32_t *)(sp + 760));     // 22b0 lw a0,760(sp)
+	a1 = sp + 165;     // 22b4 addiu a1,sp,165
+	a2 = 16;     // 22b8 li a2,16
+	a3 = 2;     // 22c0 li a3,2
+	v0 = memcmp((void *)a0, (void *)a1, a2);
+	s4 = (int8_t)v0;     // 22c4 seb s4,v0
+	s0 = 10;     // 22c8 li s0,10
+	if(s4 == 0) {
+		s0 = s4;
+	};     // 22d0 movz s0,s4,s4
+	goto __1fa0;     // 22cc b 8096
 }
 
 struct inituse_detail {
@@ -1085,15 +2081,15 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 
 	/* 2358 */
 	int8_t sp_40, sp_41;
-	if((ret = func_1db4(decrypt->FileLength,
+	if((ret = func_1db4_c(decrypt->FileLength, // a0
 					decrypt->pInOutBuffer,
 					&sp_40,
 					&sp_41,
-					decrypt->initusebuffer + 32,
-					decrypt->initusebuffer,
-					decrypt->initusebuffer + 48,
-					decrypt->pGLBuffer,
-					decrypt->initusebuffer + 17456)) != 0)
+					decrypt->initusebuffer + 32, // a4 (sp + 16)
+					decrypt->initusebuffer, // a5 (sp + 20)
+					decrypt->initusebuffer + 48, // a6 (sp + 24)
+					decrypt->pGLBuffer, // a7 (sp + 28)
+					decrypt->initusebuffer + 17456)) != 0) // a8 (sp + 32)
 		return ret;
 
 	// The firmware check routine above returns two sector counts minus 1
@@ -1173,5 +2169,93 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	decrypt->InOutLen -= 2048;
 	
 	return 0; // success
+}
+
+// TODO
+void func_fw_decrypt_run_c(uint32_t a0, uint32_t a1, uint32_t a2)
+{
+	uint32_t a3, ra, s0, s1, s2, s3, s4, s5, sp, v0, v1, zero;
+	zero = 0;
+	uint32_t stack[14];
+	sp = (uint32_t)stack;
+
+	a3 = (0xbfc3) << 16;     // 2550 lui a3,0xbfc3
+	v1 = (0xbfc3) << 16;     // 2554 lui v1,0xbfc3
+	*((uint32_t *)(sp + 36)) = s3;     // 2558 sw s3,36(sp)
+	v0 = (0xbfc3) << 16;     // 255c lui v0,0xbfc3
+	s3 = (uint32_t)__bss + 0x1520;     // 2560 la s3,__bss + 0x1520
+	*((uint32_t *)(sp + 48)) = ra;     // 2564 sw ra,48(sp)
+	*((uint32_t *)(sp + 44)) = s5;     // 2568 sw s5,44(sp)
+	*((uint32_t *)(sp + 40)) = s4;     // 256c sw s4,40(sp)
+	*((uint32_t *)(sp + 32)) = s2;     // 2570 sw s2,32(sp)
+	*((uint32_t *)(sp + 28)) = s1;     // 2578 sw s1,28(sp)
+	*((uint32_t *)(sp + 24)) = s0;     // 257c sw s0,24(sp)
+	s5 = (uint32_t)__bss + 0x1320;     // 2580 la s5,__bss + 0x1320
+	s0 = a2;     // 2584 move s0,a2
+	s1 = a0;     // 2588 move s1,a0
+	s2 = a1;     // 258c move s2,a1
+	a0 = s3;     // 2590 move a0,s3
+	a1 = zero;     // 2594 move a1,zero
+	a2 = 32;     // 2598 li a2,32
+	a3 = 1;     // 25a0 li a3,1
+	memset((void *)a0, a1, a2);     // 259c jal memset
+	a0 = s5;     // 25a4 move a0,s5
+	a1 = zero;     // 25a8 move a1,zero
+	a2 = 512;     // 25ac li a2,512
+	a3 = 1;     // 25b4 li a3,1
+	memset((void *)a0, a1, a2);     // 25b0 jal memset
+	a0 = sp + 16;     // 25b8 addiu a0,sp,16
+	a1 = s0 + 260;     // 25bc addiu a1,s0,260
+	a2 = 2;     // 25c0 li a2,2
+	a3 = zero;     // 25c8 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);     // 25c4 jal memcpy
+	a0 = s3;     // 25cc move a0,s3
+	a1 = s0 + 264;     // 25d0 addiu a1,s0,264
+	a2 = 32;     // 25d4 li a2,32
+	a3 = zero;     // 25dc move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);     // 25d8 jal memcpy
+	a2 = (((int32_t)s2) < 512);     // 25e4 slti a2,s2,512
+	goto __25fc;     // 25e0 b 9724
+
+	__25e8:
+	a2 = *((int16_t*)(16 + sp));     // 25e8 lh a2,16(sp)
+	s2 = s2 + -512;     // 25f0 addiu s2,s2,-512
+	func_268c_c((void *)a0, (void *)a1, a2);
+	s1 = s1 + 512;     // 25f4 addiu s1,s1,512
+	a2 = (((int32_t)s2) < 512);     // 25f8 slti a2,s2,512
+
+	__25fc:
+	a0 = s1;     // 25fc move a0,s1
+	if(a2 == 0) {
+		a1 = s3;     // 2604 move a1,s3
+		goto __25e8;
+	} else {
+		a1 = s3;     // 2604 move a1,s3
+	};     // 2600 beqz a2,9704
+
+	if(s2 != 0) {
+		ra = *((uint32_t *)(sp + 48));     // 260c lw ra,48(sp)
+		goto __2630;
+	} else {
+		ra = *((uint32_t *)(sp + 48));     // 260c lw ra,48(sp)
+	};     // 2608 bnez s2,9776
+
+	return;     // 2628 jr ra
+
+	__2630:
+	a0 = s5;     // 2630 move a0,s5
+	a1 = s1;     // 2634 move a1,s1
+	a2 = s2;     // 2638 move a2,s2
+	a3 = zero;     // 2640 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);     // 263c jal memcpy
+	a2 = *((int16_t*)(16 + sp));     // 2644 lh a2,16(sp)
+	a0 = s5;     // 2648 move a0,s5
+	a1 = s3;     // 2650 move a1,s3
+	func_268c_c((void *)a0, (void *)a1, a2);     // 264c jal func_268c
+	a0 = s1;     // 2654 move a0,s1
+	a1 = s5;     // 2658 move a1,s5
+	a2 = s2;     // 265c move a2,s2
+	a3 = zero;     // 2664 move a3,zero
+	memcpy((void *)a0, (void *)a1, a2);     // 2660 jal memcpy
 }
 

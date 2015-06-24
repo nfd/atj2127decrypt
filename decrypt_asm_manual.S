@@ -934,11 +934,10 @@ func_1490_asm:
     addiu	sp,sp,56		// 165c
 .end func_1490_asm
 
-// finished
-
-.global func_1660
-.ent func_1660
-func_1660:
+// suspect 2 args, return void
+.global func_1660_asm
+.ent func_1660_asm
+func_1660_asm:
     addiu	sp,sp,-56		// 1660
     sw	ra,48(sp)		// 1664
     sw	s7,44(sp)		// 1668
@@ -1056,12 +1055,13 @@ func_1660:
     lw	s0,16(sp)		// 182c
     j	func_13f8_c		// 1830
     addiu	sp,sp,56		// 1834
-.end func_1660
+.end func_1660_asm
 
-
-.globl func_1838
-.ent func_1838
-func_1838:
+// returns an int, takes 3 args
+// spills to stack a few times, but just words afaict
+.globl func_1838_asm
+.ent func_1838_asm
+func_1838_asm:
     addiu	sp,sp,-56		// 1838
     sw	ra,48(sp)		// 183c
     sw	s5,44(sp)		// 1840
@@ -1119,7 +1119,7 @@ func_1838:
 	__1904:
     bltz	s0,__196c		// 1904
     addiu	a0,sp,16		// 1908
-    jal	func_1660    /* only called here and below */		// 190c
+    jal	func_1660_c    /* only called here and below */		// 190c
     move	a1,s1		// 1910
     lw	a0,16(sp)		// 1914
     jal	copy_32_bytes		// 1918
@@ -1162,7 +1162,7 @@ func_1838:
     addiu	a0,sp,16		// 198c
 
 	__1990:
-    jal	func_1660    /* only called here and above */		// 1990
+    jal	func_1660_c    /* only called here and above */		// 1990
     move	a1,s1		// 1994
     lw	a0,16(sp)		// 1998
     jal	copy_32_bytes		// 199c
@@ -1211,11 +1211,11 @@ func_1838:
     move	v0,zero		// 1a38
     jr	ra		// 1a3c
     addiu	sp,sp,56		// 1a40
-.end func_1838
+.end func_1838_asm
 
-.globl func_1a44
-.ent func_1a44
-func_1a44:
+.globl func_1a44_asm
+.ent func_1a44_asm
+func_1a44_asm:
     addiu	sp,sp,-24		// 1a44
     sw	ra,20(sp)		// 1a48
     sw	s0,16(sp)		// 1a4c
@@ -1234,11 +1234,11 @@ func_1a44:
     move	v0,zero		// 1a7c
     jr	ra		// 1a80
     addiu	sp,sp,24		// 1a84
-.end func_1a44
+.end func_1a44_asm
 
-.globl func_1a88
-.ent func_1a88
-func_1a88:
+.globl func_1a88_asm
+.ent func_1a88_asm
+func_1a88_asm:
     lui	t0,0xbfc3		// 1a88
     addiu	sp,sp,-40		// 1a8c
 	la v1, __bss + 0x0f20
@@ -1261,7 +1261,7 @@ func_1a88:
     li	a1,8		// 1ad4
     move	a0,s0		// 1ad8
     move	a1,s1		// 1adc
-    jal	func_1838    /* only called from here */		// 1ae0
+    jal	func_1838_c    /* only called from here */		// 1ae0
     addiu	a2,sp,16		// 1ae4
     move	s0,v0		// 1ae8
     move	a0,s2		// 1aec
@@ -1278,8 +1278,7 @@ func_1a88:
     lw	s0,24(sp)		// 1b10
     jr	ra		// 1b14
     addiu	sp,sp,40		// 1b18
-.end func_1a88
-
+.end func_1a88_asm
 
 .globl func_1b1c
 .ent func_1b1c
@@ -1313,9 +1312,9 @@ func_1b1c:
     sb	a0,0(v1)		// 1b84
 .end func_1b1c
 
-.globl func_1b88
-.ent func_1b88
-func_1b88:
+.globl func_1b88_asm
+.ent func_1b88_asm
+func_1b88_asm:
 	la      t4,_data_3484
     move	t5,a1		// 1b90
     move	t3,a0		// 1b94
@@ -1361,11 +1360,11 @@ func_1b88:
     addiu	a3,a3,1		// 1c24
     jr	ra		// 1c28
     nop		// 1c2c
-.end func_1b88
+.end func_1b88_asm
 
-.globl func_1c30
-.ent func_1c30
-func_1c30:
+.globl func_1c30_asm
+.ent func_1c30_asm
+func_1c30_asm:
     addiu	sp,sp,-64		// 1c30
     sw	s1,52(sp)		// 1c34
     sw	s0,48(sp)		// 1c38
@@ -1380,7 +1379,7 @@ func_1c30:
     sw	zero,28(sp)		// 1c5c
     sw	zero,32(sp)		// 1c60
     sw	zero,36(sp)		// 1c64
-    jal	func_1b88      /* only called from here */		// 1c68
+    jal	func_1b88_c      /* only called from here */		// 1c68
     sw	zero,40(sp)		// 1c6c
     move	a2,s1		// 1c70
     move	a3,s0		// 1c74
@@ -1394,11 +1393,12 @@ func_1c30:
     lw	s0,48(sp)		// 1c94
     jr	ra		// 1c98
     addiu	sp,sp,64		// 1c9c
-.end func_1c30
+.end func_1c30_asm
 
-.globl func_1ca0
-.ent func_1ca0
-func_1ca0:
+// 5 arguments, one on the stack as 64(sp). returns a value.
+.globl func_1ca0_asm
+.ent func_1ca0_asm
+func_1ca0_asm:
     addiu	sp,sp,-48		// 1ca0
     sw	s1,28(sp)		// 1ca4
     move	s1,a0		// 1ca8
@@ -1417,7 +1417,7 @@ func_1ca0:
     move	a0,s0		// 1cdc
     sh	v1,16(sp)		// 1ce0
     sw	ra,44(sp)		// 1ce4
-    jal	func_1c30               /* only called from here */		// 1ce8
+    jal	func_1c30_c               /* only called from here */		// 1ce8
     sw	s2,32(sp)		// 1cec
     lui	v0,0xbfc3		// 1cf0
     move	a0,s0		// 1cf4
@@ -1470,11 +1470,13 @@ func_1ca0:
     move	v0,v1		// 1da8
     jr	ra		// 1dac
     addiu	sp,sp,48		// 1db0
-.end func_1ca0
+.end func_1ca0_asm
 
-.globl func_1db4
-.ent func_1db4
-func_1db4:
+// finished
+
+.globl func_1db4_asm
+.ent func_1db4_asm
+func_1db4_asm:
 	/* a0: file length
 	 * a1: pInOutBuffer
 	 * a2: *num_sectors_1
@@ -1588,7 +1590,7 @@ func_1db4:
     move	a1,s8		// 1f18
     addiu	a2,sp,673		// 1f1c
     addiu	a3,sp,616		// 1f20
-    jal	func_1ca0           /* only called from here */		// 1f24
+    jal	func_1ca0_c           /* only called from here */		// 1f24
     sw	s2,16(sp)		// 1f28
     bnez	v0,__1fa0		// 1f2c
     move	s0,v0		// 1f30
@@ -1682,14 +1684,14 @@ func_1db4:
     jal memcpy		// 207c
     move	a3,zero		// 2080
     lb	a1,252(sp)		// 2084
-    jal	func_1a44        /* only called from here. Copies static data */		// 2088
+    jal	func_1a44_c        /* only called from here. Copies static data */		// 2088
     addiu	a0,sp,680		// 208c
     bnez	v0,__1fa0		// 2090
     move	s0,v0		// 2094
     addiu	s1,sp,91		// 2098
     lw	a2,640(sp)		// 209c
     move	a0,s1		// 20a0
-    jal	func_1a88       /* only called from here */		// 20a4
+    jal	func_1a88_c       /* only called from here */		// 20a4
     addiu	a1,sp,124		// 20a8
     bnez	v0,__1fa0		// 20ac
     move	s0,v0		// 20b0
@@ -1829,7 +1831,7 @@ func_1db4:
     li	s0,10		// 22c8
     b	__1fa0		// 22cc
     movz	s0,s4,s4		// 22d0
-.end func_1db4
+.end func_1db4_asm
 
 .globl func_fw_decrypt_init
 .ent func_fw_decrypt_init
@@ -1885,7 +1887,7 @@ func_fw_decrypt_init:
     sw	t1,24(sp)			// initusebuffer + 48
     sw	t0,32(sp)			// initusebuffer + 17458
     sw	s3,20(sp)			// initusebuffer
-    jal	func_1db4        /* only called from here: init? Uses 744 bytes of stack */
+    jal	func_1db4_c        /* only called from here: init? Uses 744 bytes of stack */
     sw	s7,28(sp)			// pGLBuffer
     addiu	a3,s3,16944  /* initusebuffer + 16944 */
     addiu	s4,s3,560    /* initusebuffer + 560 */
@@ -2026,9 +2028,9 @@ __24dc_exit:
 .end func_fw_decrypt_init
 
 /* TODO this was automatically generated and thus(?) suspect */
-.globl func_fw_decrypt_run
-.ent func_fw_decrypt_run
-func_fw_decrypt_run:
+.globl func_fw_decrypt_run_asm
+.ent func_fw_decrypt_run_asm
+func_fw_decrypt_run_asm:
     addiu sp,sp,-56                // 254c 
     lui a3,0xbfc3                  // 2550 
     lui v1,0xbfc3                  // 2554 
@@ -2116,12 +2118,12 @@ func_fw_decrypt_run:
     jr ra                          // 2684 
     addiu sp,sp,56                 // 2688 
 
-.end func_fw_decrypt_run
+.end func_fw_decrypt_run_asm
 
 
-.globl func_268c
-.ent func_268c
-func_268c:
+.globl func_268c_asm
+.ent func_268c_asm
+func_268c_asm:
 	// This now has a (horrific) C implementation
     addiu	sp,sp,-64		// 268c
     lui	t8,0xbfc3		// 2690
@@ -2233,7 +2235,7 @@ func_268c:
     lw	s0,32(sp)		// 2820
     jr	ra		// 2824
     addiu	sp,sp,64		// 2828
-.end func_268c
+.end func_268c_asm
 
 .data
 _key_282c:

@@ -26,8 +26,8 @@ const uint8_t fwimage_key_name[] = "FWIMAGE FW ";
 const uint8_t nandid_key_name[] = "FLASH_IDBIN";
 
 /* Assembly-language routines */
-extern int func_fw_decrypt_init(struct decrypt_struct *);
-extern void func_fw_decrypt_run(uint8_t *buf_out, int length, uint8_t *crypt);
+//extern int func_fw_decrypt_init(struct decrypt_struct *);
+//extern void func_fw_decrypt_run(uint8_t *buf_out, int length, uint8_t *crypt);
 
 #if 0
 static void dump_buffer(char *filename, uint8_t *buf, int length)
@@ -73,7 +73,7 @@ read_and_decrypt(struct decrypt_struct *decrypt_info, int fd, uint8_t *buffer, i
 			return -1;
 		}
 
-		func_fw_decrypt_run(decrypt_info->pInOutBuffer, read_bytes, decrypt_info->pGLBuffer);
+		func_fw_decrypt_run_c(decrypt_info->pInOutBuffer, read_bytes, decrypt_info->pGLBuffer);
 
 		memcpy(buffer, decrypt_info->pInOutBuffer, read_bytes);
 
@@ -206,7 +206,7 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir)
 
 	ret = func_fw_decrypt_init_c(decrypt_info);
 	if(ret != 0) {
-		printf("Firmware failed validity checks\n");
+		printf("Firmware failed validity checks (%d)\n", ret);
 		return ret;
 	}
 
