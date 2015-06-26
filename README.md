@@ -8,7 +8,7 @@ You can compile this version on any 32-bit little-endian system (I think). Note 
 Installation and setup
 ---
 
-    make -f Makefile decrypt
+    make decrypt
 	./decrypt firmware.hex
 
 
