@@ -1540,7 +1540,7 @@ int func_1ca0_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4)
 
 int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t a7, uint32_t a8)
 {
-	int32_t ra, s0, s1, s2, s3, s4, s5, s6, s7, s8, sp, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
+	int32_t ra, s0, s1, s2, s3, s4, s6, s7, s8, sp, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
 	zero = 0;
 	uint32_t stack[196];
 	sp = (uint32_t)stack;
@@ -1697,16 +1697,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	v1 = s0;     // 1fa0 move v1,s0
 
 	__1fa4:
-	ra = *((uint32_t *)(sp + 740));     // 1fa4 lw ra,740(sp)
-	s8 = *((uint32_t *)(sp + 736));     // 1fa8 lw s8,736(sp)
-	s7 = *((uint32_t *)(sp + 732));     // 1fac lw s7,732(sp)
-	s6 = *((uint32_t *)(sp + 728));     // 1fb0 lw s6,728(sp)
-	s5 = *((uint32_t *)(sp + 724));     // 1fb4 lw s5,724(sp)
-	s4 = *((uint32_t *)(sp + 720));     // 1fb8 lw s4,720(sp)
-	s3 = *((uint32_t *)(sp + 716));     // 1fbc lw s3,716(sp)
-	s2 = *((uint32_t *)(sp + 712));     // 1fc0 lw s2,712(sp)
-	s1 = *((uint32_t *)(sp + 708));     // 1fc4 lw s1,708(sp)
-	s0 = *((uint32_t *)(sp + 704));     // 1fc8 lw s0,704(sp)
 	v0 = v1;     // 1fcc move v0,v1
 	return v0;     // 1fd0 jr ra
 
@@ -2145,14 +2135,11 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 
 void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *pGLBuffer)
 {
-	uint32_t a0, a1, a2 ,a3, ra, s0, s1, s2, s3, s5, sp, v0, v1, zero;
+	uint32_t a0, a1, a2, s0, s1, s2, s3, s5, sp, zero;
 	zero = 0;
 	uint32_t stack[14];
 	sp = (uint32_t)stack;
 
-	a3 = (0xbfc3) << 16;     // 2550 lui a3,0xbfc3
-	v1 = (0xbfc3) << 16;     // 2554 lui v1,0xbfc3
-	v0 = (0xbfc3) << 16;     // 255c lui v0,0xbfc3
 	s3 = (uint32_t)__bss + 0x1520;     // 2560 la s3,__bss + 0x1520
 	s5 = (uint32_t)__bss + 0x1320;     // 2580 la s5,__bss + 0x1320
 	s0 = (uint32_t)pGLBuffer;     // 2584 move s0,a2
@@ -2161,22 +2148,18 @@ void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *
 	a0 = s3;     // 2590 move a0,s3
 	a1 = zero;     // 2594 move a1,zero
 	a2 = 32;     // 2598 li a2,32
-	a3 = 1;     // 25a0 li a3,1
 	memset((void *)a0, a1, a2);     // 259c jal memset
 	a0 = s5;     // 25a4 move a0,s5
 	a1 = zero;     // 25a8 move a1,zero
 	a2 = 512;     // 25ac li a2,512
-	a3 = 1;     // 25b4 li a3,1
 	memset((void *)a0, a1, a2);     // 25b0 jal memset
 	a0 = sp + 16;     // 25b8 addiu a0,sp,16
 	a1 = s0 + 260;     // 25bc addiu a1,s0,260
 	a2 = 2;     // 25c0 li a2,2
-	a3 = zero;     // 25c8 move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);     // 25c4 jal memcpy
 	a0 = s3;     // 25cc move a0,s3
 	a1 = s0 + 264;     // 25d0 addiu a1,s0,264
 	a2 = 32;     // 25d4 li a2,32
-	a3 = zero;     // 25dc move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);     // 25d8 jal memcpy
 	a2 = (((int32_t)s2) < 512);     // 25e4 slti a2,s2,512
 	goto __25fc;     // 25e0 b 9724
@@ -2198,11 +2181,8 @@ void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *
 	};     // 2600 beqz a2,9704
 
 	if(s2 != 0) {
-		ra = *((uint32_t *)(sp + 48));     // 260c lw ra,48(sp)
 		goto __2630;
-	} else {
-		ra = *((uint32_t *)(sp + 48));     // 260c lw ra,48(sp)
-	};     // 2608 bnez s2,9776
+	}
 
 	return;     // 2628 jr ra
 
@@ -2210,7 +2190,6 @@ void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *
 	a0 = s5;     // 2630 move a0,s5
 	a1 = s1;     // 2634 move a1,s1
 	a2 = s2;     // 2638 move a2,s2
-	a3 = zero;     // 2640 move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);     // 263c jal memcpy
 	a2 = *((int16_t*)(16 + sp));     // 2644 lh a2,16(sp)
 	a0 = s5;     // 2648 move a0,s5
@@ -2219,7 +2198,6 @@ void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *
 	a0 = s1;     // 2654 move a0,s1
 	a1 = s5;     // 2658 move a1,s5
 	a2 = s2;     // 265c move a2,s2
-	a3 = zero;     // 2664 move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);     // 2660 jal memcpy
 }
 

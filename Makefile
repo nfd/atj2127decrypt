@@ -1,13 +1,14 @@
-CC = musl-gcc
-CFLAGS = -c -g -march=mips32r2 -Wall -mno-plt -mno-shared -fno-pic -static -std=c99 -G0 -mno-gpopt
-LDFLAGS = -Xassembler -non_shared -static
+CC = gcc
+CFLAGS = -c -g -Wall -m32 -std=c99
+LDFLAGS = -m32
 
-#decrypt: decrypt_asm.o decrypt.o
-decrypt: decrypt_asm_manual.o decrypt_impl.o decrypt.o
+ifeq ($(shell uname -s),Darwin)
+	CFFLAGS += -arch i386
+	LDFLAGS += -arch i386
+endif
+
+decrypt: decrypt_impl.o decrypt.o
 	$(CC) $(LDFLAGS) -o decrypt $+
-
-test: test_asm.o test.o decrypt_impl.o
-	$(CC) $(LDFLAGS) -o test $+
 
 decrypt_test: decrypt_impl.o decrypt_test.o
 	$(CC) $(LDFLAGS) -o decrypt_test $+
@@ -15,10 +16,7 @@ decrypt_test: decrypt_impl.o decrypt_test.o
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-%.o: %.S
-	$(CC) $(CFLAGS) -o $@ $<
-
 clean:
-	rm -f *.o decrypt
+	rm -f *.o decrypt_test
 
 
