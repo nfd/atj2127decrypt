@@ -349,7 +349,7 @@ int32_t func_dd8_c(uint32_t a0, uint32_t a1)
 	}
 
 	a2 = a2 + -1;     // e00 addiu a2,a2,-1
-	if(a2 >= 0) {
+	if(((int32_t)a2) >= 0) {
 		v1 = *((uint32_t *)(v0 + 0));     // e08 lw v1,0(v0)
 		goto __df8;
 	} else {
@@ -364,7 +364,7 @@ int32_t func_dd8_c(uint32_t a0, uint32_t a1)
 	goto __e3c;     // e2c b 3644
 
 	__e34:
-	if(v1 < 0) {
+	if(((int32_t)v1) < 0) {
 		return a3;
 	}
 
@@ -413,7 +413,7 @@ uint32_t func_e58_c(uint32_t a0, uint32_t a1)
 	} ;     // e88 bnezl a2,3756
 
 	//__e90:
-	if(a3 >= 0) {
+	if(((int32_t)a3) >= 0) {
 		v1 = *((uint32_t *)(a0 + 0));     // e94 lw v1,0(a0)
 		goto __e6c;
 	} ;     // e90 bgezl a3,3692
@@ -493,7 +493,7 @@ void func_f64_c(uint32_t a0, uint32_t a1)
 	uint32_t a2, a3, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
 	zero = 0;
 
-	t2 = (a1 < 0);     // f64 slti t2,a1,0
+	t2 = (((int32_t)a1) < 0);     // f64 slti t2,a1,0
 	t0 = a1 + 31;     // f68 addiu t0,a1,31
 	if(t2 == 0) {
 		t0 = a1;
@@ -1552,7 +1552,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	*((uint32_t*)(sp + 744 + 28)) = a7;
 	*((uint32_t*)(sp + 744 + 32)) = a8;
 
-	*((uint32_t *)(sp + 720)) = s4;     // 1db8 sw s4,720(sp)
 	s4 = *((uint32_t *)(sp + 776));     // 1dbc lw s4,776(sp)
 	a0 = (0xbfc3) << 16;     // 1dc0 lui a0,0xbfc3
 	t6 = s4 + 1536;     // 1dc4 addiu t6,s4,1536
@@ -1562,11 +1561,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	t2 = s4 + 2048;     // 1dd4 addiu t2,s4,2048
 	t3 = s4 + 2176;     // 1dd8 addiu t3,s4,2176
 	t4 = s4 + 2304;     // 1ddc addiu t4,s4,2304
-	*((uint32_t *)(sp + 732)) = s7;     // 1de0 sw s7,732(sp)
-	*((uint32_t *)(sp + 724)) = s5;     // 1de4 sw s5,724(sp)
-	*((uint32_t *)(sp + 716)) = s3;     // 1de8 sw s3,716(sp)
-	*((uint32_t *)(sp + 708)) = s1;     // 1df0 sw s1,708(sp)
-	*((uint32_t *)(sp + 704)) = s0;     // 1df4 sw s0,704(sp)
 	s3 = a1;     // 1df8 move s3,a1
 	a0 = s4;     // 1dfc move a0,s4
 	a1 = zero;     // 1e00 move a1,zero
@@ -1575,7 +1569,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	a2 = 512;     // 1e0c li a2,512
 	a3 = 1;     // 1e10 li a3,1
 	s0 = s4 + 512;     // 1e14 addiu s0,s4,512
-	*((uint32_t *)(sp + 740)) = ra;     // 1e18 sw ra,740(sp)
 	*((uint32_t *)(sp + 256)) = t6;     // 1e1c sw t6,256(sp)
 	*((uint32_t *)(sp + 260)) = t5;     // 1e20 sw t5,260(sp)
 	*((uint32_t *)(sp + 640)) = t0;     // 1e24 sw t0,640(sp)
@@ -1583,9 +1576,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	*((uint32_t *)(sp + 128)) = t2;     // 1e2c sw t2,128(sp)
 	*((uint32_t *)(sp + 680)) = t3;     // 1e30 sw t3,680(sp)
 	*((uint32_t *)(sp + 684)) = t4;     // 1e34 sw t4,684(sp)
-	*((uint32_t *)(sp + 736)) = s8;     // 1e38 sw s8,736(sp)
-	*((uint32_t *)(sp + 728)) = s6;     // 1e3c sw s6,728(sp)
-	*((uint32_t *)(sp + 712)) = s2;     // 1e40 sw s2,712(sp)
 	*((uint16_t *)(sp + 24)) = (zero & 0xffff);     // 1e44 sh zero,24(sp)
 	*((uint8_t *)(sp + 672)) = (zero & 0xff);     // 1e48 sb zero,672(sp)
 	*((uint8_t *)(sp + 673)) = (zero & 0xff);     // 1e4c sb zero,673(sp)
@@ -1611,7 +1601,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = 3;     // 1e90 li v1,3
 	};     // 1e8c bnez v0,8100
 
-	__1e94:
 	t9 = *((uint8_t*)(494 + s3));     // 1e94 lbu t9,494(s3)
 	a0 = s0;     // 1e98 move a0,s0
 	a2 = t9 & 0xf;     // 1e9c andi a2,t9,0xf
@@ -1639,7 +1628,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = v0;     // 1ee8 move s0,v0
 	};     // 1ee4 bnez v0,8096
 
-	__1eec:
 	ra = *((uint8_t *)(s1 + 0));     // 1eec lb ra,0(s1)
 	v0 = *((uint8_t *)(s7 + 0));     // 1ef0 lb v0,0(s7)
 	a0 = s4;     // 1ef4 move a0,s4
@@ -1663,7 +1651,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = v0;     // 1f30 move s0,v0
 	};     // 1f2c bnez v0,8096
 
-	__1f34:
 	s2 = sp + 32;     // 1f34 addiu s2,sp,32
 	a0 = s2;     // 1f38 move a0,s2
 	a1 = zero;     // 1f3c move a1,zero
@@ -1688,7 +1675,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 3;     // 1f7c li s0,3
 	};     // 1f78 bnez s6,8096
 
-	__1f80:
 	v1 = *((uint8_t *)(sp + 56));     // 1f80 lb v1,56(sp)
 	t4 = 126;     // 1f84 li t4,126
 	if(v1 != t4) {
@@ -1698,7 +1684,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 8;     // 1f8c li s0,8
 	};     // 1f88 bne v1,t4,8096
 
-	__1f90:
 	t2 = *((uint32_t *)(sp + 52));     // 1f90 lw t2,52(sp)
 	t3 = 512;     // 1f94 li t3,512
 	if(t2 == t3) {
@@ -1735,7 +1720,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = s0;     // 1fe4 move v1,s0
 	};     // 1fe0 bne t0,t1,8100
 
-	__1fe8:
 	t6 = (0xbfc3) << 16;     // 1fe8 lui t6,0xbfc3
 	a1 = (uint32_t)signature_34b0;     // 1fec la a1,__data + 0x4b0
 	a0 = sp + 58;     // 1ff0 addiu a0,sp,58
@@ -1750,7 +1734,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = s0;     // 2008 move v1,s0
 	};     // 2004 bnez t5,8100
 
-	__200c:
 	s6 = s3 + 42;     // 200c addiu s6,s3,42
 	a0 = sp + 74;     // 2010 addiu a0,sp,74
 	a1 = s6;     // 2014 move a1,s6
@@ -1766,7 +1749,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 5;     // 2030 li s0,5
 	};     // 202c bne a1,a0,8096
 
-	__2034:
 	a0 = *((uint32_t *)(sp + 124));     // 2034 lw a0,124(sp)
 	a1 = zero;     // 2038 move a1,zero
 	a2 = 32;     // 203c li a2,32
@@ -1797,7 +1779,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = v0;     // 2094 move s0,v0
 	};     // 2090 bnez v0,8096
 
-	__2098:
 	s1 = sp + 91;     // 2098 addiu s1,sp,91
 	a2 = *((uint32_t *)(sp + 640));     // 209c lw a2,640(sp)
 	a0 = s1;     // 20a0 move a0,s1
@@ -1810,7 +1791,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = v0;     // 20b0 move s0,v0
 	};     // 20ac bnez v0,8096
 
-	__20b4:
 	a0 = *((uint32_t *)(sp + 764));     // 20b4 lw a0,764(sp)
 	a1 = s1;     // 20b8 move a1,s1
 	a2 = 32;     // 20bc li a2,32
@@ -1823,7 +1803,7 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	a3 = 361;     // 20d8 li a3,361
 	s1 = sp + 132;     // 20dc addiu s1,sp,132
 	*((uint32_t *)(sp + 16)) = s8;     // 20e4 sw s8,16(sp)
-	func_d80_c(a0, a1, a2, a3, s8);
+	func_d80_c(a0, a1, a2, a3, (uint8_t *)s8);
 	a1 = s0;     // 20e8 move a1,s0
 	a0 = s1;     // 20ec move a0,s1
 	a2 = 2;     // 20f0 li a2,2
@@ -1845,7 +1825,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = (int32_t)(((int16_t)t8));     // 2124 seh v1,t8
 	};     // 2120 bne a2,t7,8096
 
-	__2128:
 	a1 = v1 + s3;     // 2128 addu a1,v1,s3
 	a0 = sp + 140;     // 212c addiu a0,sp,140
 	a2 = 108;     // 2130 li a2,108
@@ -1860,7 +1839,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 4;     // 2148 li s0,4
 	};     // 2144 bne t9,s3,8096
 
-	__214c:
 	ra = (0xbfc3) << 16;     // 214c lui ra,0xbfc3
 	a1 = (uint32_t)signature_34ac;     // 2150 la a1,__data + 0x4ac
 	a0 = sp + 141;     // 2154 addiu a0,sp,141
@@ -1875,7 +1853,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 3;     // 216c li s0,3
 	};     // 2168 bnez s7,8096
 
-	__2170:
 	s2 = (0xbfc3) << 16;     // 2170 lui s2,0xbfc3
 	a1 = (uint32_t)signature_34a8;     // 2174 la a1,__data + 0x4a8
 	a0 = sp + 145;     // 2178 addiu a0,sp,145
@@ -1890,7 +1867,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = *((int8_t *)(sp + 181));     // 2190 lb v1,181(sp)
 	};     // 218c bnez v0,8096
 
-	__2194:
 	t4 = -66;     // 2194 li t4,-66
 	if(v1 != t4) {
 		s0 = 5;     // 219c li s0,5
@@ -1899,7 +1875,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 5;     // 219c li s0,5
 	};     // 2198 bne v1,t4,8096
 
-	__21a0:
 	a0 = *((uint32_t *)(sp + 768));     // 21a0 lw a0,768(sp)
 	a1 = zero;     // 21a4 move a1,zero
 	a2 = 512;     // 21a8 li a2,512
@@ -1953,7 +1928,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 2;     // 225c li s0,2
 	};     // 2258 bnez v0,8096
 
-	__2260:
 	a0 = sp + 324;     // 2260 addiu a0,sp,324
 	a1 = sp + 149;     // 2264 addiu a1,sp,149
 	a2 = 16;     // 2268 li a2,16
@@ -1967,7 +1941,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		a0 = *((uint32_t *)(sp + 760));     // 227c lw a0,760(sp)
 	};     // 2278 beqz s0,8840
 
-	__2280:
 	s0 = 1;     // 2284 li s0,1
 	goto __1fa0;     // 2280 b 8096
 
@@ -1987,7 +1960,6 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = s0;     // 22ac move v1,s0
 	};     // 22a8 beqz v0,8100
 
-	__22b0:
 	a0 = *((uint32_t *)(sp + 760));     // 22b0 lw a0,760(sp)
 	a1 = sp + 165;     // 22b4 addiu a1,sp,165
 	a2 = 16;     // 22b8 li a2,16
@@ -2081,15 +2053,15 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 
 	/* 2358 */
 	int8_t sp_40, sp_41;
-	if((ret = func_1db4_c(decrypt->FileLength, // a0
-					decrypt->pInOutBuffer,
-					&sp_40,
-					&sp_41,
-					decrypt->initusebuffer + 32, // a4 (sp + 16)
-					decrypt->initusebuffer, // a5 (sp + 20)
-					decrypt->initusebuffer + 48, // a6 (sp + 24)
-					decrypt->pGLBuffer, // a7 (sp + 28)
-					decrypt->initusebuffer + 17456)) != 0) // a8 (sp + 32)
+	if((ret = func_1db4_c((uint32_t)(decrypt->FileLength), // a0
+					(uint32_t)(decrypt->pInOutBuffer),
+					(uint32_t)(&sp_40),
+					(uint32_t)(&sp_41),
+					(uint32_t)(decrypt->initusebuffer + 32), // a4 (sp + 16)
+					(uint32_t)(decrypt->initusebuffer), // a5 (sp + 20)
+					(uint32_t)(decrypt->initusebuffer + 48), // a6 (sp + 24)
+					(uint32_t)(decrypt->pGLBuffer), // a7 (sp + 28)
+					(uint32_t)(decrypt->initusebuffer + 17456))) != 0) // a8 (sp + 32)
 		return ret;
 
 	// The firmware check routine above returns two sector counts minus 1
@@ -2171,29 +2143,21 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	return 0; // success
 }
 
-// TODO
-void func_fw_decrypt_run_c(uint32_t a0, uint32_t a1, uint32_t a2)
+void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *pGLBuffer)
 {
-	uint32_t a3, ra, s0, s1, s2, s3, s4, s5, sp, v0, v1, zero;
+	uint32_t a0, a1, a2 ,a3, ra, s0, s1, s2, s3, s5, sp, v0, v1, zero;
 	zero = 0;
 	uint32_t stack[14];
 	sp = (uint32_t)stack;
 
 	a3 = (0xbfc3) << 16;     // 2550 lui a3,0xbfc3
 	v1 = (0xbfc3) << 16;     // 2554 lui v1,0xbfc3
-	*((uint32_t *)(sp + 36)) = s3;     // 2558 sw s3,36(sp)
 	v0 = (0xbfc3) << 16;     // 255c lui v0,0xbfc3
 	s3 = (uint32_t)__bss + 0x1520;     // 2560 la s3,__bss + 0x1520
-	*((uint32_t *)(sp + 48)) = ra;     // 2564 sw ra,48(sp)
-	*((uint32_t *)(sp + 44)) = s5;     // 2568 sw s5,44(sp)
-	*((uint32_t *)(sp + 40)) = s4;     // 256c sw s4,40(sp)
-	*((uint32_t *)(sp + 32)) = s2;     // 2570 sw s2,32(sp)
-	*((uint32_t *)(sp + 28)) = s1;     // 2578 sw s1,28(sp)
-	*((uint32_t *)(sp + 24)) = s0;     // 257c sw s0,24(sp)
 	s5 = (uint32_t)__bss + 0x1320;     // 2580 la s5,__bss + 0x1320
-	s0 = a2;     // 2584 move s0,a2
-	s1 = a0;     // 2588 move s1,a0
-	s2 = a1;     // 258c move s2,a1
+	s0 = (uint32_t)pGLBuffer;     // 2584 move s0,a2
+	s1 = (uint32_t)pInOutBuffer;     // 2588 move s1,a0
+	s2 = read_bytes;     // 258c move s2,a1
 	a0 = s3;     // 2590 move a0,s3
 	a1 = zero;     // 2594 move a1,zero
 	a2 = 32;     // 2598 li a2,32
