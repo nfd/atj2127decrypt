@@ -255,7 +255,7 @@ int dump_firmware(char *filename_in)
 	decrypt_info.pInOutBuffer = malloc(DECRYPT_INOUT_LENGTH);
 	decrypt_info.InOutLen = DECRYPT_INOUT_LENGTH;
 	decrypt_info.FileLength = stat_buf.st_size;
-	decrypt_info.pGLBuffer = malloc(DECRYPT_GL_LENGTH);
+	decrypt_info.pGLBuffer = malloc(sizeof(struct GLBuffer));
 	decrypt_info.initusebuffer = malloc(DECRYPT_INIT_LENGTH);
 	decrypt_info.initusebufferlen = DECRYPT_INIT_LENGTH;
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -c -g -Wall -m32 -std=c99
+CFLAGS = -c -g -Wall -m32 -std=c99 -O2
 LDFLAGS = -m32
 
 ifeq ($(shell uname -s),Darwin)
@@ -17,6 +17,6 @@ decrypt_test: decrypt_impl.o decrypt_test.o
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f *.o decrypt_test
+	rm -f *.o decrypt_test decrypt
 
 

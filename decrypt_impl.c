@@ -1972,21 +1972,14 @@ struct inituse_detail {
 	uint8_t loc17456[2432];
 };
 
-// NB this isn't used yet
-struct glbuffer_detail {
-	uint8_t loc0[256];
-	uint32_t unused_1;
-	uint16_t rounds_to_perform;
-	uint16_t unused_2;
-	uint8_t key[32];
-	uint32_t unused_3;
-};
-
 /* Better name might be fw_decrypt_atj2127.
+ * a.k.a. func_268c_c
  * Decrypts (32 * count) bytes in-place in buf using session_key.
 */
-void func_268c_c(uint32_t *buf, uint32_t *session_key, int count)
+void fw_decrypt_atj2127(void *buf_v, void *session_key_v, int count)
 {
+	uint32_t *buf = buf_v;
+	uint32_t *session_key = session_key_v;
 	uint32_t key[8];
 	int i;
 
@@ -2102,7 +2095,7 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	int length = 16 * 1024;
 
 	while(length >= 512) {
-		func_268c_c((uint32_t *)current_sector, (uint32_t *)inituse, rounds_to_perform); // 246c
+		fw_decrypt_atj2127((uint32_t *)current_sector, (uint32_t *)inituse, rounds_to_perform); // 246c
 		length -= 512;
 		current_sector += 512;
 	}
@@ -2111,7 +2104,7 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	if(length != 0) { // 2510
 		// TODO: This is clearly dead code, so what's it for?
 		memcpy(inituse->loc16944, inituse->loc560, length);
-		func_268c_c((uint32_t *)(inituse->loc16944), (uint32_t *)inituse, rounds_to_perform);
+		fw_decrypt_atj2127((uint32_t *)(inituse->loc16944), (uint32_t *)inituse, rounds_to_perform);
 		memcpy(inituse->loc560, inituse->loc16944, length);
 	}
 
@@ -2122,10 +2115,10 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	memcpy(decrypt->pInOutBuffer, inituse->loc560, decrypt->InOutLen-2048); // 2498
 
 	// Store the number of rounds for later
-	memcpy(&(decrypt->pGLBuffer[260]), &rounds_to_perform, 2);
+	decrypt->pGLBuffer->rounds_to_perform = rounds_to_perform;
 
-	// Store encrypt key or encryption initial state?
-	memcpy(&(decrypt->pGLBuffer[264]), inituse, 32);
+	// Store decryption key
+	memcpy(decrypt->pGLBuffer->key, inituse, 32);
 
 	// Return the number of bytes decrypted.
 	decrypt->InOutLen -= 2048;
@@ -2133,71 +2126,40 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	return 0; // success
 }
 
-void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, uint8_t *pGLBuffer)
+/*
+ * Use the key derived during initialisation to decrypt a buffer.
+ *
+ * Note that the key is reset before decryption begins, and the maximum size
+ * passed here is 2048, so decryption begins anew every 2 kilobytes.
+ *
+ * Official firmwares never seem to pass a size not a multiple of 512, so the
+ * partial-sector-decryption code here is never used.
+ *
+*/
+void func_fw_decrypt_run_c(uint8_t *pInOutBuffer, uint32_t read_bytes, struct GLBuffer *pGLBuffer)
 {
-	uint32_t a0, a1, a2, s0, s1, s2, s3, s5, sp, zero;
-	zero = 0;
-	uint32_t stack[14];
-	sp = (uint32_t)stack;
+	uint8_t session_key[32];
+	uint8_t *current = pInOutBuffer;
 
-	s3 = (uint32_t)__bss + 0x1520;     // 2560 la s3,__bss + 0x1520
-	s5 = (uint32_t)__bss + 0x1320;     // 2580 la s5,__bss + 0x1320
-	s0 = (uint32_t)pGLBuffer;     // 2584 move s0,a2
-	s1 = (uint32_t)pInOutBuffer;     // 2588 move s1,a0
-	s2 = read_bytes;     // 258c move s2,a1
-	a0 = s3;     // 2590 move a0,s3
-	a1 = zero;     // 2594 move a1,zero
-	a2 = 32;     // 2598 li a2,32
-	memset((void *)a0, a1, a2);     // 259c jal memset
-	a0 = s5;     // 25a4 move a0,s5
-	a1 = zero;     // 25a8 move a1,zero
-	a2 = 512;     // 25ac li a2,512
-	memset((void *)a0, a1, a2);     // 25b0 jal memset
-	a0 = sp + 16;     // 25b8 addiu a0,sp,16
-	a1 = s0 + 260;     // 25bc addiu a1,s0,260
-	a2 = 2;     // 25c0 li a2,2
-	memcpy((void *)a0, (void *)a1, a2);     // 25c4 jal memcpy
-	a0 = s3;     // 25cc move a0,s3
-	a1 = s0 + 264;     // 25d0 addiu a1,s0,264
-	a2 = 32;     // 25d4 li a2,32
-	memcpy((void *)a0, (void *)a1, a2);     // 25d8 jal memcpy
-	a2 = (((int32_t)s2) < 512);     // 25e4 slti a2,s2,512
-	goto __25fc;     // 25e0 b 9724
+	memcpy(session_key, pGLBuffer->key, sizeof(session_key));
 
-	__25e8:
-	a2 = *((int16_t*)(16 + sp));     // 25e8 lh a2,16(sp)
-	s2 = s2 + -512;     // 25f0 addiu s2,s2,-512
-	func_268c_c((void *)a0, (void *)a1, a2);
-	s1 = s1 + 512;     // 25f4 addiu s1,s1,512
-	a2 = (((int32_t)s2) < 512);     // 25f8 slti a2,s2,512
-
-	__25fc:
-	a0 = s1;     // 25fc move a0,s1
-	if(a2 == 0) {
-		a1 = s3;     // 2604 move a1,s3
-		goto __25e8;
-	} else {
-		a1 = s3;     // 2604 move a1,s3
-	};     // 2600 beqz a2,9704
-
-	if(s2 != 0) {
-		goto __2630;
+	while(read_bytes >= 512) {
+		fw_decrypt_atj2127(current, session_key, pGLBuffer->rounds_to_perform);
+		read_bytes -= 512;
+		current += 512;
 	}
 
-	return;     // 2628 jr ra
+	if(read_bytes != 0) {
+		/* Amount read wasn't a multiple of sector size, so decrypt the final
+		 * partial sector.
+		*/
+		uint8_t buf[512];
 
-	__2630:
-	a0 = s5;     // 2630 move a0,s5
-	a1 = s1;     // 2634 move a1,s1
-	a2 = s2;     // 2638 move a2,s2
-	memcpy((void *)a0, (void *)a1, a2);     // 263c jal memcpy
-	a2 = *((int16_t*)(16 + sp));     // 2644 lh a2,16(sp)
-	a0 = s5;     // 2648 move a0,s5
-	a1 = s3;     // 2650 move a1,s3
-	func_268c_c((void *)a0, (void *)a1, a2);     // 264c jal func_268c
-	a0 = s1;     // 2654 move a0,s1
-	a1 = s5;     // 2658 move a1,s5
-	a2 = s2;     // 265c move a2,s2
-	memcpy((void *)a0, (void *)a1, a2);     // 2660 jal memcpy
+		memset(buf, 0, 512);
+
+		memcpy(buf, current, read_bytes);
+		fw_decrypt_atj2127(buf, session_key, pGLBuffer->rounds_to_perform);
+		memcpy(current, buf, read_bytes);
+	}
 }
 
