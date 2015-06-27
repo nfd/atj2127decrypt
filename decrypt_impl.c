@@ -1538,6 +1538,15 @@ int func_1ca0_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4)
 	return v0;     // 1dac jr ra
 }
 
+// a0: file length
+// a1: pInOutBuffer
+// a2: output (number of sectors #1, passed as a uint8_t *)
+// a3: output (number of sectors #1, '')
+// a4: ?? (16 bytes)
+// a5: decryption key is stored here
+// a6: ?? 
+// a7: pGLBuffer
+// a8: wayyy up the top of initusebuffer
 int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t a7, uint32_t a8)
 {
 	int32_t ra, s0, s1, s2, s3, s4, s6, s7, s8, sp, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;

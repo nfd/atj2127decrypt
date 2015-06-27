@@ -68,7 +68,9 @@ read_and_decrypt(struct decrypt_struct *decrypt_info, int fd, uint8_t *buffer, i
 		else
 			read_bytes = length;
 
-		if(read(fd, decrypt_info->pInOutBuffer, read_bytes) != read_bytes) {
+		int amt_read = read(fd, decrypt_info->pInOutBuffer, read_bytes);
+		if(amt_read != read_bytes) {
+			printf("amt read %d read bytes %d length %d\n", amt_read, read_bytes, length);
 			perror("read_and_decrypt: read");
 			return -1;
 		}
@@ -84,61 +86,37 @@ read_and_decrypt(struct decrypt_struct *decrypt_info, int fd, uint8_t *buffer, i
 	return 0;
 }
 
+#define WRITE_BUFFER_SIZE (16 * 1024)
 static int
 firmware_file_write(struct decrypt_struct *decrypt_info, int fd, int fd_out, uint32_t fw_offset, uint32_t fw_length)
 {
-    uint16_t sector_num;
-    uint32_t write_addr;
 	uint8_t *data_buffer; /* Scratch memory */
+	size_t buffer_length = WRITE_BUFFER_SIZE < fw_length ? WRITE_BUFFER_SIZE : fw_length;
 
-	data_buffer = malloc(16 * 1024);
+	data_buffer = malloc(buffer_length);
 	if(!data_buffer) {
 		perror("Couldn't allocate scratch\n");
 		return -1;
 	}
 
-    uint16_t sector_total = (uint16_t)((fw_length + 511) / 512);
-
 	lseek(fd, fw_offset, SEEK_SET);
-	if(read_and_decrypt(decrypt_info, fd, data_buffer, 16 * 1024) != 0) {
-		perror("firmware_file_write: read initial");
-		free(data_buffer);
-		return -1;
-	}
 
-    write_addr = 0;
+    while (fw_length) {
+		size_t chunk_size = WRITE_BUFFER_SIZE < fw_length ? WRITE_BUFFER_SIZE : fw_length;
 
-	if(write(fd_out, data_buffer, 16 * 1024) != 16 * 1024) {
-		perror("firmware_file_write: write initial");
-		free(data_buffer);
-		return -1;
-	} else {
-        write_addr += 16 * 1024;
-    }
-
-    sector_total -= 32;
-
-    while (sector_total > 0) {
-        if (sector_total > 32) {
-            sector_num = 32;
-        } else {
-            sector_num = sector_total;
-        }
-
-		if(read_and_decrypt(decrypt_info, fd, data_buffer, sector_num * 512) != 0) {
+		if(read_and_decrypt(decrypt_info, fd, data_buffer, chunk_size) != 0) {
 			printf("firmware_file_write: read_and_decrypt in loop\n");
 			free(data_buffer);
 			return -1;
 		}
 
-		if(write(fd_out, data_buffer, sector_num * 512) != sector_num * 512) {
+		if(write(fd_out, data_buffer, chunk_size) != chunk_size) {
 			printf("firmware_file_write: write in loop\n");
 			free(data_buffer);
 			return -1;
 		}
 
-        write_addr += sector_num << 9;
-        sector_total -= sector_num;
+		fw_length -= chunk_size;
     }
 
 	free(data_buffer);
@@ -178,13 +156,18 @@ dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *output_dir, 
 		return -1;
 	}
 
-	int fd_out = open(pathname, O_CREAT | O_RDWR, 0666);
+	int fd_out = open(pathname, O_CREAT | O_WRONLY | O_TRUNC, 0666);
 	if(fd_out < 0) {
 		perror("open fd_out");
 		return -1;
 	}
 
-	printf("Writing %s (type %c)\n", filename, direntry->type);
+	/*printf("AFI dir entry: type %d, address %x, offset %x, length %x, sub_type %x, checksum %x\n",
+			direntry->type, direntry->address, direntry->offset, direntry->length, direntry->sub_type,
+			direntry->checksum);
+			*/
+
+	printf("Writing %s (type %c, length %d)\n", filename, direntry->type, direntry->length);
 
 	firmware_file_write(decrypt_info, fd, fd_out, firmware_base + direntry->offset, direntry->length);
 	close(fd_out);

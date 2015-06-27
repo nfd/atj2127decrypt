@@ -16,8 +16,8 @@ upgrade-clip-jam-1.03.hex d9f92cf7a588be48f82af4f0497fa484ffd6845f  out/FWSCF647
 upgrade-clip-jam-1.03.hex ad19b5d5c930a5bd6b5117b2631ac3c5cc0b996a  out/FWSCF648.BIN
 upgrade-clip-jam-1.03.hex acc6275181edb7e06a03950641697c0dbcd4d1ce  out/FWSCF649.BIN
 upgrade-clip-jam-1.03.hex ec3cdeabbfb4b7d0d5767b130a75916e2b5c4f6f  out/FWSCF650.BIN
-upgrade-clip-jam-1.03.hex 18a186a419fd2ff4dd761d5039c88fa878c6943a  out/MBREC.BIN
-upgrade-clip-jam-1.03.hex 3f16ae0e10a71a533ae393e024ea2f9ccce45852  out/NANDHWSC.BIN
+upgrade-clip-jam-1.03.hex 1045b1430633e3f09a4869fca917aace9ca4559a  out/MBREC.BIN
+upgrade-clip-jam-1.03.hex d6826ddb21eca23cb533a00de8590e6287295dea  out/NANDHWSC.BIN
 upgrade-1.22.hex 97ce185e1274c01092b474460439f4da8011458a  out/BRECF644.BIN
 upgrade-1.22.hex 9e85f9c442f618246f49d8eb1dbdd80a3e545006  out/BRECF645.BIN
 upgrade-1.22.hex 9b3bcadeb0efb2d0aadd620b8fd3163a519bfc43  out/BRECF646.BIN
@@ -36,8 +36,8 @@ upgrade-1.22.hex 056575e1c33a706333b1083fe8f6ed0b8296965d  out/FWSCF647.BIN
 upgrade-1.22.hex 7695524fed9ba32396c96ed12bc9936c86dc8bd3  out/FWSCF648.BIN
 upgrade-1.22.hex 61c5e3e32846d1f9b819182d76ada1ffc083b7e7  out/FWSCF649.BIN
 upgrade-1.22.hex 1561083a14800a8c883011c9e668c9e2dfea6a96  out/FWSCF650.BIN
-upgrade-1.22.hex f25c103961fe62f374465837bc20ab51c7190f3c  out/MBREC.BIN
-upgrade-1.22.hex f08c4a4362d8359bc27f7b25385d133fb2464554  out/NANDHWSC.BIN
+upgrade-1.22.hex 1045b1430633e3f09a4869fca917aace9ca4559a  out/MBREC.BIN
+upgrade-1.22.hex 69aef00e65feda4e978e5c1a397ce82fb807fa97  out/NANDHWSC.BIN
 Muse4_Cpu_Cap_v1.20A.upg cf95e728f92bc510b0c48b6264d2c291048c8f1f  out/ADEC09_2.BIN
 Muse4_Cpu_Cap_v1.20A.upg ba2ed76fdde7945c2ecc6b1c21aced942e403414  out/ADFUS.BIN
 Muse4_Cpu_Cap_v1.20A.upg a6a865dcd93dc9e42ec0ebf24886327be2192ff8  out/FAT16.BIN
@@ -45,7 +45,7 @@ Muse4_Cpu_Cap_v1.20A.upg 3f2b9584a26e7fa4cc1d88e0b4102c2c2e24936a  out/FIBAK.FW
 Muse4_Cpu_Cap_v1.20A.upg f49b87160ea60ef3d91f529fe6ebe900689cf3e2  out/FWIMAGE.FW
 Muse4_Cpu_Cap_v1.20A.upg 2bce605d2f4f5b964f8487d4d9f39a7fa7ab0be1  out/MBRCF092.BIN
 Muse4_Cpu_Cap_v1.20A.upg 031122d55a366eb8bbf675c600c5b353267e22f9  out/NFCHIPID.BIN
-Muse4_Cpu_Cap_v1.20A.upg 9b6cd9b073b8b97b036c063ffc6cae418f8dbbdd  out/RR_NFINF.BIN
+Muse4_Cpu_Cap_v1.20A.upg 9f64ea11befa398e2ee3a0b18e4a22559faa8571  out/RR_NFINF.BIN
 upgrade-1.15.hex 209ce60d0e1e3fa8ed3db8dd70367a00e1d5c731  out/BRECF644.BIN
 upgrade-1.15.hex 0ddbcb550f7c468715ceb49a53ce4929fa450ff0  out/BRECF645.BIN
 upgrade-1.15.hex 8bea09c04ddea83a1c33c5c4edcd1fce2e518983  out/BRECF646.BIN
@@ -64,8 +64,8 @@ upgrade-1.15.hex 8a4c0de51fe93e09e1329c37fb24c1aad83c41c5  out/FWSCF647.BIN
 upgrade-1.15.hex c2bc05088c700a2abe46845e5f587ca118d2af5f  out/FWSCF648.BIN
 upgrade-1.15.hex 369985d38e446580cc71085f02e7e9ca0ed501e8  out/FWSCF649.BIN
 upgrade-1.15.hex 777e9cd4eff1e6a0334416dc65906fe4c198b19f  out/FWSCF650.BIN
-upgrade-1.15.hex f5a843fe713381728aca37774f5bf54c139f7886  out/MBREC.BIN
-upgrade-1.15.hex d5caf5e88855a7d29f40af18b4789ce57423c798  out/NANDHWSC.BIN
+upgrade-1.15.hex 1045b1430633e3f09a4869fca917aace9ca4559a  out/MBREC.BIN
+upgrade-1.15.hex 65a02e247d5842d6133380a20de21179e0bc579b  out/NANDHWSC.BIN
 upgrade-1.17.hex 209ce60d0e1e3fa8ed3db8dd70367a00e1d5c731  out/BRECF644.BIN
 upgrade-1.17.hex 0ddbcb550f7c468715ceb49a53ce4929fa450ff0  out/BRECF645.BIN
 upgrade-1.17.hex 8bea09c04ddea83a1c33c5c4edcd1fce2e518983  out/BRECF646.BIN
@@ -84,8 +84,8 @@ upgrade-1.17.hex 8a4c0de51fe93e09e1329c37fb24c1aad83c41c5  out/FWSCF647.BIN
 upgrade-1.17.hex c2bc05088c700a2abe46845e5f587ca118d2af5f  out/FWSCF648.BIN
 upgrade-1.17.hex 369985d38e446580cc71085f02e7e9ca0ed501e8  out/FWSCF649.BIN
 upgrade-1.17.hex 777e9cd4eff1e6a0334416dc65906fe4c198b19f  out/FWSCF650.BIN
-upgrade-1.17.hex 7a7d19dd93e11db22df604c8445936887b109c66  out/MBREC.BIN
-upgrade-1.17.hex 7562e7447ede0f0c7e0b7c94a8b25a2ca7e91da6  out/NANDHWSC.BIN
+upgrade-1.17.hex 1045b1430633e3f09a4869fca917aace9ca4559a  out/MBREC.BIN
+upgrade-1.17.hex a53b8c59b1cb7d1f25ab7da41333bfc4bcb46e7d  out/NANDHWSC.BIN
 upgrade-1.18.hex 656cd640c5cb2671cdba2da55ea30aa1fe467b6e  out/BRECF644.BIN
 upgrade-1.18.hex 6c9ff3a5b8cc005df5aa37385335c1fd84561a17  out/BRECF645.BIN
 upgrade-1.18.hex 0e20812401ba7ead14a9b36d5738509435cc9faf  out/BRECF646.BIN
@@ -104,8 +104,8 @@ upgrade-1.18.hex 9d4371a7dc9587907a7924475329c14af275f0a9  out/FWSCF647.BIN
 upgrade-1.18.hex 187d1262440a03006b329a7084eb38fcd011966c  out/FWSCF648.BIN
 upgrade-1.18.hex 0708cad5c3bcee76eaf47096ad3446a0fe75dd0f  out/FWSCF649.BIN
 upgrade-1.18.hex 47e6959eb52380994c6e142642f198bfee6c3f0c  out/FWSCF650.BIN
-upgrade-1.18.hex df9cbbb11597d05962d1ca9045bc741316545f7f  out/MBREC.BIN
-upgrade-1.18.hex 03aa353ba930d6c317732e5c33726ac328a5347f  out/NANDHWSC.BIN
+upgrade-1.18.hex 1045b1430633e3f09a4869fca917aace9ca4559a  out/MBREC.BIN
+upgrade-1.18.hex 6ee1e1a05bd5c7c64a367eb31a76232747a97ed0  out/NANDHWSC.BIN
 upgrade-sweetpea.hex d9b7592ec6be66701a502701de899522842edc83  out/BRECF644.BIN
 upgrade-sweetpea.hex 58a4cf5a27f5617c3485d0f361dd699872a2a1da  out/BRECF645.BIN
 upgrade-sweetpea.hex 84e40d27c6ab0b556ad6e3f0960bb199ed336e0f  out/BRECF646.BIN
@@ -114,7 +114,7 @@ upgrade-sweetpea.hex 7a84b9ff624794569dc2f2b59acada7cc7d09e73  out/BRECF648.BIN
 upgrade-sweetpea.hex aba05b918a3285cd33c24b9eecb3a77f5aa3433a  out/BRECF649.BIN
 upgrade-sweetpea.hex d0f054056da7a4b0191fb377c5fa1e42ba997151  out/BRECF650.BIN
 upgrade-sweetpea.hex 53d3270ff578c3e040501fb7b07e682d5d5ff43c  out/FLASH_ID.BIN
-upgrade-sweetpea.hex 5d69def2dfbb3f1884c23d42ce077d9ae2e2124f  out/FWIMAGE.FW
+upgrade-sweetpea.hex 1f6b1f23a4cd5a943deb9e8e28e110d69e057ad8  out/FWIMAGE.FW
 upgrade-sweetpea.hex 698943dafa36104788c26c09ef7cd88047fbffe8  out/FWSCF644.BIN
 upgrade-sweetpea.hex 0a65dc8f68f204af2182b6f399a6429428be36ea  out/FWSCF645.BIN
 upgrade-sweetpea.hex 6d29ce0609e5e02975d29684867463d426953f24  out/FWSCF646.BIN
@@ -122,5 +122,5 @@ upgrade-sweetpea.hex 417dd6deda62c3d33ca0211b4c359c9c41fcc3de  out/FWSCF647.BIN
 upgrade-sweetpea.hex 462825af84b7ff13b57f9c237673e980bf795139  out/FWSCF648.BIN
 upgrade-sweetpea.hex 611f1da2aee797bb7e2b4c8782773ceb4814d042  out/FWSCF649.BIN
 upgrade-sweetpea.hex 4f188d3d8ee46a3f14d66ba8364791d857c6f8c1  out/FWSCF650.BIN
-upgrade-sweetpea.hex 30993dfa3f3ec44fc5943d04a0c46ef378cb6e01  out/MBREC.BIN
-upgrade-sweetpea.hex a589fc99e90b02e93c7b1cb1f39ec60e4aa08a17  out/NANDHWSC.BIN
+upgrade-sweetpea.hex 1045b1430633e3f09a4869fca917aace9ca4559a  out/MBREC.BIN
+upgrade-sweetpea.hex c1a093c19697de2de773c5787f43eae5f314929e  out/NANDHWSC.BIN
