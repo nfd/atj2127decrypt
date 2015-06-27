@@ -3,8 +3,8 @@
 test_one() {
 	#echo $1 >> test/compare
 	rm -Rf out
-	./decrypt ../$1
-	ls out/* | xargs sha1sum | sed "s/^/$1 /" - >> test/compare
+	./decrypt test-firmware/$1
+	ls out/* | xargs sha1sum | sed "s/^/$1 /" >> test/compare
 }
 
 make
