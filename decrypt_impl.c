@@ -122,7 +122,8 @@ uint8_t data_3484[] = {
 	0x41, 0xc5, 0x51, 0xaf
 };
 
-uint8_t firmware_signature_3498[] = {
+// aka _data_3498
+uint8_t firmware_signature[] = {
 	0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
 	0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x75   /* "3DUfw... */ /* 34a8 */
 };
@@ -1538,7 +1539,7 @@ int func_1ca0_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4)
 	return v0;     // 1dac jr ra
 }
 
-// a0: file length
+// a0: file length (unused)
 // a1: pInOutBuffer
 // a2: output (number of sectors #1, passed as a uint8_t *)
 // a3: output (number of sectors #1, '')
@@ -1546,23 +1547,23 @@ int func_1ca0_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4)
 // a5: decryption key is stored here
 // a6: ?? 
 // a7: pGLBuffer
-// a8: wayyy up the top of initusebuffer
-int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t a7, uint32_t a8)
+// a8: wayyy up the top of initusebuffer -- stores a bunch of sectors
+int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_count_1, uint8_t *sector_count_2, uint32_t a4, uint32_t a5, uint32_t a6, uint32_t pGLBuffer, uint8_t *scratch)
 {
-	int32_t ra, s0, s1, s2, s3, s4, s6, s7, s8, sp, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
+	int32_t a0, a1, a2, a3, ra, s0, s1, s2, s3, s4, s6, s7, s8, sp, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, v0, v1, zero;
 	zero = 0;
+	int ret;
 	uint32_t stack[196];
 	sp = (uint32_t)stack;
 
 	// sp offset by -744
-	*((uint32_t*)(sp + 744 + 16)) = a4;
-	*((uint32_t*)(sp + 744 + 20)) = a5;
-	*((uint32_t*)(sp + 744 + 24)) = a6;
-	*((uint32_t*)(sp + 744 + 28)) = a7;
-	*((uint32_t*)(sp + 744 + 32)) = a8;
+	//*((uint32_t*)(sp + 744 + 16)) = a4;
+	//*((uint32_t*)(sp + 744 + 20)) = a5;
+	//*((uint32_t*)(sp + 744 + 24)) = a6;
+	//*((uint32_t*)(sp + 744 + 28)) = a7;
+	//*((uint32_t*)(sp + 744 + 32)) = a8;
 
-	s4 = *((uint32_t *)(sp + 776));     // 1dbc lw s4,776(sp)
-	a0 = (0xbfc3) << 16;     // 1dc0 lui a0,0xbfc3
+	s4 = (uint32_t)scratch;     // 1dbc lw s4,776(sp)
 	t6 = s4 + 1536;     // 1dc4 addiu t6,s4,1536
 	t5 = s4 + 1664;     // 1dc8 addiu t5,s4,1664
 	t0 = s4 + 1792;     // 1dcc addiu t0,s4,1792
@@ -1570,14 +1571,10 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	t2 = s4 + 2048;     // 1dd4 addiu t2,s4,2048
 	t3 = s4 + 2176;     // 1dd8 addiu t3,s4,2176
 	t4 = s4 + 2304;     // 1ddc addiu t4,s4,2304
-	s3 = a1;     // 1df8 move s3,a1
-	a0 = s4;     // 1dfc move a0,s4
-	a1 = zero;     // 1e00 move a1,zero
-	s1 = a2;     // 1e04 move s1,a2
-	s7 = a3;     // 1e08 move s7,a3
-	a2 = 512;     // 1e0c li a2,512
-	a3 = 1;     // 1e10 li a3,1
-	s0 = s4 + 512;     // 1e14 addiu s0,s4,512
+	s3 = (uint32_t)pInOutBuffer;     // 1df8 move s3,a1
+
+	uint8_t *directory = scratch + 512;
+	s0 = (uint32_t)directory;     // 1e14 addiu s0,s4,512
 	*((uint32_t *)(sp + 256)) = t6;     // 1e1c sw t6,256(sp)
 	*((uint32_t *)(sp + 260)) = t5;     // 1e20 sw t5,260(sp)
 	*((uint32_t *)(sp + 640)) = t0;     // 1e24 sw t0,640(sp)
@@ -1586,113 +1583,58 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	*((uint32_t *)(sp + 680)) = t3;     // 1e30 sw t3,680(sp)
 	*((uint32_t *)(sp + 684)) = t4;     // 1e34 sw t4,684(sp)
 	*((uint16_t *)(sp + 24)) = (zero & 0xffff);     // 1e44 sh zero,24(sp)
-	*((uint8_t *)(sp + 672)) = (zero & 0xff);     // 1e48 sb zero,672(sp)
 	*((uint8_t *)(sp + 673)) = (zero & 0xff);     // 1e4c sb zero,673(sp)
-	s8 = *((uint32_t *)(sp + 772));     // 1e54 lw s8,772(sp)
-	memset((void *)a0, a1, a2);
-	a0 = s0;     // 1e58 move a0,s0
-	a1 = zero;     // 1e5c move a1,zero
-	a2 = 512;     // 1e60 li a2,512
-	a3 = 1;     // 1e68 li a3,1
-	memset((void *)a0, a1, a2);
-	v1 = (0xbfc3) << 16;     // 1e6c lui v1,0xbfc3
-	s6 = (uint32_t)firmware_signature_3498;     // 1e70 la s6,__data + 0x498
-	a0 = s3;     // 1e74 move a0,s3
-	a1 = s6;     // 1e78 move a1,s6
-	a2 = 16;     // 1e7c li a2,16
-	a3 = 2;     // 1e84 li a3,2
-	v0 = memcmp((void *)a0, (void *)a1, a2);
-	v0 = (int8_t)v0;     // 1e88 seb v0,v0
-	if(v0 != 0) {
-		v1 = 3;     // 1e90 li v1,3
-		goto __1fa4;
-	} else {
-		v1 = 3;     // 1e90 li v1,3
-	};     // 1e8c bnez v0,8100
+	s8 = pGLBuffer;     // 1e54 lw s8,772(sp)
 
-	t9 = *((uint8_t*)(494 + s3));     // 1e94 lbu t9,494(s3)
-	a0 = s0;     // 1e98 move a0,s0
-	a2 = t9 & 0xf;     // 1e9c andi a2,t9,0xf
-	*((uint8_t *)(s1 + 0)) = (a2 & 0xff);     // 1ea0 sb a2,0(s1)
-	t8 = *((uint8_t*)(510 + s3));     // 1ea4 lbu t8,510(s3)
-	a2 = 1024;     // 1ea8 li a2,1024
-	a3 = t8 & 0xf;     // 1eac andi a3,t8,0xf
-	*((uint8_t *)(s7 + 0)) = (a3 & 0xff);     // 1eb0 sb a3,0(s7)
-	s2 = *((uint8_t *)(s1 + 0));     // 1eb4 lb s2,0(s1)
-	a3 = zero;     // 1eb8 move a3,zero
-	t7 = s2 << 0x9;     // 1ebc sll t7,s2,0x9
-	a1 = t7 + s3;     // 1ec0 addu a1,t7,s3
-	a1 = a1 + 1024;     // 1ec4 addiu a1,a1,1024
-	s2 = sp + 320;     // 1ecc addiu s2,sp,320
-	memcpy((void *)a0, (void *)a1, a2);
-	a0 = s0;     // 1ed0 move a0,s0
-	a1 = sp + 248;     // 1ed4 addiu a1,sp,248
-	a2 = s2;     // 1ed8 move a2,s2
-	a3 = sp + 672;     // 1ee0 addiu a3,sp,672
-	v0 = func_808_c((void *)a0, (void *)a1, (void *)a2, (void *)a3);
-	if(v0 != 0) {
-		s0 = v0;     // 1ee8 move s0,v0
-		goto __1fa0;
-	} else {
-		s0 = v0;     // 1ee8 move s0,v0
-	};     // 1ee4 bnez v0,8096
+	// In original this was done in two 512-byte operations
+	memset(scratch, 0, 1024);
 
-	ra = *((uint8_t *)(s1 + 0));     // 1eec lb ra,0(s1)
-	v0 = *((uint8_t *)(s7 + 0));     // 1ef0 lb v0,0(s7)
-	a0 = s4;     // 1ef4 move a0,s4
-	s7 = ra + v0;     // 1ef8 addu s7,ra,v0
-	s1 = s7 << 0x9;     // 1efc sll s1,s7,0x9
-	s0 = s1 + s3;     // 1f00 addu s0,s1,s3
-	a1 = s0 + 2560;     // 1f04 addiu a1,s0,2560
-	a2 = 512;     // 1f08 li a2,512
-	a3 = zero;     // 1f10 move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
-	a0 = s4;     // 1f14 move a0,s4
-	a1 = s8;     // 1f18 move a1,s8
-	a2 = sp + 673;     // 1f1c addiu a2,sp,673
-	a3 = sp + 616;     // 1f20 addiu a3,sp,616
-	*((uint32_t *)(sp + 16)) = s2;     // 1f28 sw s2,16(sp)
-	v0 = func_1ca0_c(a0, a1, a2, a3, s2);
-	if(v0 != 0) {
-		s0 = v0;     // 1f30 move s0,v0
-		goto __1fa0;
-	} else {
-		s0 = v0;     // 1f30 move s0,v0
-	};     // 1f2c bnez v0,8096
+	if(memcmp(pInOutBuffer, firmware_signature, 16) != 0) {
+		// Bad signature 
+		return 3;
+	}
 
-	s2 = sp + 32;     // 1f34 addiu s2,sp,32
-	a0 = s2;     // 1f38 move a0,s2
-	a1 = zero;     // 1f3c move a1,zero
-	a2 = 91;     // 1f40 li a2,91
-	a3 = 1;     // 1f48 li a3,1
-	memset((void *)a0, a1, a2);
-	a0 = s2;     // 1f4c move a0,s2
-	a1 = s3;     // 1f50 move a1,s3
-	a2 = 42;     // 1f54 li a2,42
-	a3 = zero;     // 1f5c move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
-	a1 = s6;     // 1f60 move a1,s6
-	a0 = s2;     // 1f64 move a0,s2
-	a2 = 16;     // 1f68 li a2,16
-	a3 = 2;     // 1f70 li a3,2
-	v0 = memcmp((void *)a0, (void *)a1, a2);
-	s6 = (int8_t)v0;     // 1f74 seb s6,v0
-	if(s6 != 0) {
-		s0 = 3;     // 1f7c li s0,3
-		goto __1fa0;
-	} else {
-		s0 = 3;     // 1f7c li s0,3
-	};     // 1f78 bnez s6,8096
+	/* Seems like these are just placed randomly to hide their meaning. Note
+	 * that the top 4 bits are discarded from each -- these are not zero in
+	 * official firmwares, and are presumably random values */
+	*sector_count_1 = pInOutBuffer[494] & 0xf;
+	*sector_count_2 = pInOutBuffer[510] & 0xf;
 
-	v1 = *((uint8_t *)(sp + 56));     // 1f80 lb v1,56(sp)
-	t4 = 126;     // 1f84 li t4,126
-	if(v1 != t4) {
-		s0 = 8;     // 1f8c li s0,8
-		goto __1fa0;
-	} else {
-		s0 = 8;     // 1f8c li s0,8
-	};     // 1f88 bne v1,t4,8096
+	int sector_count_1_bytes = ((int)*sector_count_1) * 512;
 
+	memcpy(directory, pInOutBuffer + sector_count_1_bytes + 1024, 1024);
+
+	uint8_t decrypted_ok = 0;
+
+	/* Decrypt central directory block */
+	ret = func_808_c(directory, (void *)(sp + 248), (void *)(sp + 320), &decrypted_ok);
+	if(ret != 0) {
+		return ret;
+	}
+
+	int skip_sectors = ((int)(*sector_count_1 + *sector_count_2)) << 0x9;
+
+	memcpy(scratch, pInOutBuffer + skip_sectors + 2560, 512);
+
+	ret = func_1ca0_c((uint32_t)scratch, pGLBuffer, sp + 673, sp + 616, sp + 320);
+	if(ret != 0) {
+		return ret;
+	}
+
+	memset((void *)(sp + 32), 0, 91);
+
+	memcpy((void *)(sp + 32), pInOutBuffer, 42);
+
+	/* do exactly the same signature check again */
+	if(memcmp((void *)(sp + 32), firmware_signature, 16) != 0) {
+		return 3; // bad signature
+	}
+
+	if(*((uint8_t *)(sp + 56)) != 0x7e) { // 24 bytes into file should be 0x7e
+		return 8;
+	}
+
+	// sector size?
 	t2 = *((uint32_t *)(sp + 52));     // 1f90 lw t2,52(sp)
 	t3 = 512;     // 1f94 li t3,512
 	if(t2 == t3) {
@@ -1749,25 +1691,20 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	};     // 202c bne a1,a0,8096
 
 	a0 = *((uint32_t *)(sp + 124));     // 2034 lw a0,124(sp)
-	a1 = zero;     // 2038 move a1,zero
-	a2 = 32;     // 203c li a2,32
-	a3 = 1;     // 2044 li a3,1
-	memset((void *)a0, a1, a2);
+	memset((void *)a0, 0, 32);
+
 	a0 = *((uint32_t *)(sp + 128));     // 2048 lw a0,128(sp)
-	a1 = zero;     // 204c move a1,zero
-	a2 = 32;     // 2050 li a2,32
-	a3 = 1;     // 2058 li a3,1
-	memset((void *)a0, a1, a2);
+	memset((void *)a0, 0, 32);
+
 	a0 = *((uint32_t *)(sp + 124));     // 205c lw a0,124(sp)
-	a1 = s3 + 91;     // 2060 addiu a1,s3,91
-	a2 = 30;     // 2064 li a2,30
-	a3 = zero;     // 206c move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
+	memcpy((void *)a0, (void *)(s3 + 91), 30);
+
 	a0 = *((uint32_t *)(sp + 128));     // 2070 lw a0,128(sp)
 	a1 = s3 + 121;     // 2074 addiu a1,s3,121
 	a2 = 30;     // 2078 li a2,30
 	a3 = zero;     // 2080 move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);
+
 	a1 = *((uint8_t *)(sp + 252));     // 2084 lb a1,252(sp)
 	a0 = sp + 680;     // 208c addiu a0,sp,680
 	v0 = func_1a44_c(a0);
@@ -1790,13 +1727,13 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = v0;     // 20b0 move s0,v0
 	};     // 20ac bnez v0,8096
 
-	a0 = *((uint32_t *)(sp + 764));     // 20b4 lw a0,764(sp)
+	a0 = a5;     // 20b4 lw a0,764(sp)
 	a1 = s1;     // 20b8 move a1,s1
 	a2 = 32;     // 20bc li a2,32
 	a3 = zero;     // 20c4 move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);
 	s0 = s3 + 151;     // 20c8 addiu s0,s3,151
-	a0 = *((uint32_t *)(sp + 764));     // 20cc lw a0,764(sp)
+	a0 = a5;     // 20cc lw a0,764(sp)
 	a2 = s0;     // 20d0 move a2,s0
 	a1 = zero;     // 20d4 move a1,zero
 	a3 = 361;     // 20d8 li a3,361
@@ -1874,12 +1811,12 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		s0 = 5;     // 219c li s0,5
 	};     // 2198 bne v1,t4,8096
 
-	a0 = *((uint32_t *)(sp + 768));     // 21a0 lw a0,768(sp)
+	a0 = a6;     // 21a0 lw a0,768(sp)
 	a1 = zero;     // 21a4 move a1,zero
 	a2 = 512;     // 21a8 li a2,512
 	a3 = 1;     // 21b0 li a3,1
 	memset((void *)a0, a1, a2);
-	t1 = *((uint32_t *)(sp + 768));     // 21b4 lw t1,768(sp)
+	t1 = a6;     // 21b4 lw t1,768(sp)
 	s7 = sp + 182;     // 21b8 addiu s7,sp,182
 	s3 = t1 + 492;     // 21bc addiu s3,t1,492
 	a3 = zero;     // 21c0 move a3,zero
@@ -1891,7 +1828,7 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	a1 = 492;     // 21d8 li a1,492
 	a2 = s3;     // 21e0 move a2,s3
 	func_97c_c((void *)a0, a1, (void *)a2);
-	t2 = *((uint32_t *)(sp + 768));     // 21e4 lw t2,768(sp)
+	t2 = a6;     // 21e4 lw t2,768(sp)
 	a1 = s4;     // 21e8 move a1,s4
 	s0 = *((uint8_t*)(500 + t2));     // 21ec lbu s0,500(t2)
 	a0 = t2;     // 21f0 move a0,t2
@@ -1910,7 +1847,7 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	a0 = s1 + 16;     // 2224 addiu a0,s1,16
 	a3 = zero;     // 222c move a3,zero
 	memcpy((void *)a0, (void *)a1, a2);
-	a2 = *((uint32_t *)(sp + 768));     // 2230 lw a2,768(sp)
+	a2 = a6;     // 2230 lw a2,768(sp)
 	a0 = s3;     // 2234 move a0,s3
 	a1 = 16;     // 2238 li a1,16
 	a3 = 492;     // 223c li a3,492
@@ -1934,10 +1871,10 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 	v0 = memcmp((void *)a0, (void *)a1, a2);
 	s0 = (int8_t)v0;     // 2274 seb s0,v0
 	if(s0 == 0) {
-		a0 = *((uint32_t *)(sp + 760));     // 227c lw a0,760(sp)
+		a0 = a4;     // 227c lw a0,760(sp)
 		goto __2288;
 	} else {
-		a0 = *((uint32_t *)(sp + 760));     // 227c lw a0,760(sp)
+		a0 = a4;     // 227c lw a0,760(sp)
 	};     // 2278 beqz s0,8840
 
 	s0 = 1;     // 2284 li s0,1
@@ -1959,7 +1896,7 @@ int func_1db4_c(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4,
 		v1 = s0;     // 22ac move v1,s0
 	};     // 22a8 beqz v0,8100
 
-	a0 = *((uint32_t *)(sp + 760));     // 22b0 lw a0,760(sp)
+	a0 = a4;     // 22b0 lw a0,760(sp)
 	a1 = sp + 165;     // 22b4 addiu a1,sp,165
 	a2 = 16;     // 22b8 li a2,16
 	a3 = 2;     // 22c0 li a3,2
@@ -2044,16 +1981,16 @@ int func_fw_decrypt_init_c(struct decrypt_struct *decrypt)
 	memset(decrypt->initusebuffer, 0, DECRYPT_INIT_LENGTH);
 
 	/* 2358 */
-	int8_t sp_40, sp_41;
+	uint8_t sp_40, sp_41;
 	if((ret = func_1db4_c((uint32_t)(decrypt->FileLength), // a0
-					(uint32_t)(decrypt->pInOutBuffer),
-					(uint32_t)(&sp_40),
-					(uint32_t)(&sp_41),
+					decrypt->pInOutBuffer,
+					&sp_40,
+					&sp_41,
 					(uint32_t)(decrypt->initusebuffer + 32), // a4 (sp + 16)
 					(uint32_t)(decrypt->initusebuffer), // a5 (sp + 20)
 					(uint32_t)(decrypt->initusebuffer + 48), // a6 (sp + 24)
 					(uint32_t)(decrypt->pGLBuffer), // a7 (sp + 28)
-					(uint32_t)(decrypt->initusebuffer + 17456))) != 0) // a8 (sp + 32)
+					decrypt->initusebuffer + 17456)) != 0) // a8 (sp + 32)
 		return ret;
 
 	// The firmware check routine above returns two sector counts minus 1

@@ -7,7 +7,7 @@ test_one() {
 	ls out/* | xargs sha1sum | sed "s/^/$1 /" >> test/compare
 }
 
-make
+make || exit
 rm -f test/compare
 
 test_one upgrade-clip-jam-1.03.hex
