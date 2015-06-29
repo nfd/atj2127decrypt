@@ -1,1 +1,2 @@
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0781", ATTRS{idProduct}=="74e7", SYMLINK+="sub20", GROUP="usb", MODE="660"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="10d6", ATTRS{idProduct}=="10d6", SYMLINK+="sub20", GROUP="usb", MODE="660"

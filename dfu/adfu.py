@@ -17,8 +17,11 @@ Reload the rules:
 	udevadm control --reload-rules
 """
 import time
+import argparse
+import struct
 
-DEVICES = {'Sandisk Clip Sport': (0x0781, 0x74E7)}
+UDISK_DEVICES = {'Sandisk Clip Sport': (0x0781, 0x74E7)}
+ADFU_DEVICES = {'Actions Semiconductor ADFU': (0x10d6, 0x10d6)}
 
 import usb.core
 import usb.util
@@ -26,8 +29,8 @@ import usb.util
 EP_TO_DEVICE = 0x2
 EP_FROM_DEVICE = 0x81
 
-def _find_device():
-	for device_name, (idvendor, idproduct) in DEVICES.items():
+def _find_device(devices):
+	for device_name, (idvendor, idproduct) in devices.items():
 		dev = usb.core.find(idVendor=idvendor, idProduct=idproduct)
 		if dev is not None:
 			print("Found", device_name)
@@ -75,7 +78,7 @@ def _cmd_unknown_1():
 		])
 
 def switch_to_dfu():
-	dev = _find_device()
+	dev = _find_device(UDISK_DEVICES)
 	if dev is None:
 		return
 
@@ -101,6 +104,131 @@ def switch_to_dfu():
 	ret = dev.read(EP_FROM_DEVICE, 512)
 	print(ret)
 
+def adfu_reboot():
+	return bytes([0x55, 0x53, 0x42, 0x43, # USBC
+		0x00, 0x00, 0x00, 0x00, # tag
+		0x00, 0x00, 0x00, 0x00, # length
+		0x00, # flags
+		0x00, # LUN 0
+		0x10, # CDB length
+		0xb0, 0x00, 0x00, 0x00, # data
+		0x00, 0x00, 0x00, 0x00, # data
+		0x00, 0x00, 0x00, 0x00, # data
+		0x00, 0x00, 0x00, 0x00, # data
+		0x00, 0x00, 0x00, 0x00  # data
+		])
+
+def switch_to_udisk():
+	dev = _find_device(ADFU_DEVICES)
+
+	dev.write(EP_TO_DEVICE, adfu_reboot())
+	ret = dev.read(EP_FROM_DEVICE, 512)
+	print(ret)
+
+def adfu_write_to_ram(length, start_address):
+	return struct.pack('<IIIBBBBIIIBBB',
+			0x43425355, # 'USBC'
+			0x00000000, # tag
+			length,
+			0, # flags
+			0, # LUN
+			0x10, # CDB length
+			0xcd,
+			0x00000013, # command
+			length,
+			start_address,
+			0, 0, 0)
+
+def adfu_prepare_exec(start_address):
+	return struct.pack('<IIIBBBBIIIBBB',
+			0x43425355, # 'USBC'
+			0x00000000, # tag
+			0, # length
+			0, # flags
+			0, # LUN
+			0x10, # CDB length
+			0xcd,
+			0x00000020, # command
+			0, # unused
+			start_address,
+			0, 0, 0)
+
+def adfu_execute(start_address):
+	return struct.pack('<IIIBBBBIIIBBB',
+			0x43425355, # 'USBC'
+			0x00000000, # tag
+			0, # length
+			0, # flags
+			0, # LUN
+			0x10, # CDB length
+			0xcd,
+			0x00000021, # command
+			0, # unused
+			start_address,
+			0, 0, 0)
+
+def adfu_read_result_block(size):
+	return struct.pack('<IIIBBBBIIIBBB',
+			0x43425355, # 'USBC'
+			0x00000000, # tag
+			size, # length
+			0x80, # flags
+			0, # LUN
+			0x10, # CDB length
+			0xcd,
+			0x00000023, # command
+			size,
+			0, # unused
+			0, 0, 0)
+
+def run_code(filename):
+	# Prepare to read data
+	with open('ADFUS.BIN', 'rb') as h:
+		adfus = h.read()
+
+	with open(filename, 'rb') as h:
+		data = h.read()
+
+	dev = _find_device(ADFU_DEVICES)
+
+	dev.write(EP_TO_DEVICE, adfu_write_to_ram(len(adfus), 0xbfc18000))
+	dev.write(EP_TO_DEVICE, adfus)
+	print(dev.read(EP_FROM_DEVICE, 512))
+
+	dev.write(EP_TO_DEVICE, adfu_prepare_exec(0xbfc18000))
+	print(dev.read(EP_FROM_DEVICE, 512))
+
+	print("start exec")
+	assert len(data) < (27 * 1024), "Code too large to fit in RAM"
+
+	dev.write(EP_TO_DEVICE, adfu_write_to_ram(len(data), 0xbfc1e000))
+	dev.write(EP_TO_DEVICE, data)
+
+	print(dev.read(EP_FROM_DEVICE, 512))
+
+	print("do exec")
+	dev.write(EP_TO_DEVICE, adfu_execute(0xbfc1e000))
+	time.sleep(0.1)
+	print(dev.read(EP_FROM_DEVICE, 512))
+
+	print("read back")
+	dev.write(EP_TO_DEVICE, adfu_read_result_block(156))
+	print(dev.read(EP_FROM_DEVICE, 512))
+	print(dev.read(EP_FROM_DEVICE, 512))
+
 if __name__ == '__main__':
-	switch_to_dfu()
+	parser = argparse.ArgumentParser()
+	parser.add_argument('command', choices=('adfu', 'udisk', 'run_code'))
+	parser.add_argument('args', nargs='*')
+	args = parser.parse_args()
+
+	if args.command == 'adfu':
+		switch_to_dfu(*args.args)
+	elif args.command == 'udisk':
+		switch_to_udisk(*args.args)
+	elif args.command == 'run_code':
+		run_code(*args.args)
+	else:
+		raise NotImplementedError()
+
 
