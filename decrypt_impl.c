@@ -1635,60 +1635,19 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	}
 
 	// sector size?
-	t2 = *((uint32_t *)(sp + 52));     // 1f90 lw t2,52(sp)
-	t3 = 512;     // 1f94 li t3,512
-	if(t2 == t3) {
-		s0 = 3;     // 1f9c li s0,3
-		goto __1fd8;
-	} else {
-		s0 = 3;     // 1f9c li s0,3
-	};     // 1f98 beq t2,t3,8152
+	if(*((uint32_t *)(sp + 52)) != 512)
+		return 3;
 
-	__1fa0:
-	v1 = s0;     // 1fa0 move v1,s0
+	if (*((uint8_t*)(57 + sp)) != 225)
+		return 3;
 
-	__1fa4:
-	v0 = v1;     // 1fcc move v0,v1
-	return v0;     // 1fd0 jr ra
+	if(memcmp((void *)(sp + 58), signature_34b0, 16) != 0)
+		return 3;
 
-	__1fd8:
-	t0 = *((uint8_t*)(57 + sp));     // 1fd8 lbu t0,57(sp)
-	t1 = 225;     // 1fdc li t1,225
-	if(t0 != t1) {
-		v1 = s0;     // 1fe4 move v1,s0
-		goto __1fa4;
-	} else {
-		v1 = s0;     // 1fe4 move v1,s0
-	};     // 1fe0 bne t0,t1,8100
+	memcpy((void *)(sp + 74), (void *)(s3 + 42), 49);
 
-	t6 = (0xbfc3) << 16;     // 1fe8 lui t6,0xbfc3
-	a1 = (uint32_t)signature_34b0;     // 1fec la a1,__data + 0x4b0
-	a0 = sp + 58;     // 1ff0 addiu a0,sp,58
-	a2 = 16;     // 1ff4 li a2,16
-	a3 = 2;     // 1ffc li a3,2
-	v0 = memcmp((void *)a0, (void *)a1, a2);
-	t5 = (int8_t)v0;     // 2000 seb t5,v0
-	if(t5 != 0) {
-		v1 = s0;     // 2008 move v1,s0
-		goto __1fa4;
-	} else {
-		v1 = s0;     // 2008 move v1,s0
-	};     // 2004 bnez t5,8100
-
-	s6 = s3 + 42;     // 200c addiu s6,s3,42
-	a0 = sp + 74;     // 2010 addiu a0,sp,74
-	a1 = s6;     // 2014 move a1,s6
-	a2 = 49;     // 2018 li a2,49
-	a3 = zero;     // 2020 move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
-	a1 = *((uint8_t *)(sp + 90));     // 2024 lb a1,90(sp)
-	a0 = 3;     // 2028 li a0,3
-	if(a1 != a0) {
-		s0 = 5;     // 2030 li s0,5
-		goto __1fa0;
-	} else {
-		s0 = 5;     // 2030 li s0,5
-	};     // 202c bne a1,a0,8096
+	if(*((uint8_t *)(sp + 90)) != 3)
+		return 5;
 
 	a0 = *((uint32_t *)(sp + 124));     // 2034 lw a0,124(sp)
 	memset((void *)a0, 0, 32);
@@ -1701,19 +1660,14 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 
 	a0 = *((uint32_t *)(sp + 128));     // 2070 lw a0,128(sp)
 	a1 = s3 + 121;     // 2074 addiu a1,s3,121
-	a2 = 30;     // 2078 li a2,30
-	a3 = zero;     // 2080 move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
+	memcpy((void *)a0, (void *)a1, 30);
 
 	a1 = *((uint8_t *)(sp + 252));     // 2084 lb a1,252(sp)
 	a0 = sp + 680;     // 208c addiu a0,sp,680
 	v0 = func_1a44_c(a0);
 	if(v0 != 0) {
-		s0 = v0;     // 2094 move s0,v0
-		goto __1fa0;
-	} else {
-		s0 = v0;     // 2094 move s0,v0
-	};     // 2090 bnez v0,8096
+		return v0;
+	}
 
 	s1 = sp + 91;     // 2098 addiu s1,sp,91
 	a2 = *((uint32_t *)(sp + 640));     // 209c lw a2,640(sp)
@@ -1721,45 +1675,26 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	a1 = sp + 124;     // 20a8 addiu a1,sp,124
 	v0 = func_1a88_c(a0, a1, a2);
 	if(v0 != 0) {
-		s0 = v0;     // 20b0 move s0,v0
-		goto __1fa0;
-	} else {
-		s0 = v0;     // 20b0 move s0,v0
-	};     // 20ac bnez v0,8096
+		return v0;
+	}
 
-	a0 = a5;     // 20b4 lw a0,764(sp)
-	a1 = s1;     // 20b8 move a1,s1
-	a2 = 32;     // 20bc li a2,32
-	a3 = zero;     // 20c4 move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
-	s0 = s3 + 151;     // 20c8 addiu s0,s3,151
-	a0 = a5;     // 20cc lw a0,764(sp)
-	a2 = s0;     // 20d0 move a2,s0
-	a1 = zero;     // 20d4 move a1,zero
-	a3 = 361;     // 20d8 li a3,361
-	s1 = sp + 132;     // 20dc addiu s1,sp,132
-	*((uint32_t *)(sp + 16)) = s8;     // 20e4 sw s8,16(sp)
-	func_d80_c(a0, a1, a2, a3, (uint8_t *)s8);
-	a1 = s0;     // 20e8 move a1,s0
-	a0 = s1;     // 20ec move a0,s1
-	a2 = 2;     // 20f0 li a2,2
-	a3 = zero;     // 20f8 move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
-	a2 = 2;     // 20fc li a2,2
-	a1 = s1;     // 2100 move a1,s1
-	a0 = sp + 24;     // 2104 addiu a0,sp,24
-	a3 = zero;     // 210c move a3,zero
-	memcpy((void *)a0, (void *)a1, a2);
+	memcpy((void *)a5, (void *)s1, 32);
+
+	func_d80_c(a5, 0, (s3 + 151), 361, (uint8_t *)s8);
+
+	memcpy((void *)(sp + 132), (void *)(s3 + 151), 2);
+
+	memcpy((void *)(sp + 24), (void *)(sp + 132), 2);
+
 	a2 = *((int16_t*)(24 + sp));     // 2110 lh a2,24(sp)
 	t7 = 251;     // 2114 li t7,251
 	t8 = a2 + 153;     // 2118 addiu t8,a2,153
 	s0 = 3;     // 211c li s0,3
 	if(a2 != t7) {
-		v1 = (int32_t)(((int16_t)t8));     // 2124 seh v1,t8
-		goto __1fa0;
-	} else {
-		v1 = (int32_t)(((int16_t)t8));     // 2124 seh v1,t8
-	};     // 2120 bne a2,t7,8096
+		return 3;
+	} 
+
+	v1 = (int32_t)(((int16_t)t8));     // 2124 seh v1,t8
 
 	a1 = v1 + s3;     // 2128 addu a1,v1,s3
 	a0 = sp + 140;     // 212c addiu a0,sp,140
@@ -1769,8 +1704,7 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	t9 = *((uint8_t *)(sp + 140));     // 213c lb t9,140(sp)
 	s3 = 2;     // 2140 li s3,2
 	if(t9 != s3) {
-		s0 = 4;     // 2148 li s0,4
-		goto __1fa0;
+		return 4;
 	} else {
 		s0 = 4;     // 2148 li s0,4
 	};     // 2144 bne t9,s3,8096
@@ -1784,7 +1718,7 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	s7 = (int8_t)v0;     // 2164 seb s7,v0
 	if(s7 != 0) {
 		s0 = 3;     // 216c li s0,3
-		goto __1fa0;
+		return 3;
 	} else {
 		s0 = 3;     // 216c li s0,3
 	};     // 2168 bnez s7,8096
@@ -1798,15 +1732,14 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	v0 = (int8_t)v0;     // 2188 seb v0,v0
 	if(v0 != 0) {
 		v1 = *((int8_t *)(sp + 181));     // 2190 lb v1,181(sp)
-		goto __1fa0;
+		return s0; // 3?
 	} else {
 		v1 = *((int8_t *)(sp + 181));     // 2190 lb v1,181(sp)
 	};     // 218c bnez v0,8096
 
 	t4 = -66;     // 2194 li t4,-66
 	if(v1 != t4) {
-		s0 = 5;     // 219c li s0,5
-		goto __1fa0;
+		return 5;
 	} else {
 		s0 = 5;     // 219c li s0,5
 	};     // 2198 bne v1,t4,8096
@@ -1853,13 +1786,13 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	a3 = 492;     // 223c li a3,492
 	*((uint32_t *)(sp + 16)) = s8;     // 2244 sw s8,16(sp)
 	func_d2c_c((void *)a0, a1, a2, a3, (void *)s8);
+	s6 = ((uint32_t)pInOutBuffer) + 42;     // 200c addiu s6,s3,42
 	a0 = s6;     // 2248 move a0,s6
 	a1 = sp + 228;     // 224c addiu a1,sp,228
 	a2 = 450;     // 2254 li a2,450
 	v0 = func_abc_c((void *)a0, (void *)a1, a2);
 	if(v0 != 0) {
-		s0 = 2;     // 225c li s0,2
-		goto __1fa0;
+		return 2;
 	} else {
 		s0 = 2;     // 225c li s0,2
 	};     // 2258 bnez v0,8096
@@ -1878,7 +1811,7 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	};     // 2278 beqz s0,8840
 
 	s0 = 1;     // 2284 li s0,1
-	goto __1fa0;     // 2280 b 8096
+	return 1;
 
 	__2288:
 	a1 = sp + 688;     // 2288 addiu a1,sp,688
@@ -1891,7 +1824,7 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	v0 = memcmp((void *)a0, (void *)a1, a2);
 	if(v0 == 0) {
 		v1 = s0;     // 22ac move v1,s0
-		goto __1fa4;
+		return v1;
 	} else {
 		v1 = s0;     // 22ac move v1,s0
 	};     // 22a8 beqz v0,8100
@@ -1906,7 +1839,7 @@ int func_1db4_c(uint32_t file_length, uint8_t *pInOutBuffer, uint8_t *sector_cou
 	if(s4 == 0) {
 		s0 = s4;
 	};     // 22d0 movz s0,s4,s4
-	goto __1fa0;     // 22cc b 8096
+	return s0;
 }
 
 struct inituse_detail {
