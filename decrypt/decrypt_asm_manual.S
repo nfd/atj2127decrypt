@@ -1,4 +1,4 @@
-#include "regdef.h"
+#include "mips-regdef.h"
 
 #define _offset_libc -28595
 

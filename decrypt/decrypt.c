@@ -10,16 +10,7 @@
 
 #include "decrypt_impl.h"
 
-/* From SDK */
-typedef struct {
-	uint8_t   name[11]; /* 8.3 format */
-	uint8_t   type; // A, B, H, F, S, U, or I  -- no idea what this is for yet
-	uint32_t  address;
-	uint32_t  offset; // file offset in bytes
-	uint32_t  length; // length in bytes, rounded up to 512 bytes 
-	uint32_t  sub_type;
-	uint32_t  checksum;
-} AFI_DIR_t;
+#include "ucos-structs.h"
 
 /* Files to look for in the firmware image */
 const uint8_t fwimage_key_name[] = "FWIMAGE FW ";

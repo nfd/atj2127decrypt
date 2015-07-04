@@ -7,13 +7,13 @@ ifeq ($(shell uname -s),Darwin)
 	LDFLAGS += -arch i386
 endif
 
-decrypt: decrypt_impl.o decrypt.o
-	$(CC) $(LDFLAGS) -o decrypt $+
+extract: extract.o allocs.o
+	$(CC) $(LDFLAGS) -o extract $+
 
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f *.o decrypt_test decrypt
+	rm -f *.o extract
 
 

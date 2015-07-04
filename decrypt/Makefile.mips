@@ -1,5 +1,5 @@
 CC = musl-gcc
-CFLAGS = -c -g -march=mips32r2 -Wall -mno-plt -mno-shared -fno-pic -static -std=c99 -G0 -mno-gpopt
+CFLAGS = -c -g -march=mips32r2 -Wall -mno-plt -mno-shared -fno-pic -static -std=c99 -G0 -mno-gpopt -I ../include
 LDFLAGS = -Xassembler -non_shared -static
 
 #decrypt: decrypt_asm.o decrypt.o
