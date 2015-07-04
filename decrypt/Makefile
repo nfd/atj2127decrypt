@@ -10,9 +10,6 @@ endif
 decrypt: decrypt_impl.o decrypt.o
 	$(CC) $(LDFLAGS) -o decrypt $+
 
-decrypt_test: decrypt_impl.o decrypt_test.o
-	$(CC) $(LDFLAGS) -o decrypt_test $+
-
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
