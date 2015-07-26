@@ -59,13 +59,15 @@ class USBMSC:
 	"""
 	Mass Storage Controller driver
 	"""
-	def __init__(self, devices=None, mock_device=None):
+	def __init__(self, devices=None, mock_device=None, timeout_ms=None):
 		if mock_device:
 			self.dev = mock_device
 			self.mock = True
 		else:
 			self.dev = _find_device(devices) # may raise DeviceNotFound
 			self.mock = False
+
+		self.timeout_ms = timeout_ms
 	
 	def sleep(self, secs):
 		if not self.mock:
@@ -97,39 +99,39 @@ class USBMSC:
 		return self.make_msc_cmd(msc_size, 0, cdb, flags=flags)
 
 	def adfu_write_to_flash(self, addr, binary):
-		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(len(binary), 0x10, len(binary) // 512, addr))
-		self.dev.write(EP_TO_DEVICE, binary)
-		status = self.dev.read(EP_FROM_DEVICE, 512)
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(len(binary), 0x10, len(binary) // 512, addr), self.timeout_ms)
+		self.dev.write(EP_TO_DEVICE, binary, self.timeout_ms)
+		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		return self.check_status(status)
 
 	def adfu_write_to_ram(self, addr, binary):
-		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(len(binary), 0x13, len(binary), addr))
-		self.dev.write(EP_TO_DEVICE, binary)
-		status = self.dev.read(EP_FROM_DEVICE, 512)
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(len(binary), 0x13, len(binary), addr), self.timeout_ms)
+		self.dev.write(EP_TO_DEVICE, binary, self.timeout_ms)
+		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		return self.check_status(status)
 
 	def adfu_switch_fw(self, addr):
-		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x20, 0, addr))
-		status = self.dev.read(EP_FROM_DEVICE, 512)
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x20, 0, addr), self.timeout_ms)
+		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		return self.check_status(status)
 
 	def adfu_read_result_block(self, size):
 		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(size, 0x23, size, 0, flags=0x80))
-		result = self.dev.read(EP_FROM_DEVICE, size)
-		status = self.dev.read(EP_FROM_DEVICE, 512)
+		result = self.dev.read(EP_FROM_DEVICE, size, self.timeout_ms)
+		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		self.check_status(status)
-		return result
+		return bytearray(result)
 
 	def adfu_execute(self, addr):
-		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x21, 0, addr))
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x21, 0, addr), self.timeout_ms)
 		time.sleep(0.1) # TODO
-		status = self.dev.read(EP_FROM_DEVICE, 512)
+		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		return self.check_status(status)
 
 	def adfu_reboot(self):
 		cdb = struct.pack('<BIIIBBB', 0xb0, 0, 0, 0, 0, 0, 0)
-		self.dev.write(EP_TO_DEVICE, self.make_msc_cmd(0, 0, cdb, flags=0))
-		status = self.dev.read(EP_FROM_DEVICE, 512)
+		self.dev.write(EP_TO_DEVICE, self.make_msc_cmd(0, 0, cdb, flags=0), self.timeout_ms)
+		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		return self.check_status(status)
 
 def _cmd_unknown_0():

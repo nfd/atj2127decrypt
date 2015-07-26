@@ -576,6 +576,7 @@ class Package:
 		# TODO: calculations based on this result
 
 		# Send MBREC
+		output.set_download_status('mbrec')
 		mbrec = load_mbrec(self)
 		usb_msc.adfu_write_to_flash(self['mbrec']['download_address'], mbrec)
 
@@ -603,6 +604,7 @@ class Package:
 		# Send BREC, in 64k chunks for some reason.
 		brec.set_header_data(len(lfi) // 512, capinfo.get(), 0, 0)
 		brec_bytes = brec.get()
+		output.set_download_status('brec')
 		download_address = brec.download_address
 		idx = 0
 		while idx < len(brec_bytes):
@@ -614,6 +616,7 @@ class Package:
 			idx += amt
 
 		# send LFI (firmware)
+		output.set_download_status('lfi')
 		lfi.set_cap(capinfo['vm_disk_cap'], capinfo['udisk_cap'])
 		download_address = lfi.download_address
 		lfi_bytes = lfi.get()
@@ -624,10 +627,12 @@ class Package:
 			idx += amt
 
 		# Send "ADFU debug buffer", aka 512 zero bytes.
+		output.set_download_status('debug')
 		debug_buf = bytearray(512)
 		usb_msc.adfu_write_to_flash(0xff000000, debug_buf)
 
 		# We're done! Reboot! Yay!
+		output.set_download_status('reboot')
 		usb_msc.adfu_reboot()
 
 
@@ -647,7 +652,7 @@ def main():
 		msc = adfu.USBMSC(mock_device=adfu_mock_usb_device.MockUSBDevice('test_actions_adfu_upgrade/indfu%02d.bin', 56,
 			skip_header=27, max_size=65535))
 	else:
-		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES)
+		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=10 * 1000)
 
 	package = Package(CONFIG, 'upgrade')
 
