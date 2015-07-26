@@ -7,10 +7,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <getopt.h>
+#include <stdbool.h>
 
 #include "decrypt_impl.h"
+#include "extract_fwimage.h"
+#include "extract_brec.h"
 
 #include "ucos-structs.h"
+#include "adfu_info.h"
 
 /* Files to look for in the firmware image */
 const uint8_t fwimage_key_name[] = "FWIMAGE FW ";
@@ -48,6 +53,18 @@ find_afi_dir_key(uint8_t *buffer, uint32_t buffer_len, const uint8_t *name, uint
 }
 #endif
 
+
+typedef int(write_file_callback)(uint8_t *, size_t, void*);
+
+struct write_file_to_disk_callback_data {
+	int fd;
+};
+
+struct write_file_to_buffer_callback_data {
+	int idx;
+	uint8_t *buffer;
+};
+
 static int
 read_and_decrypt(struct decrypt_struct *decrypt_info, int fd, uint8_t *buffer, int length)
 {
@@ -79,7 +96,7 @@ read_and_decrypt(struct decrypt_struct *decrypt_info, int fd, uint8_t *buffer, i
 
 #define WRITE_BUFFER_SIZE (16 * 1024)
 static int
-firmware_file_write(struct decrypt_struct *decrypt_info, int fd, int fd_out, uint32_t fw_offset, uint32_t fw_length)
+firmware_file_write(struct decrypt_struct *decrypt_info, int fd, write_file_callback *cb, void *cb_data, uint32_t fw_offset, uint32_t fw_length)
 {
 	uint8_t *data_buffer; /* Scratch memory */
 	size_t buffer_length = WRITE_BUFFER_SIZE < fw_length ? WRITE_BUFFER_SIZE : fw_length;
@@ -101,7 +118,7 @@ firmware_file_write(struct decrypt_struct *decrypt_info, int fd, int fd_out, uin
 			return -1;
 		}
 
-		if(write(fd_out, data_buffer, chunk_size) != chunk_size) {
+		if((*cb)(data_buffer, chunk_size, cb_data) != 0) {
 			printf("firmware_file_write: write in loop\n");
 			free(data_buffer);
 			return -1;
@@ -135,10 +152,22 @@ make_sensible_direntry_filename(AFI_DIR_t *direntry, char *out)
 }
 
 static int
-dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *output_dir, uint32_t firmware_base, AFI_DIR_t *direntry)
+write_file_to_disk_callback(uint8_t *data, size_t size, void *cb_data)
+{
+	int fd_out = ((struct write_file_to_disk_callback_data *)cb_data)->fd;
+
+	if(write(fd_out, data, size) != size)
+		return -1;
+
+	return 0;
+}
+
+static int
+write_file_to_disk(struct decrypt_struct *decrypt_info, int fd, char *output_dir, uint32_t firmware_base, AFI_DIR_t *direntry)
 {
 	char filename[8 + 3 + 2]; // max 8 character name, 3 character stem, a dot, and a \0.
 	char pathname[256];
+	struct write_file_to_disk_callback_data cb_data;
 
 	make_sensible_direntry_filename(direntry, filename);
 
@@ -160,14 +189,76 @@ dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *output_dir, 
 
 	printf("Writing %s (type %c, length %d)\n", filename, direntry->type, direntry->length);
 
-	firmware_file_write(decrypt_info, fd, fd_out, firmware_base + direntry->offset, direntry->length);
+	cb_data.fd = fd_out;
+
+	firmware_file_write(decrypt_info, fd, &write_file_to_disk_callback, &cb_data, firmware_base + direntry->offset, direntry->length);
 	close(fd_out);
 	return 0;
 }
 
+static int
+write_file_to_buffer_callback(uint8_t *data, size_t size, void *v_cb_data)
+{
+	struct write_file_to_buffer_callback_data *cb_data = v_cb_data;
+
+	memcpy(cb_data->buffer + cb_data->idx, data, size);
+	cb_data->idx += size;
+
+	return 0;
+}
+
+static uint8_t *
+write_file_to_buffer(struct decrypt_struct *decrypt_info, int fd, char *output_dir, uint32_t firmware_base, AFI_DIR_t *direntry)
+{
+	struct write_file_to_buffer_callback_data cb_data;
+
+	cb_data.buffer = malloc(direntry->length);
+	cb_data.idx = 0;
+
+	firmware_file_write(decrypt_info, fd, write_file_to_buffer_callback, &cb_data, firmware_base + direntry->offset, direntry->length);
+
+	return cb_data.buffer;
+}
+
+static int dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *output_dir, uint32_t firmware_base, AFI_DIR_t *current, bool split, struct adfu_info *info)
+{
+	bool write_to_disk = true;
+
+	if(split) {
+		if (memcmp(current->name, "FWIMAGE FW ", 11) == 0) {
+			uint8_t *data = write_file_to_buffer(decrypt_info, fd, output_dir, firmware_base, current);
+
+			extract_fwimage_from_bytes(data, output_dir);
+
+			if(info)
+				get_adfu_info(data, info);
+
+			free(data);
+			write_to_disk = false;
+		}
+
+		if (memcmp(current->name, "BRECF650BIN", 11) == 0) { /* TODO: no particular reason to use this one */
+			uint8_t *data = write_file_to_buffer(decrypt_info, fd, output_dir, firmware_base, current);
+
+			split_brec_bytes(data, output_dir);
+
+			free(data);
+
+			// Write brec to disk anyway
+		}
+
+	}
+
+	
+	if(write_to_disk) {
+		write_file_to_disk(decrypt_info, fd, output_dir, firmware_base, current);
+	}
+
+	return 0;
+}
 
 static int
-do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir)
+do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir, bool split, struct adfu_info *info)
 {
 	int ret;
 	uint32_t firmware_base;
@@ -188,7 +279,7 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir)
 	//printf("firmware offset %x\n", firmware_base);  // Always 0x800?
 	//dump_buffer("inital_decrypt.bin", decrypt_info->pInOutBuffer, DECRYPT_INOUT_LENGTH );
 	
-	// The decryption gives us a mapping of files to what seem to be offsets. 
+	// The decryption gives us a mapping of files to offsets. 
 	// Count the number of directory entries and store them somewhere.
 	int num_entries = 0;
 	for(AFI_DIR_t *current = (AFI_DIR_t *)decrypt_info->pInOutBuffer; current->name[0] != 0; current++)
@@ -204,7 +295,7 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir)
 	// TODO: First entry seems to be a signature of sorts rather than a file
 	for(int entry_idx = 1; entry_idx < num_entries; entry_idx++) {
 		AFI_DIR_t *current = &directory[entry_idx];
-		dump_single_file(decrypt_info, fd, output_dir, firmware_base, current);
+		dump_single_file(decrypt_info, fd, output_dir, firmware_base, current, split, info);
 	}
 
 	free(directory);
@@ -212,12 +303,57 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir)
 	return 0;
 }
 
-int dump_firmware(char *filename_in)
+static int 
+write_adfu_info(char *output_dir, struct adfu_info *info)
+{
+	char pathname[1024];
+	FILE *info_file;
+
+	sprintf(pathname, "%s/adfu_info.json", output_dir);
+
+	info_file = fopen(pathname, "w");
+
+	fprintf(info_file, "{\"fwimage\":{\n");
+	fprintf(info_file, "	\"sdk_description\": \"%.4s\",\n", info->sdk_ver);
+	fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", info->usb_setup_info);
+	fprintf(info_file, "	\"SDK_VER\": \"%s\",\n", info->sdk_description);
+	fprintf(info_file, "	\"files\":[");
+
+	for(int filename_idx=0; filename_idx < info->num_files; filename_idx++) {
+		char filename[13];
+		int new_fn_idx, old_fn_idx;
+
+		for(new_fn_idx = old_fn_idx = 0; old_fn_idx < 11; old_fn_idx ++) {
+			char c = info->filename[filename_idx][old_fn_idx];
+			if(c != ' ')
+				filename[new_fn_idx++] = c;
+
+			if(old_fn_idx == 7)
+				filename[new_fn_idx++] = '.';
+		}
+
+		filename[new_fn_idx++] = '\0';
+
+		fprintf(info_file, "\"%s\"", filename);
+
+		if(filename_idx < info->num_files - 1) {
+			fprintf(info_file, ", ");
+		}
+	}
+
+	fprintf(info_file, "]}\n}\n");
+
+	fclose(info_file);
+
+	return 0;
+}
+
+int dump_firmware(char *filename_in, char *output_dir, bool split, bool dfuscript)
 {
 	struct stat stat_buf;
 	struct decrypt_struct decrypt_info;
+	struct adfu_info info;
 	int fd_in;
-	char *output_dir = "out";
 
 	if(stat(filename_in, &stat_buf) != 0) {
 		perror("stat");
@@ -251,10 +387,13 @@ int dump_firmware(char *filename_in)
 		return -1;
 	}
 
-	if(do_dump(&decrypt_info, fd_in, output_dir) != 0) {
+	if(do_dump(&decrypt_info, fd_in, output_dir, split, dfuscript? &info : NULL) != 0) {
 		fprintf(stderr, "do_upgrade fail\n");
 		return -1;
 	}
+
+	if(dfuscript)
+		write_adfu_info(output_dir, &info);
 
 	free(decrypt_info.pInOutBuffer);
 	free(decrypt_info.pGLBuffer);
@@ -263,8 +402,61 @@ int dump_firmware(char *filename_in)
 	return 0;
 }
 
+const struct option longopts[] = {
+	{"split", no_argument, NULL, 's'},
+	{"dfu", no_argument, NULL, 'd'},
+	{"help", no_argument, NULL, 'h'}
+};
+
+static void show_help() {
+	printf("decrypt [options] filename [outdir] -- decrypt an Actions UPGRADE.HEX file\n");
+	printf("\n");
+	printf(" filename  : an UPGRADE.HEX file\n");
+	printf(" outdir    : output directory (default: 'out')\n");
+	printf("   --split : Split BREC and FWIMAGE into component parts\n");
+	printf("   --dfu   : Produce an ADFU upgrade script (implies --split)\n");
+	printf("   --help  : Show this message\n");
+}
+
+
 int main(int argc, char **argv)
 {
-	return dump_firmware(argv[1]);
+	int arg;
+
+	bool split_fw = false;
+	bool make_dfuscript = false;
+
+	while((arg = getopt_long(argc, argv, "", longopts, NULL)) != -1) {
+		switch(arg) {
+			case 's':
+				split_fw = true;
+				break;
+			case 'd':
+				make_dfuscript = split_fw = true;
+				break;
+			case 'h':
+				show_help();
+				return 1;
+			default:
+				printf("Option %c not implemented\n", arg);
+				return 1;
+		};
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if(0 == argc) {
+		show_help();
+		return 1;
+	}
+
+	char *fw_filename = argv[0];
+	char *outdir = "out";
+
+	if(argc > 1)
+		outdir = argv[1];
+
+	return dump_firmware(fw_filename, outdir, split_fw, make_dfuscript);
 }
 

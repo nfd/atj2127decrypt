@@ -2,6 +2,7 @@
 The Actions ADFU upgrade script, translated from Actions scripting language
 """
 import os
+import json
 import struct
 import argparse
 from collections import namedtuple
@@ -64,8 +65,8 @@ CONFIG = {
 	'fwimage': {
 		'sdk_description': '20121228_SVN9494_Formal_AddUHost',
 		'download_address': 0xc0000000,
-		'INF_USERDEFINED_ID_48': b'4512482ADF0FEEEE', # AKA UsbSetupInfo
-		'SDK_VER': b'1.10',
+		'INF_USERDEFINED_ID_48': '4512482ADF0FEEEE', # AKA UsbSetupInfo
+		'SDK_VER': '1.10',
 		'files': [
 			'kernel.drv', 'KER_TEXT.BIN', 'KER_INIT.BIN', 'KER_DATA.BIN',
 			'fmtdata.bin', 'card.DRV', 'cards.DRV', 'nand.DRV', 'uhost.DRV',
@@ -304,21 +305,21 @@ LDIR_t = c_struct('LDIR_t',
 		('I', 'checksum'))
 
 LFIHead_t = c_struct('LFIHead_t', 
-		('I', 'LFIFlag'),
-		('B', 'sdkversion', 4),		# from SDK_VER
-		('B', 'version', 4),		# from VER
-		('H', 'VID'),
-		('H', 'PID'),
-		('I', 'DirItemCheckSum'),
-		(LFICapInfo_t, 'CapInfo'),
-		('B', 'Reserve0', 11),
-		('B', 'udisk_setting'),		# from udisk_set_value
-		('B', 'UsbSetupInfo', 48),	# from INF_USERDEFINED_ID_48
-		('B', 'sdk_description', 336),	# from SDK_DESCRIPTION
-		('B', 'Reserve3', 42),
-		('I', 'R3_cfg_offset'),
-		('H', 'Headchecksum'),
-		(LDIR_t, 'ldiritem', 240))
+		('I', 'LFIFlag'),			# 0..3
+		('B', 'sdkversion', 4),		# from SDK_VER   4..7
+		('B', 'version', 4),		# from VER  8..11
+		('H', 'VID'),				# 12..13
+		('H', 'PID'),				# 14..15
+		('I', 'DirItemCheckSum'),   # 16..19
+		(LFICapInfo_t, 'CapInfo'),  # 20..67
+		('B', 'Reserve0', 11),		# 68..78
+		('B', 'udisk_setting'),		# from udisk_set_value  79..79
+		('B', 'UsbSetupInfo', 48),	# from INF_USERDEFINED_ID_48  80..127
+		('B', 'sdk_description', 336),	# from SDK_DESCRIPTION   128...463
+		('B', 'Reserve3', 42),		# 464..505
+		('I', 'R3_cfg_offset'),		# 506..509
+		('H', 'Headchecksum'),		# 510..513
+		(LDIR_t, 'ldiritem', 240))	# 514...
 
 ADFU_FWScanInfo_t = c_struct('ADFU_FWScanInfo_t',
 	('B', 'FrameType', 2),
@@ -370,9 +371,9 @@ class LFI:
 
 		lfihead['LFIFlag'] = 0xff0aa55 # magic LFI signature
 		lfihead.set_bytes('sdk_description', package['fwimage']['sdk_description'].encode('utf-8'))
-		lfihead.set_bytes('UsbSetupInfo', package['fwimage']['INF_USERDEFINED_ID_48'])
-		lfihead.set_bytes('sdkversion', package['fwimage']['SDK_VER'])
-		lfihead.set_bytes('version', package['fwimage']['SDK_VER']) # ?
+		lfihead.set_bytes('UsbSetupInfo', package['fwimage']['INF_USERDEFINED_ID_48'].encode('utf-8'))
+		lfihead.set_bytes('sdkversion', package['fwimage']['SDK_VER'].encode('utf-8'))
+		lfihead.set_bytes('version', package['fwimage']['SDK_VER'].encode('utf-8')) # ?
 
 		fwimage = [lfihead_bytes]
 		offset  = len(lfihead_bytes)
@@ -415,7 +416,7 @@ class LFI:
 class BrecWithResources:
 	def __init__(self, package, flash_type):
 		self._res = self._load_res(package)
-		self._brec_bin = self._load_merged_brec_bin(package, flash_type)
+		self._brec_bin = self._load_merged_brec_bin(package, flash_type, len(self._res))
 
 		self.sector_count = (len(self._brec_bin) + len(self._res)) // 512 # dwSector_Size = dBRECCap in original
 		self.download_address = package['brec']['download_address']
@@ -433,7 +434,7 @@ class BrecWithResources:
 		struct.pack_into('<I', self._brec_bin, 8, dLFICap)
 		self._brec_bin[192:192 + 32] = sCapInfo
 
-	def _load_merged_brec_bin(self, package, flash_type):
+	def _load_merged_brec_bin(self, package, flash_type, resource_len):
 		"""
 		Retrieve brec and welcome.bin, insert welcome.bin 4k inside the brec,
 		and return the result. 
@@ -448,11 +449,11 @@ class BrecWithResources:
 			brec_bytes[merge_start:merge_start + len(welcome_bin_bytes)] = welcome_bin_bytes
 
 			# Store location of start and end of welcome resources
-			struct.pack_into('<HH', brec_bytes, 12, len(brec_bytes) // 512, len(self._res) // 512)
+			struct.pack_into('<HH', brec_bytes, 12, len(brec_bytes) // 512, resource_len // 512)
 
 
 		# Length of brec in sectors, length of whole ensemble in sectors.
-		struct.pack_into('<HH', brec_bytes, 4, len(brec_bytes) // 512, (len(brec_bytes) + len(self._res)) // 512)
+		struct.pack_into('<HH', brec_bytes, 4, len(brec_bytes) // 512, (len(brec_bytes) + resource_len) // 512)
 
 		# Bizzarre-o checksum
 		checksum = file_checksum(brec_bytes[512:], stride=2, magic=0x1234)
@@ -481,11 +482,20 @@ def load_mbrec(package):
 
 class Package:
 	def __init__(self, config, basedir):
-		self.config = config
+		self.config = config.copy()
 		self.basedir = basedir
+		self.update_config()
 
 	def __getitem__(self, key):
 		return self.config[key]
+
+	def update_config(self):
+		adfu_info_pathname = os.path.join(self.basedir, 'adfu_info.json')
+		if os.path.exists(adfu_info_pathname):
+			with open(adfu_info_pathname, 'r') as h:
+				adfu_info = json.load(h)
+
+			self.config['fwimage'].update(adfu_info['fwimage'])
 
 	def read_bytes(self, filename):
 		with open(os.path.join(self.basedir, filename), 'rb') as h:
@@ -646,6 +656,7 @@ class TextOutput:
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-t', '--test', action='store_true', help='Verification / test run')
+	parser.add_argument('dir', help='Directory containing upgrade')
 	args = parser.parse_args()
 
 	if args.test:
@@ -654,7 +665,7 @@ def main():
 	else:
 		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=10 * 1000)
 
-	package = Package(CONFIG, 'upgrade')
+	package = Package(CONFIG, args.dir)
 
 	output = TextOutput()
 	package.upgrade(msc, output)

@@ -1,5 +1,4 @@
 *.o
-decrypt
 out/*
 test/compare
 test-firmware/*
