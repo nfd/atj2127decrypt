@@ -19,9 +19,12 @@ Reload the rules:
 import time
 import argparse
 import struct
+from collections import namedtuple
 
-UDISK_DEVICES = {'Sandisk Clip Sport': (0x0781, 0x74E7)}
-ADFU_DEVICES = {'Actions Semiconductor ADFU': (0x10d6, 0x10d6)}
+USBDevice = namedtuple('USBDevice', ('name', 'idVendor', 'idProduct'))
+
+UDISK_DEVICES = {USBDevice('Sandisk Clip Sport', 0x0781, 0x74E7), USBDevice('Actions HS USB Flashdisk', 0x10d6, 0x1101)}
+ADFU_DEVICES = {USBDevice('Actions Semiconductor ADFU', 0x10d6, 0x10d6)}
 
 import usb.core
 import usb.util
@@ -29,15 +32,18 @@ import usb.util
 EP_TO_DEVICE = 0x2
 EP_FROM_DEVICE = 0x81
 
+class DeviceNotFound(Exception):
+	pass
+
 def _find_device(devices):
-	for device_name, (idvendor, idproduct) in devices.items():
-		dev = usb.core.find(idVendor=idvendor, idProduct=idproduct)
+	for usbdevice in devices:
+		print(usbdevice)
+		dev = usb.core.find(idVendor=usbdevice.idVendor, idProduct=usbdevice.idProduct)
 		if dev is not None:
-			print("Found", device_name)
+			print("Found", usbdevice.name)
 			break
 	else:
-		print("Can't find device")
-		return None
+		raise DeviceNotFound()
 
 	# Choose the first (and only) configuration.
 	if dev.is_kernel_driver_active(0):
@@ -48,6 +54,83 @@ def _find_device(devices):
 	#dev.set_configuration()
 
 	return dev
+
+class USBMSC:
+	"""
+	Mass Storage Controller driver
+	"""
+	def __init__(self, devices=None, mock_device=None):
+		if mock_device:
+			self.dev = mock_device
+			self.mock = True
+		else:
+			self.dev = _find_device(devices) # may raise DeviceNotFound
+			self.mock = False
+	
+	def sleep(self, secs):
+		if not self.mock:
+			time.sleep(secs)
+	
+	def check_status(self, status):
+		signature, tag, dataResidue, status = struct.unpack('<IIIB', status)
+		assert signature == 0x53425355, signature # USBS
+		assert status == 0
+		return status
+
+	def make_msc_cmd(self, size, lun, cdb, flags=0):
+		return struct.pack('<IIIBBB',
+				0x43425355, # 'USBC'
+				0x00000000, # tag
+				size, # length
+				flags,
+				lun, # LUN
+				len(cdb)) + cdb
+
+	def make_adfu_cmd(self, msc_size, cmd, length, start_address, flags=0):
+		cdb = struct.pack('<BIIIBBB',
+				0xcd,
+				cmd,
+				length,
+				start_address,
+				0, 0, 0)
+
+		return self.make_msc_cmd(msc_size, 0, cdb, flags=flags)
+
+	def adfu_write_to_flash(self, addr, binary):
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(len(binary), 0x10, len(binary) // 512, addr))
+		self.dev.write(EP_TO_DEVICE, binary)
+		status = self.dev.read(EP_FROM_DEVICE, 512)
+		return self.check_status(status)
+
+	def adfu_write_to_ram(self, addr, binary):
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(len(binary), 0x13, len(binary), addr))
+		self.dev.write(EP_TO_DEVICE, binary)
+		status = self.dev.read(EP_FROM_DEVICE, 512)
+		return self.check_status(status)
+
+	def adfu_switch_fw(self, addr):
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x20, 0, addr))
+		status = self.dev.read(EP_FROM_DEVICE, 512)
+		return self.check_status(status)
+
+	def adfu_read_result_block(self, size):
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(size, 0x23, size, 0, flags=0x80))
+		result = self.dev.read(EP_FROM_DEVICE, size)
+		status = self.dev.read(EP_FROM_DEVICE, 512)
+		self.check_status(status)
+		return result
+
+	def adfu_execute(self, addr):
+		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x21, 0, addr))
+		time.sleep(0.1) # TODO
+		status = self.dev.read(EP_FROM_DEVICE, 512)
+		return self.check_status(status)
+
+	def adfu_reboot(self):
+		cdb = struct.pack('<BIIIBBB', 0xb0, 0, 0, 0, 0, 0, 0)
+		self.dev.write(EP_TO_DEVICE, self.make_msc_cmd(0, 0, cdb, flags=0))
+		status = self.dev.read(EP_FROM_DEVICE, 512)
+		return self.check_status(status)
 
 def _cmd_unknown_0():
 	# Vendor-specific command 0xCC.
@@ -125,62 +208,6 @@ def switch_to_udisk():
 	ret = dev.read(EP_FROM_DEVICE, 512)
 	print(ret)
 
-def adfu_write_to_ram(length, start_address):
-	return struct.pack('<IIIBBBBIIIBBB',
-			0x43425355, # 'USBC'
-			0x00000000, # tag
-			length,
-			0, # flags
-			0, # LUN
-			0x10, # CDB length
-			0xcd,
-			0x00000013, # command
-			length,
-			start_address,
-			0, 0, 0)
-
-def adfu_prepare_exec(start_address):
-	return struct.pack('<IIIBBBBIIIBBB',
-			0x43425355, # 'USBC'
-			0x00000000, # tag
-			0, # length
-			0, # flags
-			0, # LUN
-			0x10, # CDB length
-			0xcd,
-			0x00000020, # command
-			0, # unused
-			start_address,
-			0, 0, 0)
-
-def adfu_execute(start_address):
-	return struct.pack('<IIIBBBBIIIBBB',
-			0x43425355, # 'USBC'
-			0x00000000, # tag
-			0, # length
-			0, # flags
-			0, # LUN
-			0x10, # CDB length
-			0xcd,
-			0x00000021, # command
-			0, # unused
-			start_address,
-			0, 0, 0)
-
-def adfu_read_result_block(size):
-	return struct.pack('<IIIBBBBIIIBBB',
-			0x43425355, # 'USBC'
-			0x00000000, # tag
-			size, # length
-			0x80, # flags
-			0, # LUN
-			0x10, # CDB length
-			0xcd,
-			0x00000023, # command
-			size,
-			0, # unused
-			0, 0, 0)
-
 def run_code(filename):
 	# Prepare to read data
 	with open('ADFUS.BIN', 'rb') as h:
@@ -189,32 +216,23 @@ def run_code(filename):
 	with open(filename, 'rb') as h:
 		data = h.read()
 
-	dev = _find_device(ADFU_DEVICES)
-
-	dev.write(EP_TO_DEVICE, adfu_write_to_ram(len(adfus), 0xbfc18000))
-	dev.write(EP_TO_DEVICE, adfus)
-	print(dev.read(EP_FROM_DEVICE, 512))
-
-	dev.write(EP_TO_DEVICE, adfu_prepare_exec(0xbfc18000))
-	print(dev.read(EP_FROM_DEVICE, 512))
-
-	print("start exec")
 	assert len(data) < (27 * 1024), "Code too large to fit in RAM"
 
-	dev.write(EP_TO_DEVICE, adfu_write_to_ram(len(data), 0xbfc1e000))
-	dev.write(EP_TO_DEVICE, data)
+	dev = USBMSC(devices=ADFU_DEVICES)
 
-	print(dev.read(EP_FROM_DEVICE, 512))
+	# Switch to software ADFU
+	dev.adfu_write_to_ram(0xbfc18000, adfus)
+	dev.adfu_switch_fw(0xbfc18000)
 
+	# Write the program
+	dev.adfu_write_to_ram(0xbfc1e000, data)
+
+	# Run it
 	print("do exec")
-	dev.write(EP_TO_DEVICE, adfu_execute(0xbfc1e000))
-	time.sleep(0.1)
-	print(dev.read(EP_FROM_DEVICE, 512))
+	dev.adfu_execute(0xbfc1e000)
 
 	print("read back")
-	dev.write(EP_TO_DEVICE, adfu_read_result_block(156))
-	print(dev.read(EP_FROM_DEVICE, 512))
-	print(dev.read(EP_FROM_DEVICE, 512))
+	print(dev.adfu_read_result_block(156))
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
