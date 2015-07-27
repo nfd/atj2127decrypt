@@ -28,7 +28,7 @@ CONFIG = {
 
 	'adfus': {
 		# Software ADFU, called ADFUS in original script
-		'filename': 'ADFUS.BIN',
+		'filename': 'adfus.bin',
 		'download_address': 0xbfc18000,
 	},
 	'hwsc': {
@@ -481,21 +481,32 @@ def load_mbrec(package):
 	return data
 
 class Package:
-	def __init__(self, config, basedir):
+	def __init__(self, config, basedir, no_write=False):
 		self.config = config.copy()
 		self.basedir = basedir
 		self.update_config()
+		self.no_write = no_write
 
 	def __getitem__(self, key):
 		return self.config[key]
 
 	def update_config(self):
+		def merge_dicts(src, dst):
+			"""
+			Like dict.update(), but non-destructively (and recursively) updates values which are dicts.
+			"""
+			for key, value in dst.items():
+				if isinstance(value, dict) and isinstance(src.get(key), dict):
+					merge_dicts(src[key], value)
+				else:
+					src[key] = value
+
 		adfu_info_pathname = os.path.join(self.basedir, 'adfu_info.json')
 		if os.path.exists(adfu_info_pathname):
 			with open(adfu_info_pathname, 'r') as h:
 				adfu_info = json.load(h)
 
-			self.config['fwimage'].update(adfu_info['fwimage'])
+			merge_dicts(self.config, adfu_info)
 
 	def read_bytes(self, filename):
 		with open(os.path.join(self.basedir, filename), 'rb') as h:
@@ -510,11 +521,23 @@ class Package:
 
 		usb_msc.adfu_write_to_ram(section['download_address'], file_bytes)
 
+	def dump_flash_write_to_disk(download_addr, data):
+		filename = 'flash-write-%08x.bin' % (download_addr)
+		print("Dumping Flash write to disk: %s" % (filename))
+
+		with open(filename, 'wb') as h:
+			h.write(data)
+
 	def upgrade(self, usb_msc=None, output=None):
 		"""
 		usb_msc: a USB mass storage controller in DFU mode
 		output: an ADFUOutput class instance
 		"""
+		if self.no_write:
+			write_to_flash = self.dump_flash_write_to_disk
+		else:
+			write_to_flash = usb_msc.adfu_write_to_flash
+
 		# Create the firmware package.
 		lfi = LFI(self)
 
@@ -588,7 +611,7 @@ class Package:
 		# Send MBREC
 		output.set_download_status('mbrec')
 		mbrec = load_mbrec(self)
-		usb_msc.adfu_write_to_flash(self['mbrec']['download_address'], mbrec)
+		write_to_flash(self['mbrec']['download_address'], mbrec)
 
 		# Create a firmware information header.
 		# This is some serious Actions-specific voodoo. "Cap" seems to mean
@@ -622,7 +645,7 @@ class Package:
 			# Download address, when it comes to flash writes, is probably
 			# actually a combination of type of thing to flash (0x40 for mbrec,
 			# 0x46 for brec) and sector offset of the data within that type.
-			usb_msc.adfu_write_to_flash(download_address + (idx // 512), brec_bytes[idx : idx + amt])
+			write_to_flash(download_address + (idx // 512), brec_bytes[idx : idx + amt])
 			idx += amt
 
 		# send LFI (firmware)
@@ -633,13 +656,13 @@ class Package:
 		idx = 0
 		while idx < len(lfi_bytes):
 			amt = min(2 * 1024 * 1024, len(lfi_bytes) - idx)
-			usb_msc.adfu_write_to_flash(download_address + (idx // 512), lfi_bytes[idx : idx + amt])
+			write_to_flash(download_address + (idx // 512), lfi_bytes[idx : idx + amt])
 			idx += amt
 
 		# Send "ADFU debug buffer", aka 512 zero bytes.
 		output.set_download_status('debug')
 		debug_buf = bytearray(512)
-		usb_msc.adfu_write_to_flash(0xff000000, debug_buf)
+		write_to_flash(0xff000000, debug_buf)
 
 		# We're done! Reboot! Yay!
 		output.set_download_status('reboot')
@@ -656,6 +679,7 @@ class TextOutput:
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-t', '--test', action='store_true', help='Verification / test run')
+	parser.add_argument('--no-write', action='store_true', help="Don't write to flash; dump files to disk instead")
 	parser.add_argument('dir', help='Directory containing upgrade')
 	args = parser.parse_args()
 
@@ -665,7 +689,7 @@ def main():
 	else:
 		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=10 * 1000)
 
-	package = Package(CONFIG, args.dir)
+	package = Package(CONFIG, args.dir, no_write=args.no_write)
 
 	output = TextOutput()
 	package.upgrade(msc, output)
