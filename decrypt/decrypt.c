@@ -315,9 +315,9 @@ write_adfu_info(char *output_dir, struct adfu_info *info)
 	info_file = fopen(pathname, "w");
 
 	fprintf(info_file, "{\"fwimage\":{\n");
-	fprintf(info_file, "	\"sdk_description\": \"%.4s\",\n", info->sdk_ver);
+	fprintf(info_file, "	\"sdk_description\": \"%s\",\n", info->sdk_description);
 	fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", info->usb_setup_info);
-	fprintf(info_file, "	\"SDK_VER\": \"%s\",\n", info->sdk_description);
+	fprintf(info_file, "	\"SDK_VER\": \"%.4s\",\n", info->sdk_ver);
 	fprintf(info_file, "	\"files\":[");
 
 	for(int filename_idx=0; filename_idx < info->num_files; filename_idx++) {
