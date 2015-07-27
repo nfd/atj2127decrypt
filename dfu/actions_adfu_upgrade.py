@@ -38,7 +38,7 @@ CONFIG = {
 	},
 	'flash_id': {
 		# Flash ID constants for the NAND driver
-		'filename': 'FLASH_ID.BIN',
+		'filename': 'flash_id.bin',
 		# Download address is returned by the HWSC program
 	},
 	'brec': {
@@ -521,7 +521,7 @@ class Package:
 
 		usb_msc.adfu_write_to_ram(section['download_address'], file_bytes)
 
-	def dump_flash_write_to_disk(download_addr, data):
+	def dump_flash_write_to_disk(self, download_addr, data):
 		filename = 'flash-write-%08x.bin' % (download_addr)
 		print("Dumping Flash write to disk: %s" % (filename))
 
