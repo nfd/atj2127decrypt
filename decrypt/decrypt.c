@@ -9,6 +9,7 @@
 #include <inttypes.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #include "decrypt_impl.h"
 #include "extract_fwimage.h"
@@ -137,7 +138,7 @@ make_sensible_direntry_filename(AFI_DIR_t *direntry, char *out)
 	for(int i=0; i < 8; i++) {
 		if(direntry->name[i] == ' ')
 			break;
-		*out++ = direntry->name[i];
+		*out++ = tolower(direntry->name[i]);
 	}
 
 	*out++ = '.';
@@ -145,7 +146,7 @@ make_sensible_direntry_filename(AFI_DIR_t *direntry, char *out)
 	for(int i=0; i < 3; i++) {
 		if(direntry->name[i + 8] == ' ')
 			break;
-		*out++ = direntry->name[i + 8];
+		*out++ = tolower(direntry->name[i + 8]);
 	}
 
 	*out++ = 0;
@@ -326,7 +327,7 @@ write_adfu_info(char *output_dir, struct adfu_info *info)
 		for(new_fn_idx = old_fn_idx = 0; old_fn_idx < 11; old_fn_idx ++) {
 			char c = info->filename[filename_idx][old_fn_idx];
 			if(c != ' ')
-				filename[new_fn_idx++] = c;
+				filename[new_fn_idx++] = tolower(c);
 
 			if(old_fn_idx == 7)
 				filename[new_fn_idx++] = '.';

@@ -8,6 +8,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "ucos-structs.h"
 #include "adfu_info.h"
@@ -22,7 +23,7 @@ make_sensible_direntry_filename(AFI_DIR_t *direntry, char *out)
 	for(int i=0; i < 8; i++) {
 		if(direntry->name[i] == ' ')
 			break;
-		*out++ = direntry->name[i];
+		*out++ = tolower(direntry->name[i]);
 	}
 
 	*out++ = '.';
@@ -30,7 +31,7 @@ make_sensible_direntry_filename(AFI_DIR_t *direntry, char *out)
 	for(int i=0; i < 3; i++) {
 		if(direntry->name[i + 8] == ' ')
 			break;
-		*out++ = direntry->name[i + 8];
+		*out++ = tolower(direntry->name[i + 8]);
 	}
 
 	*out++ = 0;

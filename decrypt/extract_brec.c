@@ -51,7 +51,7 @@ int split_brec_bytes(uint8_t *brec_bytes, char *output_dir)
 	size_t resources_start = info->brec_length_sectors * SECTOR_SIZE;
 	size_t resources_length = info->resources_length_sectors * SECTOR_SIZE;
 
-	write_brec_portion(output_dir, "WELCOME.BIN", brec_bytes + WELCOME_BIN_START_LOCATION, WELCOME_BIN_LENGTH);
-	write_brec_portion(output_dir, "WELCOME.RES", brec_bytes + resources_start, resources_length);
+	write_brec_portion(output_dir, "welcome.bin", brec_bytes + WELCOME_BIN_START_LOCATION, WELCOME_BIN_LENGTH);
+	write_brec_portion(output_dir, "welcome.res", brec_bytes + resources_start, resources_length);
 }
 
