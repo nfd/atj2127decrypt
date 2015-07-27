@@ -53,5 +53,7 @@ int split_brec_bytes(uint8_t *brec_bytes, char *output_dir)
 
 	write_brec_portion(output_dir, "welcome.bin", brec_bytes + WELCOME_BIN_START_LOCATION, WELCOME_BIN_LENGTH);
 	write_brec_portion(output_dir, "welcome.res", brec_bytes + resources_start, resources_length);
+
+	return 0;
 }
 
