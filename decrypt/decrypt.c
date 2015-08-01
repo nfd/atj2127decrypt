@@ -342,19 +342,16 @@ write_adfu_info(char *output_dir, struct adfu_info_struct *adfu_info, bool split
 	}
 
 	fprintf(info_file, "\"fwimage\":{\n");
-	fprintf(info_file, "	\"sdk_description\": \"%s\",\n", adfu_info->sdk_description);
-	fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", adfu_info->usb_setup_info);
-	fprintf(info_file, "	\"SDK_VER\": \"%.4s\",\n", adfu_info->sdk_ver);
+	if(split == true) {
+		fprintf(info_file, "	\"sdk_description\": \"%s\",\n", adfu_info->sdk_description);
+		fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", adfu_info->usb_setup_info);
+		fprintf(info_file, "	\"SDK_VER\": \"%.4s\",\n", adfu_info->sdk_ver);
 
-	if(split == true && (adfu_info->r3_config_filename_idx != -1)) {
-		ldir_name_to_filename(filename, adfu_info->filename[adfu_info->r3_config_filename_idx]);
-		fprintf(info_file, "	\"r3_config_filename\": \"%s\",\n", filename);
-	}
+		if(adfu_info->r3_config_filename_idx != -1) {
+			ldir_name_to_filename(filename, adfu_info->filename[adfu_info->r3_config_filename_idx]);
+			fprintf(info_file, "	\"r3_config_filename\": \"%s\",\n", filename);
+		}
 
-	if(split == false) {
-		fprintf(info_file, "	\"premerged\": true,\n");
-		fprintf(info_file, "	\"premerged_filename\": \"fwimage.fw\"\n");
-	} else {
 		fprintf(info_file, "	\"files\":[");
 
 		for(int filename_idx=0; filename_idx < adfu_info->num_files; filename_idx++) {
@@ -367,6 +364,9 @@ write_adfu_info(char *output_dir, struct adfu_info_struct *adfu_info, bool split
 			}
 		}
 		fprintf(info_file, "]\n");
+	} else {
+		fprintf(info_file, "	\"premerged\": true,\n");
+		fprintf(info_file, "	\"premerged_filename\": \"fwimage.fw\"\n");
 	}
 
 	fprintf(info_file, "}\n}\n");
