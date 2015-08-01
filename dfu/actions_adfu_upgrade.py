@@ -43,12 +43,12 @@ CONFIG = {
 		# Download address is returned by the HWSC program
 	},
 	'brec': {
-		'filename_template': 'brecf%d.bin',
+		'filename_template': 'brec%04x.bin',
 		# These become part of brec: the bin is inserted at 4k into the file,
 		# and the res is written immediately after brec. 
-		'welcome_bin_template': 'welcome%d.bin',
+		'welcome_bin_template': 'welcome%04x.bin',
 		'wecome_bin': 'welcome.bin', # use if templated file not available
-		'welcome_res_template': 'welcome%d.res',
+		'welcome_res_template': 'welcome%04x.res',
 		'welcome_res': 'welcome.res', # ditto
 		'welcome_bin_merge_location': 4 * 1024,
 		'download_address': 0x46000000,
@@ -59,7 +59,7 @@ CONFIG = {
 	},
 	'fwsc': {
 		# Firmware scan?
-		'filename_template': 'fwscf%d.bin', # %d is the Flash type e.g. 650
+		'filename_template': 'fwsc%04x.bin', # %x is the Flash type e.g. f650
 		'download_address': 0xbfc1e000,
 		'entrypoint': 0xbfc1e200,
 
@@ -254,21 +254,28 @@ def get_nand_info_block(nand_id_data, nand_id):
 		return nand_info_block
 
 def get_flash_type(nand_info_block):
-	# This is pretty nasty. Original has "30" after the 6 for all (i.e. types are 63045 etc)
+	# This is pretty nasty.
+	# NB this makes more sense in hex, e.g. 63045 = 0xF645 = hynix 26nm MLC flash (see ap_upgrade)
 	if nand_info_block[0] == 173 and (nand_info_block[5] & 7) == 3:
-		return 645
+		# Hynix 26nm MLC
+		return 0xf645
 	elif nand_info_block[0] == 152:
-		return 646
+		# Toshiba 26nm MLC
+		return 0xf646
 	elif nand_info_block[0] == 173 and (nand_info_block[5] & 7) == 1:
-		return 647
+		# Hynix 20nm MLC
+		return 0xf647
 	elif nand_info_block[0] == 236 and (nand_info_block[5] & 7) == 4:
-		return 648
+		# Samsung 21nm MLC
+		return 0xf648
 	elif nand_info_block[0] == 44 and nand_info_block[2] == 68 and (nand_info_block[1] & 15) == 4:
-		return 649
+		# Micron 20nm MLC
+		return 0xf649
 	elif nand_info_block[0] == 69 and nand_info_block[5] == 87:
-		return 650 # NB the type is reported as (630)56, but it is mapped to files ending in -50.
+		# Sandisk 19nm MLC
+		return 0xf650
 	else:
-		return 644
+		return 0xf644
 
 def align(b, amt):
 	padding = len(b) % amt if amt else 0
@@ -454,8 +461,9 @@ class BrecWithResources:
 		else:
 			return self._brec_bin
 
-	def set_header_data(self, dLFICap, sCapInfo, flash_size, spi_nor_decrypt_mode):
+	def set_header_data(self, dLFICap, sCapInfo, flash_size, spi_nor_decrypt_mode, nand_info_block):
 		struct.pack_into('<I', self._brec_bin, 8, dLFICap)
+		self._brec_bin[128:128+64] = nand_info_block[:64]
 		self._brec_bin[192:192 + 32] = sCapInfo
 
 	def _load_merged_brec_bin(self, package, flash_type, resource_len):
@@ -605,7 +613,7 @@ class Package:
 		nand_id_data = self.read_bytes(self['flash_id']['filename'])
 		flash_id = hwscaninfo.get_bytes('flash_id', 0, 2)
 		nand_info_block = get_nand_info_block(nand_id_data, flash_id)
-		print('nand info block', nand_info_block)
+		#print('nand info block', nand_info_block)
 
 		# Write the flash info to RAM at the address indicated by HW scan.
 		output.set_download_status('fwsc')
@@ -621,8 +629,7 @@ class Package:
 
 		# Download FWSC (Firmware Scan. (?))
 		fwsc_filename = self['fwsc']['filename_template'] % (flash_type)
-
-		fwsc_bytes = self.read_bytes(self['fwsc']['filename_template'] % (flash_type))
+		fwsc_bytes = self.read_bytes(fwsc_filename)
 
 		fwinfo = FWInfoBlock(fwsc_bytes) # FW info written to first few bytes of fwsc
 		fwinfo['bEraseFlag'] = self['erase_flash']
@@ -674,7 +681,7 @@ class Package:
 		print('udisk cap', capinfo['udisk_cap'])
 
 		# Send BREC, in 64k chunks for some reason.
-		brec.set_header_data(len(lfi) // 512, capinfo.get(), 0, 0)
+		brec.set_header_data(len(lfi) // 512, capinfo.get(), 0, 0, nand_info_block)
 		brec_bytes = brec.get()
 		output.set_download_status('brec')
 		download_address = brec.download_address
