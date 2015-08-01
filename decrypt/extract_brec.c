@@ -54,7 +54,7 @@ int split_brec_bytes(uint8_t *brec_bytes, char *output_dir, char *flash_type)
 	size_t resources_start = brec_length;
 	size_t resources_length = info->resources_length_sectors * SECTOR_SIZE;
 
-	sprintf(filename, "brecf%s.bin", flash_type);
+	sprintf(filename, "brec%s.bin", flash_type);
 	write_brec_portion(output_dir, filename, brec_bytes, brec_length);
 
 	sprintf(filename, "welcome%s.bin", flash_type);

@@ -240,7 +240,10 @@ static int dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *o
 
 		if (memcmp(current->name, "BREC", 4) == 0) {
 			/* TODO hacky */
-			char flash_type[4] = {current->name[5], current->name[6], current->name[7], '\0'};
+			char flash_type[5] = {tolower(current->name[4]),
+				tolower(current->name[5]),
+				tolower(current->name[6]),
+				tolower(current->name[7]), '\0'};
 
 			uint8_t *data = write_file_to_buffer(decrypt_info, fd, output_dir, firmware_base, current);
 
