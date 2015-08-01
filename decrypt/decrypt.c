@@ -221,7 +221,7 @@ write_file_to_buffer(struct decrypt_struct *decrypt_info, int fd, char *output_d
 	return cb_data.buffer;
 }
 
-static int dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *output_dir, uint32_t firmware_base, AFI_DIR_t *current, bool split, struct adfu_info *info)
+static int dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *output_dir, uint32_t firmware_base, AFI_DIR_t *current, bool split, struct adfu_info_struct *adfu_info)
 {
 	bool write_to_disk = true;
 
@@ -231,21 +231,23 @@ static int dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *o
 
 			extract_fwimage_from_bytes(data, output_dir);
 
-			if(info)
-				get_adfu_info(data, info);
+			if(adfu_info)
+				get_adfu_info(data, adfu_info);
 
 			free(data);
 			write_to_disk = false;
 		}
 
-		if (memcmp(current->name, "BRECF650BIN", 11) == 0) { /* TODO: no particular reason to use this one */
+		if (memcmp(current->name, "BREC", 4) == 0) {
+			/* TODO hacky */
+			char flash_type[4] = {current->name[5], current->name[6], current->name[7], '\0'};
+
 			uint8_t *data = write_file_to_buffer(decrypt_info, fd, output_dir, firmware_base, current);
 
-			split_brec_bytes(data, output_dir);
+			split_brec_bytes(data, output_dir, flash_type);
 
 			free(data);
-
-			// Write brec to disk anyway
+			write_to_disk = false;
 		}
 
 	}
@@ -259,7 +261,7 @@ static int dump_single_file(struct decrypt_struct *decrypt_info, int fd, char *o
 }
 
 static int
-do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir, bool split, struct adfu_info *info)
+do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir, bool split, struct adfu_info_struct *adfu_info)
 {
 	int ret;
 	uint32_t firmware_base;
@@ -296,7 +298,7 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir, bool spli
 	// TODO: First entry seems to be a signature of sorts rather than a file
 	for(int entry_idx = 1; entry_idx < num_entries; entry_idx++) {
 		AFI_DIR_t *current = &directory[entry_idx];
-		dump_single_file(decrypt_info, fd, output_dir, firmware_base, current, split, info);
+		dump_single_file(decrypt_info, fd, output_dir, firmware_base, current, split, adfu_info);
 	}
 
 	free(directory);
@@ -304,9 +306,27 @@ do_dump(struct decrypt_struct *decrypt_info, int fd, char *output_dir, bool spli
 	return 0;
 }
 
-static int 
-write_adfu_info(char *output_dir, struct adfu_info *info)
+static void
+ldir_name_to_filename(char *filename, char *src)
 {
+	int new_fn_idx, old_fn_idx;
+
+	for(new_fn_idx = old_fn_idx = 0; old_fn_idx < 11; old_fn_idx ++) {
+		char c = src[old_fn_idx];
+		if(c != ' ')
+			filename[new_fn_idx++] = tolower(c);
+
+		if(old_fn_idx == 7)
+			filename[new_fn_idx++] = '.';
+	}
+
+	filename[new_fn_idx++] = '\0';
+}
+
+static int 
+write_adfu_info(char *output_dir, struct adfu_info_struct *adfu_info)
+{
+	char filename[13];
 	char pathname[1024];
 	FILE *info_file;
 
@@ -315,29 +335,23 @@ write_adfu_info(char *output_dir, struct adfu_info *info)
 	info_file = fopen(pathname, "w");
 
 	fprintf(info_file, "{\"fwimage\":{\n");
-	fprintf(info_file, "	\"sdk_description\": \"%s\",\n", info->sdk_description);
-	fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", info->usb_setup_info);
-	fprintf(info_file, "	\"SDK_VER\": \"%.4s\",\n", info->sdk_ver);
+	fprintf(info_file, "	\"sdk_description\": \"%s\",\n", adfu_info->sdk_description);
+	fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", adfu_info->usb_setup_info);
+	fprintf(info_file, "	\"SDK_VER\": \"%.4s\",\n", adfu_info->sdk_ver);
+
+	if(adfu_info->r3_config_filename_idx != -1) {
+		ldir_name_to_filename(filename, adfu_info->filename[adfu_info->r3_config_filename_idx]);
+		fprintf(info_file, "	\"r3_config_filename\": \"%s\",\n", filename);
+	}
+
 	fprintf(info_file, "	\"files\":[");
 
-	for(int filename_idx=0; filename_idx < info->num_files; filename_idx++) {
-		char filename[13];
-		int new_fn_idx, old_fn_idx;
-
-		for(new_fn_idx = old_fn_idx = 0; old_fn_idx < 11; old_fn_idx ++) {
-			char c = info->filename[filename_idx][old_fn_idx];
-			if(c != ' ')
-				filename[new_fn_idx++] = tolower(c);
-
-			if(old_fn_idx == 7)
-				filename[new_fn_idx++] = '.';
-		}
-
-		filename[new_fn_idx++] = '\0';
+	for(int filename_idx=0; filename_idx < adfu_info->num_files; filename_idx++) {
+		ldir_name_to_filename(filename, adfu_info->filename[filename_idx]);
 
 		fprintf(info_file, "\"%s\"", filename);
 
-		if(filename_idx < info->num_files - 1) {
+		if(filename_idx < adfu_info->num_files - 1) {
 			fprintf(info_file, ", ");
 		}
 	}
@@ -353,7 +367,7 @@ int dump_firmware(char *filename_in, char *output_dir, bool split, bool dfuscrip
 {
 	struct stat stat_buf;
 	struct decrypt_struct decrypt_info;
-	struct adfu_info info;
+	struct adfu_info_struct adfu_info;
 	int fd_in;
 
 	if(stat(filename_in, &stat_buf) != 0) {
@@ -388,13 +402,13 @@ int dump_firmware(char *filename_in, char *output_dir, bool split, bool dfuscrip
 		return -1;
 	}
 
-	if(do_dump(&decrypt_info, fd_in, output_dir, split, dfuscript? &info : NULL) != 0) {
+	if(do_dump(&decrypt_info, fd_in, output_dir, split, dfuscript? &adfu_info : NULL) != 0) {
 		fprintf(stderr, "do_upgrade fail\n");
 		return -1;
 	}
 
 	if(dfuscript)
-		write_adfu_info(output_dir, &info);
+		write_adfu_info(output_dir, &adfu_info);
 
 	free(decrypt_info.pInOutBuffer);
 	free(decrypt_info.pGLBuffer);

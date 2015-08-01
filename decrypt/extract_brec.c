@@ -44,15 +44,24 @@ write_brec_portion(char *output_dir, char *filename, uint8_t *data, size_t lengt
 	return 0;
 }
 
-int split_brec_bytes(uint8_t *brec_bytes, char *output_dir)
+int split_brec_bytes(uint8_t *brec_bytes, char *output_dir, char *flash_type)
 {
+	char filename[256];
+
 	struct brec_info *info = (void *)brec_bytes;
 
-	size_t resources_start = info->brec_length_sectors * SECTOR_SIZE;
+	size_t brec_length = info->brec_length_sectors * SECTOR_SIZE;
+	size_t resources_start = brec_length;
 	size_t resources_length = info->resources_length_sectors * SECTOR_SIZE;
 
-	write_brec_portion(output_dir, "welcome.bin", brec_bytes + WELCOME_BIN_START_LOCATION, WELCOME_BIN_LENGTH);
-	write_brec_portion(output_dir, "welcome.res", brec_bytes + resources_start, resources_length);
+	sprintf(filename, "brecf%s.bin", flash_type);
+	write_brec_portion(output_dir, filename, brec_bytes, brec_length);
+
+	sprintf(filename, "welcome%s.bin", flash_type);
+	write_brec_portion(output_dir, filename, brec_bytes + WELCOME_BIN_START_LOCATION, WELCOME_BIN_LENGTH);
+
+	sprintf(filename, "welcome%s.res", flash_type);
+	write_brec_portion(output_dir, filename, brec_bytes + resources_start, resources_length);
 
 	return 0;
 }

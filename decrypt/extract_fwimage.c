@@ -89,18 +89,28 @@ extract_fwimage_from_bytes(uint8_t *buf, char *output_dir)
 }
 
 int
-get_adfu_info(uint8_t *buf, struct adfu_info *info)
+get_adfu_info(uint8_t *buf, struct adfu_info_struct *info)
 {
+	uint32_t r3_config_offset;
+
 	/* TODO get LFI_Head_t in here */
 	memcpy(info->sdk_ver, buf + 4, 4);
 	memcpy(info->usb_setup_info, buf + 80, 48);
 	memcpy(info->sdk_description, buf + 128, 336);
+
+	memcpy(&r3_config_offset, buf + 506, 4);
+
+	if(r3_config_offset == 0)
+		info->r3_config_filename_idx = -1;
 
 	AFI_DIR_t *entry = (AFI_DIR_t *)(&buf[FW_CENTRAL_DIRECTORY_OFFSET]);
 	int idx = 0;
 
 	for(idx = 0; entry->name[0]; entry++, idx++) {
 		memcpy(info->filename[idx], entry->name, 11);
+
+		if(r3_config_offset == entry->offset)
+			info->r3_config_filename_idx = idx;
 	}
 
 	info->num_files = idx;
