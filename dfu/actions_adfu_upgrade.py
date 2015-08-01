@@ -391,10 +391,11 @@ class LFI:
 			ldir['checksum'] = file_checksum(file_bytes, stride=4) & 0xffffffff
 			ldir['length'] = len(file_bytes)
 			fwimage.append(file_bytes)
-			offset += len(file_bytes)
 
 			if r3_config_filename == filename:
-				lfihead.set_bytes('R3_cfg_offset', offset // 512)
+				lfihead['R3_cfg_offset'] = offset // 512
+
+			offset += len(file_bytes)
 
 		lfihead['DirItemCheckSum'] = file_checksum(lfihead.get_bytes('ldiritem', 0, 240), stride=4) & 0xffffffff
 
