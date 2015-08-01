@@ -324,7 +324,7 @@ ldir_name_to_filename(char *filename, char *src)
 }
 
 static int 
-write_adfu_info(char *output_dir, struct adfu_info_struct *adfu_info)
+write_adfu_info(char *output_dir, struct adfu_info_struct *adfu_info, bool split)
 {
 	char filename[13];
 	char pathname[1024];
@@ -333,30 +333,43 @@ write_adfu_info(char *output_dir, struct adfu_info_struct *adfu_info)
 	sprintf(pathname, "%s/adfu_info.json", output_dir);
 
 	info_file = fopen(pathname, "w");
+	fprintf(info_file, "{\n");
 
-	fprintf(info_file, "{\"fwimage\":{\n");
+	if(split == false) {
+		fprintf(info_file, "\"brec\":{\n");
+		fprintf(info_file, "	\"premerged\": true\n");
+		fprintf(info_file, "},\n");
+	}
+
+	fprintf(info_file, "\"fwimage\":{\n");
 	fprintf(info_file, "	\"sdk_description\": \"%s\",\n", adfu_info->sdk_description);
 	fprintf(info_file, "	\"INF_USERDEFINED_ID_48\": \"%.48s\",\n", adfu_info->usb_setup_info);
 	fprintf(info_file, "	\"SDK_VER\": \"%.4s\",\n", adfu_info->sdk_ver);
 
-	if(adfu_info->r3_config_filename_idx != -1) {
+	if(split == true && (adfu_info->r3_config_filename_idx != -1)) {
 		ldir_name_to_filename(filename, adfu_info->filename[adfu_info->r3_config_filename_idx]);
 		fprintf(info_file, "	\"r3_config_filename\": \"%s\",\n", filename);
 	}
 
-	fprintf(info_file, "	\"files\":[");
+	if(split == false) {
+		fprintf(info_file, "	\"premerged\": true,\n");
+		fprintf(info_file, "	\"premerged_filename\": \"fwimage.fw\"\n");
+	} else {
+		fprintf(info_file, "	\"files\":[");
 
-	for(int filename_idx=0; filename_idx < adfu_info->num_files; filename_idx++) {
-		ldir_name_to_filename(filename, adfu_info->filename[filename_idx]);
+		for(int filename_idx=0; filename_idx < adfu_info->num_files; filename_idx++) {
+			ldir_name_to_filename(filename, adfu_info->filename[filename_idx]);
 
-		fprintf(info_file, "\"%s\"", filename);
+			fprintf(info_file, "\"%s\"", filename);
 
-		if(filename_idx < adfu_info->num_files - 1) {
-			fprintf(info_file, ", ");
+			if(filename_idx < adfu_info->num_files - 1) {
+				fprintf(info_file, ", ");
+			}
 		}
+		fprintf(info_file, "]\n");
 	}
 
-	fprintf(info_file, "]}\n}\n");
+	fprintf(info_file, "}\n}\n");
 
 	fclose(info_file);
 
@@ -408,7 +421,7 @@ int dump_firmware(char *filename_in, char *output_dir, bool split, bool dfuscrip
 	}
 
 	if(dfuscript)
-		write_adfu_info(output_dir, &adfu_info);
+		write_adfu_info(output_dir, &adfu_info, split);
 
 	free(decrypt_info.pInOutBuffer);
 	free(decrypt_info.pGLBuffer);
@@ -429,7 +442,7 @@ static void show_help() {
 	printf(" filename  : an UPGRADE.HEX file\n");
 	printf(" outdir    : output directory (default: 'out')\n");
 	printf("   --split : Split BREC and FWIMAGE into component parts\n");
-	printf("   --dfu   : Produce an ADFU upgrade script (implies --split)\n");
+	printf("   --dfu   : Produce an ADFU upgrade script\n");
 	printf("   --help  : Show this message\n");
 }
 
@@ -447,7 +460,7 @@ int main(int argc, char **argv)
 				split_fw = true;
 				break;
 			case 'd':
-				make_dfuscript = split_fw = true;
+				make_dfuscript = true;
 				break;
 			case 'h':
 				show_help();
