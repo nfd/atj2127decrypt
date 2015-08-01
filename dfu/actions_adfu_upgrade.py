@@ -5,6 +5,7 @@ import os
 import json
 import struct
 import argparse
+import time
 from collections import namedtuple
 
 import adfu, adfu_mock_usb_device
@@ -368,6 +369,17 @@ class LFI:
 	def __init__(self, package):
 		self.download_address = package['fwimage']['download_address']
 
+		if package['fwimage'].get('premerged', False):
+			self._load_premerged(package)
+		else:
+			self._create_fwimage(package)
+
+	def _load_premerged(self, package):
+		fwimage_bytes = package.read_and_pad(package['fwimage']['premerged_filename'], 512)
+		self.lfihead = LFIHead_t(fwimage_bytes)
+		self.fwimage = [fwimage_bytes]
+
+	def _create_fwimage(self, package):
 		lfihead_bytes = bytearray(LFIHead_t.LENGTH)
 		lfihead = LFIHead_t(lfihead_bytes)
 
@@ -423,8 +435,12 @@ class LFI:
 
 class BrecWithResources:
 	def __init__(self, package, flash_type):
-		self._res = self._load_res(package, flash_type)
-		self._brec_bin = self._load_merged_brec_bin(package, flash_type, len(self._res))
+		if package['brec'].get('premerged', False):
+			self._brec_bin = package.read_and_pad(package['brec']['filename_template'] % (flash_type), 1024)
+			self._res = b''
+		else:
+			self._res = self._load_res(package, flash_type)
+			self._brec_bin = self._load_merged_brec_bin(package, flash_type, len(self._res))
 
 		self.sector_count = (len(self._brec_bin) + len(self._res)) // 512 # dwSector_Size = dBRECCap in original
 		self.download_address = package['brec']['download_address']
@@ -624,6 +640,7 @@ class Package:
 		usb_msc.adfu_execute(self['fwsc']['entrypoint'])
 
 		# TODO: wait?
+		time.sleep(2)
 
 		# Read back result
 		scan_info = ADFU_FWScanInfo_t(usb_msc.adfu_read_result_block(ADFU_FWScanInfo_t.LENGTH))
