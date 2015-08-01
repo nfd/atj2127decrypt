@@ -45,8 +45,10 @@ CONFIG = {
 		'filename_template': 'brecf%d.bin',
 		# These become part of brec: the bin is inserted at 4k into the file,
 		# and the res is written immediately after brec. 
-		'welcome_bin': 'welcome.bin',
-		'welcome_res': 'welcome.res',
+		'welcome_bin_template': 'welcome%d.bin',
+		'wecome_bin': 'welcome.bin', # use if templated file not available
+		'welcome_res_template': 'welcome%d.res',
+		'welcome_res': 'welcome.res', # ditto
 		'welcome_bin_merge_location': 4 * 1024,
 		'download_address': 0x46000000,
 	},
@@ -369,11 +371,13 @@ class LFI:
 		lfihead_bytes = bytearray(LFIHead_t.LENGTH)
 		lfihead = LFIHead_t(lfihead_bytes)
 
-		lfihead['LFIFlag'] = 0xff0aa55 # magic LFI signature
+		lfihead['LFIFlag'] = 0x0ff0aa55 # magic LFI signature
 		lfihead.set_bytes('sdk_description', package['fwimage']['sdk_description'].encode('utf-8'))
 		lfihead.set_bytes('UsbSetupInfo', package['fwimage']['INF_USERDEFINED_ID_48'].encode('utf-8'))
 		lfihead.set_bytes('sdkversion', package['fwimage']['SDK_VER'].encode('utf-8'))
 		lfihead.set_bytes('version', package['fwimage']['SDK_VER'].encode('utf-8')) # ?
+
+		r3_config_filename = package['fwimage'].get('r3_config_filename')
 
 		fwimage = [lfihead_bytes]
 		offset  = len(lfihead_bytes)
@@ -388,6 +392,9 @@ class LFI:
 			ldir['length'] = len(file_bytes)
 			fwimage.append(file_bytes)
 			offset += len(file_bytes)
+
+			if r3_config_filename == filename:
+				lfihead.set_bytes('R3_cfg_offset', offset // 512)
 
 		lfihead['DirItemCheckSum'] = file_checksum(lfihead.get_bytes('ldiritem', 0, 240), stride=4) & 0xffffffff
 
@@ -415,7 +422,7 @@ class LFI:
 
 class BrecWithResources:
 	def __init__(self, package, flash_type):
-		self._res = self._load_res(package)
+		self._res = self._load_res(package, flash_type)
 		self._brec_bin = self._load_merged_brec_bin(package, flash_type, len(self._res))
 
 		self.sector_count = (len(self._brec_bin) + len(self._res)) // 512 # dwSector_Size = dBRECCap in original
@@ -440,17 +447,15 @@ class BrecWithResources:
 		and return the result. 
 		"""
 		brec_bytes = package.read_and_pad(package['brec']['filename_template'] % (flash_type), 1024)
+		welcome_bin_bytes = self._load_with_fallback(package, 'welcome_bin_template', 'welcome_bin', flash_type)
 
-		if 'welcome_bin' in CONFIG['brec']:
-			welcome_bin_bytes = package.read_and_pad(package['brec']['welcome_bin'], 512)
-
+		if welcome_bin_bytes:
 			# Merge it in.
 			merge_start = package['brec']['welcome_bin_merge_location']
 			brec_bytes[merge_start:merge_start + len(welcome_bin_bytes)] = welcome_bin_bytes
 
 			# Store location of start and end of welcome resources
 			struct.pack_into('<HH', brec_bytes, 12, len(brec_bytes) // 512, resource_len // 512)
-
 
 		# Length of brec in sectors, length of whole ensemble in sectors.
 		struct.pack_into('<HH', brec_bytes, 4, len(brec_bytes) // 512, (len(brec_bytes) + resource_len) // 512)
@@ -461,9 +466,22 @@ class BrecWithResources:
 
 		return brec_bytes
 
-	def _load_res(self, package):
-		if 'welcome_res' in package['brec']:
-			return package.read_and_pad(package['brec']['welcome_res'], 512)
+	def _load_res(self, package, flash_type):
+		return self._load_with_fallback(package, 'welcome_res_template', 'welcome_res', flash_type)
+
+	def _load_with_fallback(self, package, key, fallback_key, flash_type):
+		"""
+		try to load welcome650.bin and .res (for numbers varying with flash type),
+		falling back to generic welcome.bin and welcome.res,
+		or None if neither of these is present.
+		"""
+		filenames = [
+				package['brec'][key] % (flash_type) if key in package['brec'] else None,
+				package['brec'][fallback_key] if fallback_key in package['brec'] else None]
+
+		for filename in filenames:
+			if filename and package.exists(filename):
+				return package.read_and_pad(filename, 512)
 		else:
 			return None
 
@@ -511,6 +529,9 @@ class Package:
 	def read_bytes(self, filename):
 		with open(os.path.join(self.basedir, filename), 'rb') as h:
 			return bytearray(h.read())
+
+	def exists(self, filename):
+		return os.path.exists(os.path.join(self.basedir, filename))
 
 	def read_and_pad(self, filename, amt):
 		return align(self.read_bytes(filename), amt)
