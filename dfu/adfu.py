@@ -23,8 +23,13 @@ from collections import namedtuple
 
 USBDevice = namedtuple('USBDevice', ('name', 'idVendor', 'idProduct'))
 
-UDISK_DEVICES = {USBDevice('Sandisk Clip Sport', 0x0781, 0x74E7), USBDevice('Actions HS USB Flashdisk', 0x10d6, 0x1101)}
-ADFU_DEVICES = {USBDevice('Actions Semiconductor ADFU', 0x10d6, 0x10d6)}
+UDISK_DEVICES = {
+		USBDevice('Sandisk Clip Sport', 0x0781, 0x74E7),
+		USBDevice('Actions HS USB Flashdisk', 0x10d6, 0x1101)
+}
+ADFU_DEVICES = {
+		USBDevice('Actions Semiconductor ADFU', 0x10d6, 0x10d6),
+}
 
 import usb.core
 import usb.util
@@ -176,8 +181,6 @@ def switch_to_dfu():
 	# Second reply is USB mass storage control reply.
 	ret = dev.read(EP_FROM_DEVICE, 512)
 	print(ret)
-
-	time.sleep(3) # TODO -- could just use check sense
 
 	dev.write(EP_TO_DEVICE, _cmd_unknown_1())
 
