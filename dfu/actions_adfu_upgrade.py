@@ -255,23 +255,22 @@ def get_nand_info_block(nand_id_data, nand_id):
 
 def get_flash_type(nand_info_block):
 	# This is pretty nasty.
-	# NB this makes more sense in hex, e.g. 63045 = 0xF645 = hynix 26nm MLC flash (see ap_upgrade)
-	if nand_info_block[0] == 173 and (nand_info_block[5] & 7) == 3:
-		# Hynix 26nm MLC
+	if nand_info_block[0] == 0xad and (nand_info_block[5] & 7) == 3:
+		# Hynix 26nm MLC, e.g. H27UCG8T2MYR, H27UBG8T2BTR: 8k pages, 2 planes
 		return 0xf645
-	elif nand_info_block[0] == 152:
-		# Toshiba 26nm MLC
+	elif nand_info_block[0] == 0x98:
+		# Toshiba 26nm MLC, e.g. TC58TEG5DCJTA00: 16k pages, 1 plane
 		return 0xf646
-	elif nand_info_block[0] == 173 and (nand_info_block[5] & 7) == 1:
+	elif nand_info_block[0] == 0xad and (nand_info_block[5] & 7) == 1:
 		# Hynix 20nm MLC
 		return 0xf647
-	elif nand_info_block[0] == 236 and (nand_info_block[5] & 7) == 4:
+	elif nand_info_block[0] == 0xec and (nand_info_block[5] & 7) == 4:
 		# Samsung 21nm MLC
 		return 0xf648
-	elif nand_info_block[0] == 44 and nand_info_block[2] == 68 and (nand_info_block[1] & 15) == 4:
+	elif nand_info_block[0] == 0x2c and nand_info_block[2] == 0x44 and (nand_info_block[1] & 15) == 4:
 		# Micron 20nm MLC
 		return 0xf649
-	elif nand_info_block[0] == 69 and nand_info_block[5] == 87:
+	elif nand_info_block[0] == 0x45 and nand_info_block[5] == 0x57:
 		# Sandisk 19nm MLC
 		return 0xf650
 	else:
@@ -463,7 +462,8 @@ class BrecWithResources:
 
 	def set_header_data(self, dLFICap, sCapInfo, flash_size, spi_nor_decrypt_mode, nand_info_block):
 		struct.pack_into('<I', self._brec_bin, 8, dLFICap)
-		self._brec_bin[128:128+64] = nand_info_block[:64]
+		# TODO this may be the source of my device brick?
+		#self._brec_bin[128:128 + 64] = nand_info_block[:64]
 		self._brec_bin[192:192 + 32] = sCapInfo
 
 	def _load_merged_brec_bin(self, package, flash_type, resource_len):

@@ -236,9 +236,20 @@ def run_code(filename):
 	print("read back")
 	print(dev.adfu_read_result_block(156))
 
+def dump_ram():
+	with open('ADFUS.BIN', 'rb') as h:
+		adfus = h.read()
+
+	dev = USBMSC(devices=ADFU_DEVICES, timeout_ms=10 * 1000)
+
+	dev.adfu_write_to_ram(0xbfc18000, adfus)
+	dev.adfu_switch_fw(0xbfc18000)
+
+	print(dev.adfu_read_result_block(512))
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('command', choices=('adfu', 'udisk', 'run_code'))
+	parser.add_argument('command', choices=('adfu', 'udisk', 'run_code', 'dump_ram'))
 	parser.add_argument('args', nargs='*')
 	args = parser.parse_args()
 
@@ -248,6 +259,8 @@ if __name__ == '__main__':
 		switch_to_udisk(*args.args)
 	elif args.command == 'run_code':
 		run_code(*args.args)
+	elif args.command == 'dump_ram':
+		dump_ram(*args.args)
 	else:
 		raise NotImplementedError()
 
