@@ -121,6 +121,7 @@ class USBMSC:
 		return self.check_status(status)
 
 	def adfu_read_result_block(self, size):
+		# TODO 0x22 does something, not sure what.
 		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(size, 0x23, size, 0, flags=0x80))
 		result = self.dev.read(EP_FROM_DEVICE, size, self.timeout_ms)
 		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
@@ -129,7 +130,6 @@ class USBMSC:
 
 	def adfu_execute(self, addr):
 		self.dev.write(EP_TO_DEVICE, self.make_adfu_cmd(0, 0x21, 0, addr), self.timeout_ms)
-		time.sleep(0.1) # TODO
 		status = self.dev.read(EP_FROM_DEVICE, 512, self.timeout_ms)
 		return self.check_status(status)
 
@@ -232,27 +232,74 @@ def run_code(filename):
 	# Write the program
 	dev.adfu_write_to_ram(0xbfc1e000, data)
 
+	# todo remove this
+	data = struct.pack('<I', 0xbfc1e000)
+	dev.adfu_write_to_ram(0xbfc1f000, data)
+
 	# Run it
 	print("do exec")
 	dev.adfu_execute(0xbfc1e000)
 
 	print("read back")
-	print(dev.adfu_read_result_block(156))
+	result = dev.adfu_read_result_block(512) # max seems to be about 14k
+	with open('result_block.bin', 'wb') as h:
+		h.write(result)
+	#print(dev.adfu_read_from_ram(156))
+
+def rerun_code(arg):
+	dev = USBMSC(devices=ADFU_DEVICES)
+
+	data = struct.pack('<I', int(arg, 16))
+	dev.adfu_write_to_ram(0xbfc1f000, data)
+
+	print("do exec")
+	dev.adfu_execute(0xbfc1e000)
+
+	print("read back")
+	result = dev.adfu_read_result_block(10240) # max seems to be about 14k
+	with open('result_block.bin', 'wb') as h:
+		h.write(result)
 
 def dump_ram():
+	# Prepare to read data
 	with open('ADFUS.BIN', 'rb') as h:
 		adfus = h.read()
 
-	dev = USBMSC(devices=ADFU_DEVICES, timeout_ms=10 * 1000)
+	with open('hack.bin', 'rb') as h:
+		data = h.read()
 
+	dev = USBMSC(devices=ADFU_DEVICES)
+
+	# Switch to software ADFU
 	dev.adfu_write_to_ram(0xbfc18000, adfus)
 	dev.adfu_switch_fw(0xbfc18000)
 
-	print(dev.adfu_read_result_block(512))
+	# Write the program
+	dev.adfu_write_to_ram(0xbfc1e000, data)
+
+	results = []
+	for block in range(0, 512 * 1024, 10 * 1024):
+		print('block %x' % (block))
+
+		data = struct.pack('<I', block)
+		dev.adfu_write_to_ram(0xbfc1f000, data)
+
+		dev.adfu_execute(0xbfc1e000)
+
+		result = dev.adfu_read_result_block(10240) # max seems to be about 14k
+		assert len(result) == 10240
+		results.append(result)
+
+	results = b''.join(results)
+
+	with open('result_block.bin', 'wb') as h:
+		h.write(results)
+
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('command', choices=('adfu', 'udisk', 'run_code', 'dump_ram'))
+	parser.add_argument('command', choices=('adfu', 'udisk', 'run_code', 'rerun_code', 'dump_ram'))
 	parser.add_argument('args', nargs='*')
 	args = parser.parse_args()
 
@@ -262,6 +309,8 @@ if __name__ == '__main__':
 		switch_to_udisk(*args.args)
 	elif args.command == 'run_code':
 		run_code(*args.args)
+	elif args.command == 'rerun_code':
+		rerun_code(*args.args)
 	elif args.command == 'dump_ram':
 		dump_ram(*args.args)
 	else:
