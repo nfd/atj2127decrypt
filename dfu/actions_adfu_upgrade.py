@@ -726,7 +726,7 @@ def main():
 		msc = adfu.USBMSC(mock_device=adfu_mock_usb_device.MockUSBDevice('test_actions_adfu_upgrade/indfu%02d.bin', 56,
 			skip_header=27, max_size=65535))
 	else:
-		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=10 * 1000)
+		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=30 * 1000)
 
 	package = Package(CONFIG, args.dir, no_write=args.no_write)
 
