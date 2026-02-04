@@ -2,6 +2,11 @@ CC ?= gcc
 CFLAGS = -c -g -Wall -std=c99 -O2 -I ../include -D_DEFAULT_SOURCE
 LDFLAGS = 
 
+ifeq ($(shell uname -s),Linux)
+    CFLAGS += -m32
+    LDFLAGS += -m32
+endif
+
 ifeq ($(shell uname -s),Darwin)
 	CFFLAGS += -arch i386
 	LDFLAGS += -arch i386

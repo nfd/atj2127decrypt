@@ -345,21 +345,15 @@ ADFU_FWScanInfo_t = c_struct('ADFU_FWScanInfo_t',
 def file_checksum(b, stride=2, magic=0):
 	"""
 	Calculate a rather literal checksum.
-
-	Note that although this function reads and returns 32-bit words, it is
-	sometimes used with a 16-bit stride, which means the reads overlap.
 	"""
 	checksum = 0
-	offset = 0
 
 	if stride == 4:
-		# Optimisation -- same logic as 'else' path below.
 		for intvals in struct.iter_unpack('<I', b):
 			checksum += intvals[0]
 	else:
-		# Slow path
-		for offset in range(0, len(b) - 4, stride):
-			checksum += (b[offset] + (b[offset + 1] << 8) + (b[offset + 2] << 16) + (b[offset + 3] << 24))
+		for shortvals in struct.iter_unpack('<H', b):
+			checksum += shortvals[0]
 	
 	checksum += magic
 	return checksum
@@ -462,8 +456,7 @@ class BrecWithResources:
 
 	def set_header_data(self, dLFICap, sCapInfo, flash_size, spi_nor_decrypt_mode, nand_info_block):
 		struct.pack_into('<I', self._brec_bin, 8, dLFICap)
-		# TODO this may be the source of my device brick?
-		#self._brec_bin[128:128 + 64] = nand_info_block[:64]
+		self._brec_bin[128:128 + 64] = nand_info_block[:64]
 		self._brec_bin[192:192 + 32] = sCapInfo
 
 	def _load_merged_brec_bin(self, package, flash_type, resource_len):
@@ -733,7 +726,7 @@ def main():
 		msc = adfu.USBMSC(mock_device=adfu_mock_usb_device.MockUSBDevice('test_actions_adfu_upgrade/indfu%02d.bin', 56,
 			skip_header=27, max_size=65535))
 	else:
-		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=10 * 1000)
+		msc = adfu.USBMSC(devices=adfu.ADFU_DEVICES, timeout_ms=30 * 1000)
 
 	package = Package(CONFIG, args.dir, no_write=args.no_write)
 
